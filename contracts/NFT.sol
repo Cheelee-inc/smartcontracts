@@ -1,0 +1,86 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+import "./interfaces/CustomNFT.sol";
+
+contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
+    string public NAME;
+    string public VERSION;
+
+    address public nftSale;
+    address public treasury;
+
+    string public baseUri;
+
+    constructor(string memory _name, string memory _version) ERC721(_name, _version) {
+        NAME = _name;
+        VERSION = _version;
+    }
+
+    function receiveNFT(address _to, uint256 _tokenId) external override {
+        require(
+            msg.sender == nftSale || msg.sender == treasury,
+            "Not allowed to call contract"
+        );
+
+        if (_exists(_tokenId)) safeTransferFrom(msg.sender, _to, _tokenId);
+        else _safeMint(_to, _tokenId);
+    }
+
+    function safeMint(address _to, uint256 _tokenId) external onlyOwner {
+        _safeMint(_to, _tokenId);
+    }
+
+    function setUri(string memory _uri) external onlyOwner {
+        baseUri = _uri;
+    }
+
+    function setNftSaleAndTreasury(address _nftSale, address _treasury)
+        external
+        onlyOwner
+    {
+        nftSale = _nftSale;
+        treasury = _treasury;
+    }
+
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        return string(abi.encodePacked(baseUri, Strings.toString(_tokenId)));
+    }
+
+    function tokensOwnedByUser(address _addr)
+        external
+        view
+        returns (uint256[] memory tokenIds)
+    {
+        uint256 balance = balanceOf(_addr);
+        tokenIds = new uint256[](balance);
+        for (uint256 i = 0; i < balance; i++)
+            tokenIds[i] = tokenOfOwnerByIndex(_addr, i);
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable, IERC165)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+}
