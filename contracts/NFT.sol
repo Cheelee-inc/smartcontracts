@@ -16,7 +16,9 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
 
     string public baseUri;
 
-    constructor(string memory _name, string memory _version) ERC721(_name, _version) {
+    constructor(string memory _name, string memory _version)
+        ERC721(_name, _version)
+    {
         NAME = _name;
         VERSION = _version;
     }

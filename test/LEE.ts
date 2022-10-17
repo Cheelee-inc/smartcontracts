@@ -22,27 +22,27 @@ describe("Test", function () {
   })
 
   it("Test max supply", async()=>{   
-    // expect(await lee.maxSupply(timestamp-1)).to.be.equal("0")
-    expect(await lee.maxSupply(timestamp)).to.be.equal("0")
-    expect(await lee.maxSupply(timestamp+=1)).to.be.equal("675154320987654320987")
-    expect(await lee.maxSupply(timestamp+=1)).to.be.equal("1350308641975308641975")
-    expect(await lee.maxSupply(timestamp+=1)).to.be.equal("2025462962962962962962")
+    // expect(await lee.currentSupply(timestamp-1)).to.be.equal("0")
+    expect(await lee.currentSupply(timestamp)).to.be.equal("0")
+    expect(await lee.currentSupply(timestamp+=1)).to.be.equal("675154320987654320987")
+    expect(await lee.currentSupply(timestamp+=1)).to.be.equal("1350308641975308641975")
+    expect(await lee.currentSupply(timestamp+=1)).to.be.equal("2025462962962962962962")
     expect(await lee.canMint(timestamp)).to.be.equal("2025462962962962962962")
 
-    expect(await lee.maxSupply(timestamp += 30 * 24 * 60 * 60 - 3)).to.be.equal("1750000000000000000000000000")
+    expect(await lee.currentSupply(timestamp += 30 * 24 * 60 * 60 - 3)).to.be.equal("1750000000000000000000000000")
     expect(await lee.canMint(timestamp)).to.be.equal("1750000000000000000000000000")
-    expect(await lee.maxSupply(timestamp += 31 * 24 * 60 * 60)).to.be.equal("3150000000000000000000000000")
+    expect(await lee.currentSupply(timestamp += 31 * 24 * 60 * 60)).to.be.equal("3150000000000000000000000000")
     expect(await lee.canMint(timestamp)).to.be.equal("3150000000000000000000000000")
-    expect(await lee.maxSupply(timestamp += 30 * 24 * 60 * 60)).to.be.equal("4550000000000000000000000000")
-    expect(await lee.maxSupply(timestamp += 60 * 24 * 60 * 60) < maxValue).to.be.equal(true)
+    expect(await lee.currentSupply(timestamp += 30 * 24 * 60 * 60)).to.be.equal("4550000000000000000000000000")
+    expect(await lee.currentSupply(timestamp += 60 * 24 * 60 * 60) < maxValue).to.be.equal(true)
 
-    let num = await lee.maxSupply(timestamp += 1 * 24 * 60 * 60)
+    let num = await lee.currentSupply(timestamp += 1 * 24 * 60 * 60)
     expect(num.toString() == maxValue.toString())
   
-    num = await lee.maxSupply(timestamp += 1 * 24 * 60 * 60)
+    num = await lee.currentSupply(timestamp += 1 * 24 * 60 * 60)
     expect(num.toString() == maxValue.toString())
 
-    num = await lee.maxSupply(timestamp += 1000 * 24 * 60 * 60)
+    num = await lee.currentSupply(timestamp += 1000 * 24 * 60 * 60)
     expect(num.toString() == maxValue.toString())
 
     await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp])

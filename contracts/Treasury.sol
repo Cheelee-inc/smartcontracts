@@ -26,7 +26,6 @@ contract Treasury is EIP712Upgradeable {
     bytes32 public NFT_PASS_TYPEHASH;
     bytes32 public PASS_TYPEHASH;
 
-    IERC20 public token;
     mapping(uint256 => bool) private usedSignature;
 
     address public signer;
