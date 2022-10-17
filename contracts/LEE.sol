@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LEE is ERC20, Ownable {
-    uint256 public constant MAX_VALUE = 7000000000 * 10**18;
+    uint256 public constant maxSupply = 7000000000 * 10**18;
     uint256 constant secondsPerDay = 86400;
 
     uint256[] public emission = [
@@ -14,7 +14,7 @@ contract LEE is ERC20, Ownable {
         4550000000000000000000000000,
         5600000000000000000000000000,
         6300000000000000000000000000,
-        MAX_VALUE
+        maxSupply
     ];
 
     uint256[] public daysIncremented = [30, 61, 91, 122, 153, 181];
@@ -28,7 +28,7 @@ contract LEE is ERC20, Ownable {
 
     function mint(address _to, uint256 _amount) external onlyOwner {
         require(
-            totalSupply() + _amount <= maxSupply(block.timestamp),
+            totalSupply() + _amount <= currentSupply(block.timestamp),
             "Can't mint more then max amount"
         );
         _mint(_to, _amount);
@@ -40,14 +40,14 @@ contract LEE is ERC20, Ownable {
         onlyOwner
         returns (uint256)
     {
-        return maxSupply(_timestamp) - totalSupply();
+        return currentSupply(_timestamp) - totalSupply();
     }
 
     function burn(address _from, uint256 _amount) external onlyOwner {
         _burn(_from, _amount);
     }
 
-    function maxSupply(uint256 _currentTimestamp)
+    function currentSupply(uint256 _currentTimestamp)
         public
         view
         returns (uint256)
@@ -59,7 +59,7 @@ contract LEE is ERC20, Ownable {
         uint256 interval;
 
         if (index == DAYS_INCREMENTED_LENGTH - 1) {
-            return MAX_VALUE;
+            return maxSupply;
         } else if (index > 0) {
             timePassed = _secondsPassed - daysIncremented[index - 1] * secondsPerDay;
             interval =
