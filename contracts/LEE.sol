@@ -61,7 +61,10 @@ contract LEE is ERC20, Ownable {
         if (index == DAYS_INCREMENTED_LENGTH - 1) {
             return MAX_SUPPLY;
         } else if (index > 0) {
-            timePassed = _secondsPassed - daysIncremented[index - 1] * secondsPerDay;
+            timePassed =
+                _secondsPassed -
+                daysIncremented[index - 1] *
+                secondsPerDay;
             interval =
                 (daysIncremented[index] - daysIncremented[index - 1]) *
                 secondsPerDay;
