@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LEE is ERC20, Ownable {
-    uint256 public constant maxSupply = 7000000000 * 10**18;
+    uint256 public constant MAX_SUPPLY = 7000000000 * 10**18;
     uint256 constant secondsPerDay = 86400;
 
     uint256[] public emission = [
@@ -14,7 +14,7 @@ contract LEE is ERC20, Ownable {
         4550000000000000000000000000,
         5600000000000000000000000000,
         6300000000000000000000000000,
-        maxSupply
+        MAX_SUPPLY
     ];
 
     uint256[] public daysIncremented = [30, 61, 91, 122, 153, 181];
@@ -59,7 +59,7 @@ contract LEE is ERC20, Ownable {
         uint256 interval;
 
         if (index == DAYS_INCREMENTED_LENGTH - 1) {
-            return maxSupply;
+            return MAX_SUPPLY;
         } else if (index > 0) {
             timePassed = _secondsPassed - daysIncremented[index - 1] * secondsPerDay;
             interval =
