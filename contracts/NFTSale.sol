@@ -165,4 +165,10 @@ contract NFTSale is EIP712, Ownable {
 
         emit Redeem(msg.sender);
     }
+
+    function setSigner(address _newSigner) external onlyOwner {
+        require(_newSigner != address(0), "Can't set zero address");
+
+        signer = _newSigner;
+    }
 }
