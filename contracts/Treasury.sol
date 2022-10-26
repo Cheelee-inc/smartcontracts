@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 
 import "./interfaces/CustomNFT.sol";
 
-contract Treasury is EIP712Upgradeable {
+contract Treasury is
+    EIP712Upgradeable,
+    ERC721HolderUpgradeable,
+    OwnableUpgradeable
+{
     event Withdrawed(
         address indexed _user,
         uint256 _amount,
@@ -28,24 +34,38 @@ contract Treasury is EIP712Upgradeable {
 
     mapping(uint256 => bool) private usedSignature;
 
-    address public signer;
+            //who              //when             //option   //amount
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
+        public tokensTransfersPerDay;
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
+        public nftTransfersPerDay;
+    uint256[] public maxNftTransfersPerDay;
+    uint256[] public maxTokenTransferPerDay;
 
-    IERC20 public lee;
-    IERC20 public cheel;
-    IERC20 public usdt;
-    CustomNFT public chests;
-    CustomNFT public glasses;
+    address public signer;
+    IERC20Upgradeable[] public tokens;
+    CustomNFT[] public nfts;
 
     function initialize(
         CustomNFT _chests,
         CustomNFT _glasses,
         address _signer,
-        IERC20 _lee,
-        IERC20 _cheel,
-        IERC20 _usdt
-    ) public initializer {
+        IERC20Upgradeable _lee,
+        IERC20Upgradeable _cheel,
+        IERC20Upgradeable _usdt
+    ) external initializer {
+        __Ownable_init();
+
+        require(address(_chests) != address(0), "Can't set zero address");
+        require(address(_glasses) != address(0), "Can't set zero address");
+        require(address(_lee) != address(0), "Can't set zero address");
+        require(address(_cheel) != address(0), "Can't set zero address");
+        require(address(_usdt) != address(0), "Can't set zero address");
+
         NAME = "TREASURY";
         EIP712_VERSION = "1";
+
+        __EIP712_init(NAME, EIP712_VERSION);
 
         NFT_PASS_TYPEHASH = keccak256(
             "WithdrawNFTSignature(uint256 nonce,uint256 id,address address_to,uint256 ttl,uint256 option)"
@@ -54,17 +74,22 @@ contract Treasury is EIP712Upgradeable {
             "WithdrawSignature(uint256 nonce,uint256 amount,address address_to,uint256 ttl,uint256 option)"
         );
 
-        __EIP712_init(NAME, EIP712_VERSION);
+        nfts.push(_chests);
+        nfts.push(_glasses);
+        maxNftTransfersPerDay.push(7);
+        maxNftTransfersPerDay.push(7);
 
-        chests = _chests;
-        glasses = _glasses;
+        tokens.push(_lee);
+        tokens.push(_cheel);
+        tokens.push(_usdt);
+        maxTokenTransferPerDay.push(100 * 10**18);
+        maxTokenTransferPerDay.push(100 * 10**18);
+        maxTokenTransferPerDay.push(100 * 10**18);
+
         signer = _signer;
-        lee = _lee;
-        cheel = _cheel;
-        usdt = _usdt;
 
-        chests.setApprovalForAll(address(chests), true);
-        glasses.setApprovalForAll(address(glasses), true);
+        nfts[0].setApprovalForAll(address(nfts[0]), true);
+        nfts[1].setApprovalForAll(address(nfts[1]), true);
     }
 
     function verifySignature(
@@ -107,21 +132,27 @@ contract Treasury is EIP712Upgradeable {
         uint256 _option,
         bytes memory _signature
     ) external {
+        require(address(tokens[_option]) != address(0), "Option disabled");
+        uint256 currentDay = getCurrentDay();
+        require(
+            tokensTransfersPerDay[_to][currentDay][_option] + _amount <=
+                maxTokenTransferPerDay[_option],
+            "Amount greater than allowed"
+        );
+        tokensTransfersPerDay[_to][currentDay][_option] += _amount;
+
         require(_ttl >= block.timestamp, "Signature is no longer active");
         require(
             verifySignature(_nonce, _amount, _to, _ttl, _option, _signature) ==
                 signer,
             "Bad Signature"
         );
-        require(usedSignature[_nonce] == false, "Signature already used");
+        require(!usedSignature[_nonce], "Signature already used");
 
         usedSignature[_nonce] = true;
+        SafeERC20Upgradeable.safeTransfer(tokens[_option], _to, _amount);
 
-        if (_option == 1) lee.transfer(_to, _amount);
-        else if (_option == 2) cheel.transfer(_to, _amount);
-        else if (_option == 3) usdt.transfer(_to, _amount);
-
-        emit Withdrawed(msg.sender, _amount, _option);
+        emit Withdrawed(_to, _amount, _option);
     }
 
     function withdrawNFT(
@@ -132,21 +163,77 @@ contract Treasury is EIP712Upgradeable {
         uint256 _option,
         bytes memory _signature
     ) external {
+        require(address(nfts[_option]) != address(0), "Option disabled");
+        uint256 currentDay = getCurrentDay();
+        require(
+            nftTransfersPerDay[_to][currentDay][_option] <
+                maxNftTransfersPerDay[_option],
+            "Too many transfers"
+        );
+        nftTransfersPerDay[_to][currentDay][_option]++;
+
         require(_ttl >= block.timestamp, "Signature is no longer active");
         require(
             verifySignatureNFT(_nonce, _id, _to, _ttl, _option, _signature) ==
                 signer,
             "Bad Signature"
         );
-        require(usedSignature[_nonce] == false, "Signature already used");
+        require(!usedSignature[_nonce], "Signature already used");
 
         usedSignature[_nonce] = true;
+        nfts[_option].receiveNFT(_to, _id);
 
-        if (_option == 1) {
-            chests.receiveNFT(_to, _id);
-        } else if (_option == 2) {
-            glasses.receiveNFT(_to, _id);
-        }
-        emit WithdrawedNFT(msg.sender, _id, _option);
+        emit WithdrawedNFT(_to, _id, _option);
+    }
+
+    function getCurrentDay() public view returns (uint256) {
+        return (block.timestamp / 86400) + 4;
+    }
+
+    function setSigner(address _signer) external onlyOwner {
+        signer = _signer;
+    }
+
+    function setTokenLimit(uint256 _index, uint256 _newLimit)
+        external
+        onlyOwner
+    {
+        maxTokenTransferPerDay[_index] = _newLimit;
+    }
+
+    function setNftLimit(uint256 _index, uint256 _newLimit) external onlyOwner {
+        maxNftTransfersPerDay[_index] = _newLimit;
+    }
+
+    function addToken(IERC20Upgradeable _addr, uint256 _limit)
+        external
+        onlyOwner
+    {
+        require(address(_addr) != address(0), "Zero address not acceptable");
+        tokens.push(_addr);
+        maxTokenTransferPerDay.push(_limit);
+    }
+
+    function addNFT(CustomNFT _addr, uint256 _limit) external onlyOwner {
+        require(address(_addr) != address(0), "Zero address not acceptable");
+        nfts.push(_addr);
+        maxNftTransfersPerDay.push(_limit);
+
+        _addr.setApprovalForAll(address(_addr), true);
+    }
+
+    function disableToken(uint256 _index) external onlyOwner {
+        tokens[_index] = IERC20Upgradeable(address(0));
+    }
+
+    function disableNFT(uint256 _index) external onlyOwner {
+        nfts[_index] = CustomNFT(address(0));
+    }
+
+    function withdrawToken(IERC20Upgradeable _token, uint256 _amount)
+        external
+        onlyOwner
+    {
+        SafeERC20Upgradeable.safeTransfer(_token, msg.sender, _amount);
     }
 }

@@ -18,7 +18,7 @@ describe("MultiVesting", function () {
     cheel = await deployCHEEL()
     vesting = await deployMultiVesting(cheel.address)
     await cheel.mint(vesting.address, 1000)
-    await vesting.setSaleContract(await owner.getAddress())
+    await vesting.setSeller(await owner.getAddress())
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)
   })
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -8,6 +8,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/CustomNFT.sol";
 
 contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
+    event SetSaleAndTreasury(address sale, address treasury);
+    event ReceiveNFT(address receiver, uint256 tokenId);
+    event SetURI(string uri);
+
     string public NAME;
     string public VERSION;
 
@@ -31,6 +35,8 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
 
         if (_exists(_tokenId)) safeTransferFrom(msg.sender, _to, _tokenId);
         else _safeMint(_to, _tokenId);
+
+        emit ReceiveNFT(_to, _tokenId);
     }
 
     function safeMint(address _to, uint256 _tokenId) external onlyOwner {
@@ -39,14 +45,23 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
 
     function setUri(string memory _uri) external onlyOwner {
         baseUri = _uri;
+
+        emit SetURI(_uri);
     }
 
     function setNftSaleAndTreasury(address _nftSale, address _treasury)
         external
         onlyOwner
     {
+        require(
+            _nftSale != address(0) && _treasury != address(0),
+            "Can't set zero address"
+        );
+
         nftSale = _nftSale;
         treasury = _treasury;
+
+        emit SetSaleAndTreasury(nftSale, treasury);
     }
 
     function tokenURI(uint256 _tokenId)

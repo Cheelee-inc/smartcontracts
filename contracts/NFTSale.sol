@@ -1,4 +1,5 @@
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -8,6 +9,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/CustomNFT.sol";
 
 contract NFTSale is EIP712, Ownable {
+    event SetPrice(uint256 price);
+    event Withdraw(uint256 amount);
+    event Pause(address owner);
+    event Redeem(address owner);
+
     string public constant NAME = "NFTSale";
     string public constant EIP712_VERSION = "1";
 
@@ -33,8 +39,8 @@ contract NFTSale is EIP712, Ownable {
     bool public purchasePaused;
 
     uint256 public pricePerToken;
-    uint256 public immutable redeemSupply;
-    uint256 public immutable purchaseSupply;
+    uint256 public redeemSupply;
+    uint256 public purchaseSupply;
 
     constructor(
         CustomNFT _nftContract,
@@ -43,12 +49,21 @@ contract NFTSale is EIP712, Ownable {
         uint256 _redeemSupply,
         uint256 _purchaseSupply
     ) EIP712(NAME, EIP712_VERSION) {
+        require(address(_nftContract) != address(0), "Can't set zero address");
         nftContract = _nftContract;
         signer = _signer;
 
         pricePerToken = _pricePerToken;
         redeemSupply = _redeemSupply;
         purchaseSupply = _purchaseSupply;
+    }
+
+    function setRedeemSupply(uint256 _newRedeemSupply) external onlyOwner {
+        redeemSupply = _newRedeemSupply;
+    }
+
+    function setPurchaseSupply(uint256 _newPurchaseSupply) external onlyOwner {
+        purchaseSupply = _newPurchaseSupply;
     }
 
     function verifySignatureRedeem(
@@ -128,17 +143,26 @@ contract NFTSale is EIP712, Ownable {
 
     function setPrice(uint256 _price) external onlyOwner {
         pricePerToken = _price;
+
+        emit SetPrice(_price);
     }
 
     function withdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        uint256 amount = address(this).balance;
+        payable(msg.sender).transfer(amount);
+
+        emit Withdraw(amount);
     }
 
     function pauseRedeem() external onlyOwner {
         redeemPaused = !redeemPaused;
+
+        emit Pause(msg.sender);
     }
 
     function pausePurchase() external onlyOwner {
         purchasePaused = !purchasePaused;
+
+        emit Redeem(msg.sender);
     }
 }

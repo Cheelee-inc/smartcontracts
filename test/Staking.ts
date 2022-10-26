@@ -85,7 +85,7 @@ describe("Test", function () {
 
     await staking.connect(user).deposit(amount, 0)
 
-    await increaseTime(8764 * 60 * 60 / 2)
+    await increaseTime(8766 * 60 * 60 / 2)
 
     let tx = await staking.earned(await user.getAddress(), 0)
     expect(tx._canCollect).to.be.equal("9000000000000000000");
@@ -101,7 +101,6 @@ describe("Test", function () {
 
     await increaseTimeDays(44) //friday
 
-    console.log("start");
     while((Math.floor(await currentTimestamp() / 86400) + 4) % 7 != 5) {
       await increaseTimeDays(1)
     }
@@ -121,5 +120,29 @@ describe("Test", function () {
     expect((await staking.earned(await user.getAddress(), 0))[1]).to.be.equal("0");
 
     expect(await cheel.balanceOf(await user.getAddress())).not.to.be.equal("0")
+  })
+
+  it("add works", async() => {
+    let secondsPerYear = 8766 * 60 * 60
+    let maxValue = "1000000000000000000000000"
+
+    await cheel.mint(staking.address, maxValue)
+    let amount  =    "100000000000000000000"
+    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(user).approve(staking.address, amount);
+
+    await expect(staking.connect(user).deposit(amount, 3)).to.be.reverted
+
+    await staking.addOption(0, 200, 0, maxValue)
+    await staking.connect(user).deposit(amount, 3)
+
+    await increaseTime(secondsPerYear)
+    console.log(await staking.earned(await user.getAddress(), 3));
+
+    console.log(await staking.getRegisteredUsersSample(0,1,0));
+    console.log(await staking.getRegisteredUsersSample(0,1,1));
+    console.log(await staking.getRegisteredUsersSample(0,1,2));
+    console.log(await staking.getRegisteredUsersSample(0,1,3));
+    
   })
 });

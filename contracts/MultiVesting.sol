@@ -1,24 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
-import "./interfaces/IERC20Mintable.sol";
-import "./interfaces/IVesting.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/IVesting.sol";
 
 contract MultiVesting is IVesting, Ownable {
-    IERC20Mintable public immutable token;
-    address public saleContract;
+    using SafeERC20 for IERC20;
+
+    event SetSeller(address newSeller);
+    event Vested(address beneficiary, uint256 amount);
+    event EmergencyVest(uint256 amount);
+
+    IERC20 public immutable token;
+    address public seller;
 
     mapping(address => uint256) public released;
 
     mapping(address => Beneficiary) public beneficiary;
 
-    constructor(IERC20Mintable _token) {
+    constructor(IERC20 _token) {
+        require(address(_token) != address(0), "Can't set zero address");
         token = _token;
     }
 
-    function setSaleContract(address _addr) external onlyOwner {
-        saleContract = _addr;
+    function setSeller(address _addr) external onlyOwner {
+        require(_addr != address(0), "Can't set zero address");
+        seller = _addr;
+
+        emit SetSeller(seller);
     }
 
     /**
@@ -33,16 +43,20 @@ contract MultiVesting is IVesting, Ownable {
         uint256 _amount,
         uint256 _cliff
     ) external override {
-        require(msg.sender == saleContract, "Only sale contract can call");
+        require(msg.sender == seller, "Only sale contract can call");
         require(
             _beneficiaryAddress != address(0),
             "beneficiary is zero address"
         );
 
+        require(_durationSeconds > 0, "Duration must be above 0");
+
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
         beneficiary[_beneficiaryAddress].duration = _durationSeconds;
         beneficiary[_beneficiaryAddress].cliff = _cliff;
         beneficiary[_beneficiaryAddress].amount += _amount;
+
+        emit Vested(_beneficiaryAddress, _amount);
     }
 
     function release(address _beneficiaryAddress) external override {
@@ -54,7 +68,7 @@ contract MultiVesting is IVesting, Ownable {
         require(_releasableAmount > 0, "Can't claim yet!");
 
         released[_beneficiaryAddress] += _releasableAmount;
-        token.transfer(_beneficiaryAddress, _releasableAmount);
+        token.safeTransfer(_beneficiaryAddress, _releasableAmount);
 
         emit Released(_releasableAmount, msg.sender);
     }
@@ -130,7 +144,24 @@ contract MultiVesting is IVesting, Ownable {
         }
     }
 
-    function emergancyVest() external override onlyOwner {
-        token.transfer(owner(), token.balanceOf(address(this)));
+    function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
+        external
+    {
+        require(
+            msg.sender == owner() || msg.sender == _oldBeneficiary,
+            "Not allowed to change"
+        );
+
+        released[_newBeneficiary] = released[_oldBeneficiary];
+        beneficiary[_newBeneficiary] = beneficiary[_oldBeneficiary];
+
+        delete released[_oldBeneficiary];
+        delete beneficiary[_oldBeneficiary];
+    }
+
+    function emergencyVest(IERC20 _token) external override onlyOwner {
+        uint256 amount = _token.balanceOf(address(this));
+        _token.safeTransfer(owner(), amount);
+        emit EmergencyVest(amount);
     }
 }

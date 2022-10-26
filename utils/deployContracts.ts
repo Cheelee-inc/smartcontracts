@@ -1,8 +1,8 @@
 import { ethers, upgrades } from "hardhat";
 
-export async function deployLEE(creationTime: number) {
+export async function deployLEE() {
     const Contract = await ethers.getContractFactory("LEE");
-    const contract = await Contract.deploy(creationTime);
+    const contract = await Contract.deploy();
     await contract.deployed();
     return contract
 }
@@ -17,7 +17,7 @@ export async function deployCHEEL() {
 export async function deployTreasury(chests: any, glasses: any, signer: any, lee: any, cheel: any, usdt: any) {
     const Contract = await ethers.getContractFactory("Treasury");
     const contract = await upgrades.deployProxy(Contract, [chests, glasses, signer, lee, cheel, usdt], {initializer: "initialize"})
-    
+    await contract.deployed()
     return contract
 }
 
@@ -51,6 +51,13 @@ export async function deployVesting(beneficiaryAddress: any, startTimestamp: any
 
 export async function deployMultiVesting(token: any) {
     const Contract = await ethers.getContractFactory("MultiVesting");
+    const contract = await Contract.deploy(token);
+    await contract.deployed();
+    return contract
+}
+
+export async function deployTest(token: any) {
+    const Contract = await ethers.getContractFactory("test");
     const contract = await Contract.deploy(token);
     await contract.deployed();
     return contract

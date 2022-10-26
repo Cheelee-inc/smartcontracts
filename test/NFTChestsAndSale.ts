@@ -2,13 +2,14 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Signer, BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { deployLEE, deployNFT, deployNFTSale, deployTreasury } from "../utils/deployContracts"
-import { currentTimestamp } from "../utils/helpers"
-import { NFTSale, NFT, Treasury } from "../typechain";
+import { deployCHEEL, deployLEE, deployNFT, deployNFTSale, deployTreasury } from "../utils/deployContracts"
+import { currentTimestamp, increaseTimeDays } from "../utils/helpers"
+import { NFTSale, NFT, Treasury, CHEEL } from "../typechain";
 
 import * as Sale from "./SaleEIP712" 
 import * as Redeem from "./RedeemEIP712" 
-import * as TrSig from "./TreasuryEIP712" 
+import * as TrNftSig from "./TreasuryNftEIP712" 
+import * as TrTokenSig from "./TreasuryTokenEIP712"
 
 describe("Test", function () {
   let owner: SignerWithAddress
@@ -21,6 +22,7 @@ describe("Test", function () {
   let timestamp: number
   let price: BigNumber
   let wrongPrice: BigNumber
+  let erc20: CHEEL
 
   before(async () => {
     [owner, user1, user2, user3] = await ethers.getSigners()
@@ -30,9 +32,12 @@ describe("Test", function () {
     timestamp = await currentTimestamp() + 1000
   
     nft = await deployNFT("it", "it")
-    nftSale = await deployNFTSale(nft.address, owner.address, price, 1000, 1000)
-    treasury = await deployTreasury(nft.address, nft.address, owner.address, owner.address, owner.address, owner.address)
-    console.log(1);
+    nftSale = await deployNFTSale(nft. address, owner.address, price, 1000, 1000)
+    
+    erc20 = await deployCHEEL()
+
+    treasury = await deployTreasury(nft.address, nft.address, owner.address, erc20.address, erc20.address, erc20.address)
+    await erc20.mint(treasury.address, "10000000000")
 
     console.log("nft: ", nft.address);
     console.log("nftSale: ", nftSale.address);
@@ -43,21 +48,6 @@ describe("Test", function () {
     
     await nft.setNftSaleAndTreasury(nftSale.address, treasury.address)
   })
-
-  async function getSaleSignature(tokenId: any, to: any, ttl: any) {
-    let domain = Sale.eip712Domain(nftSale.address, (await ethers.provider.getNetwork()).chainId)
-    return await owner._signTypedData(domain, Sale.Pass, {id: tokenId, address_to: to, ttl_timestamp: ttl})
-  }
-
-  async function getRedeemSignature(tokenId: any, to: any, ttl: any) {
-    let domain = Redeem.eip712Domain(nftSale.address, (await ethers.provider.getNetwork()).chainId)
-    return await owner._signTypedData(domain, Redeem.Pass, {id: tokenId, address_to: to, ttl_timestamp: ttl})
-  }
-
-  async function getTreasurySignature(nonce: any, tokenId: any, to: any, ttl: any, option: any) {
-    let domain = TrSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
-    return await owner._signTypedData(domain, TrSig.Pass, {nonce: nonce, id: tokenId, address_to: to, ttl: ttl, option: option})
-  }
 
   it("purchase & redeem", async () => {
     let sale1 = await getSaleSignature(123, owner.address, timestamp)
@@ -85,13 +75,13 @@ describe("Test", function () {
   })
 
   it("mint and transfer from and to treasury", async () => {
-    let id = 132
-    let nonce = 123456
+    let id = 12345
+    let nonce = 12345
 
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
     await treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)
     expect(await nft.balanceOf(owner.address)).to.be.equal(3);
-
+    
     //send to inner wallet
     await nft.transferFrom(owner.address, treasury.address, id)
     //withdraw from inner wallet
@@ -105,4 +95,100 @@ describe("Test", function () {
     await treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)
     expect(await nft.balanceOf(owner.address)).to.be.equal(3);
   }) 
+
+  it("transfers per day work", async() => {
+    let id = 12345
+    let nonce = 123456
+    await treasury.setNftLimit(1, 3)
+    await nft.transferFrom(owner.address, treasury.address, id)
+   
+    let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
+    
+    await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Too many transfers")
+
+    await treasury.setNftLimit(1, 4)
+    await treasury.withdrawNFT(nonce++, id, owner.address, timestamp, 1, sig)
+
+    expect(await treasury.nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(4)
+    await increaseTimeDays(1)
+    expect(await treasury.nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(0)
+  })
+
+  it("disable and add token works", async()=>{
+    let id = 12345
+    let nonce = 22222
+    timestamp = await currentTimestamp() + 1000
+
+    await nft.transferFrom(owner.address, treasury.address, id)
+    let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
+    await treasury.disableNFT(1)
+    
+    await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Option disabled")
+
+    let newNFT = await deployNFT("it", "it")
+    await newNFT.setNftSaleAndTreasury(nftSale.address, treasury.address)
+    await treasury.addNFT(newNFT.address, 2)
+
+    let newSig = await getTreasurySignature(nonce, id, owner.address, timestamp, 2)
+    await treasury.withdrawNFT(nonce++, id, owner.address, timestamp, 2, newSig)
+    await newNFT.transferFrom(owner.address, treasury.address, id)
+
+    newSig = await getTreasurySignature(nonce, id, owner.address, timestamp, 2)
+    await treasury.withdrawNFT(nonce++, id, owner.address, timestamp, 2, newSig)
+    await newNFT.transferFrom(owner.address, treasury.address, id)
+
+    newSig = await getTreasurySignature(nonce, id, owner.address, timestamp, 2)
+    await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 2, newSig)).to.be.reverted
+  })
+
+  it("erc20 works", async()=>{
+      let token = await deployCHEEL()
+      await treasury.addToken(token.address, 100000)
+
+      let amount = 10000
+
+      await token.mint(treasury.address, 100000)
+
+      let nonce = 321
+      timestamp = await currentTimestamp() + 1000
+
+      let sig = await getTreasuryErc20Signature(nonce, amount, owner.address, timestamp, 3)
+      await treasury.withdraw(nonce++, amount, owner.address, timestamp, 3, sig)
+      sig = await getTreasuryErc20Signature(nonce, amount, owner.address, timestamp, 3)
+      await treasury.withdraw(nonce++, amount, owner.address, timestamp, 3, sig)
+      sig = await getTreasuryErc20Signature(nonce, amount, owner.address, timestamp, 3)
+      await treasury.withdraw(nonce++, amount, owner.address, timestamp, 3, sig)
+
+      sig = await getTreasuryErc20Signature(nonce, amount, owner.address, timestamp, 2)
+      await expect(treasury.withdraw(nonce, "10000000000000000000000", owner.address, timestamp, 2, sig)).to.be.revertedWith("Amount greater than allowed")
+
+      console.log(await token.balanceOf(owner.address));
+  })
+
+  it("withdraw works", async()=> {
+    console.log(await erc20.balanceOf(owner.address));
+    await treasury.withdrawToken(erc20.address, 100)
+    console.log(await erc20.balanceOf(owner.address));
+  })
+
+
+  async function getSaleSignature(tokenId: any, to: any, ttl: any) {
+    let domain = Sale.eip712Domain(nftSale.address, (await ethers.provider.getNetwork()).chainId)
+    return await owner._signTypedData(domain, Sale.Pass, {id: tokenId, address_to: to, ttl_timestamp: ttl})
+  }
+
+  async function getRedeemSignature(tokenId: any, to: any, ttl: any) {
+    let domain = Redeem.eip712Domain(nftSale.address, (await ethers.provider.getNetwork()).chainId)
+    return await owner._signTypedData(domain, Redeem.Pass, {id: tokenId, address_to: to, ttl_timestamp: ttl})
+  }
+
+  async function getTreasurySignature(nonce: any, tokenId: any, to: any, ttl: any, option: any) {
+    let domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
+    return await owner._signTypedData(domain, TrNftSig.Pass, {nonce: nonce, id: tokenId, address_to: to, ttl: ttl, option: option})
+  }
+
+  async function getTreasuryErc20Signature(nonce: any, tokenId: any, to: any, ttl: any, option: any) {
+    let domain = TrTokenSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
+    return await owner._signTypedData(domain, TrTokenSig.Pass, {nonce: nonce, amount: tokenId, address_to: to, ttl: ttl, option: option})
+  }
 })
