@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IVesting.sol";
@@ -16,12 +17,17 @@ contract MultiVesting is IVesting, Ownable {
     address public seller;
 
     mapping(address => uint256) public released;
-
     mapping(address => Beneficiary) public beneficiary;
+
+    bool public changeBenificiaryAllowed;
+    bool public earlyWithdrawAllowed;
 
     constructor(IERC20 _token) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
+
+        changeBenificiaryAllowed = true;
+        earlyWithdrawAllowed = true;
     }
 
     function setSeller(address _addr) external onlyOwner {
@@ -147,6 +153,7 @@ contract MultiVesting is IVesting, Ownable {
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
     {
+        require(changeBenificiaryAllowed, "Option not allowed");
         require(
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
@@ -160,8 +167,17 @@ contract MultiVesting is IVesting, Ownable {
     }
 
     function emergencyVest(IERC20 _token) external override onlyOwner {
+        require(earlyWithdrawAllowed, "Option not allowed");
+
         uint256 amount = _token.balanceOf(address(this));
         _token.safeTransfer(owner(), amount);
         emit EmergencyVest(amount);
+    }
+
+    function setChangeBenificiaryAllowed() external onlyOwner {
+        changeBenificiaryAllowed = !changeBenificiaryAllowed;
+    }
+    function setEarlyWithdrawAllowed() external onlyOwner {
+        earlyWithdrawAllowed = !earlyWithdrawAllowed;
     }
 }

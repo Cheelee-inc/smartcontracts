@@ -12,9 +12,11 @@ describe("MultiVesting", function () {
   let vesting: MultiVesting
   let owner: SignerWithAddress
   let receiver: SignerWithAddress
+  let receiver2: SignerWithAddress
+  let receiver3: SignerWithAddress
 
   before(async()=>{
-    [owner, receiver] = await ethers.getSigners()
+    [owner, receiver, receiver2, receiver3] = await ethers.getSigners()
     cheel = await deployCHEEL()
     vesting = await deployMultiVesting(cheel.address)
     await cheel.mint(vesting.address, 1000)
@@ -61,4 +63,28 @@ describe("MultiVesting", function () {
     expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), await currentTimestamp()))[1]).to.be.equal(0)
   })
 
+  it("Blocking works", async()=>{
+    let amount = 1000
+
+    await cheel.mint(vesting.address, amount)
+
+    expect (await cheel.balanceOf(vesting.address)).to.be.equal(amount)
+    await vesting.setEarlyWithdrawAllowed()
+    await expect(vesting.emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
+    expect (await cheel.balanceOf(vesting.address)).to.be.equal(amount)
+
+    await vesting.setEarlyWithdrawAllowed()
+    expect(await vesting.emergencyVest(cheel.address)).to.be.ok
+    expect (await cheel.balanceOf(vesting.address)).to.be.equal(0)
+  })
+
+  it("change beneficiary works", async() => {
+    await vesting.vest(await receiver2.getAddress(), await currentTimestamp(), 1, 1000, 0)
+    expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
+    await vesting.updateBeneficiary(receiver2.address, receiver3.address)
+
+    expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(0)    
+    expect((await vesting.releasable(await receiver3.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
+
+  })
 })
