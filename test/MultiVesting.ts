@@ -18,7 +18,7 @@ describe("MultiVesting", function () {
   before(async()=>{
     [owner, receiver, receiver2, receiver3] = await ethers.getSigners()
     cheel = await deployCHEEL()
-    vesting = await deployMultiVesting(cheel.address)
+    vesting = await deployMultiVesting(cheel.address, true, true)
     await cheel.mint(vesting.address, 1000)
     await vesting.setSeller(await owner.getAddress())
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)
@@ -69,13 +69,11 @@ describe("MultiVesting", function () {
     await cheel.mint(vesting.address, amount)
 
     expect (await cheel.balanceOf(vesting.address)).to.be.equal(amount)
-    await vesting.setEarlyWithdrawAllowed()
-    await expect(vesting.emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
-    expect (await cheel.balanceOf(vesting.address)).to.be.equal(amount)
-
-    await vesting.setEarlyWithdrawAllowed()
     expect(await vesting.emergencyVest(cheel.address)).to.be.ok
     expect (await cheel.balanceOf(vesting.address)).to.be.equal(0)
+
+    await vesting.disableEarlyWithdraw()
+    await expect(vesting.emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
   })
 
   it("change beneficiary works", async() => {
