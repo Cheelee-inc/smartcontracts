@@ -34,7 +34,7 @@ contract Treasury is
 
     mapping(uint256 => bool) private usedSignature;
 
-            //who              //when             //option   //amount
+    //who              //when             //option   //amount
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
         public tokensTransfersPerDay;
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))

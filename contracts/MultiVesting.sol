@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IVesting.sol";
@@ -16,12 +17,21 @@ contract MultiVesting is IVesting, Ownable {
     address public seller;
 
     mapping(address => uint256) public released;
-
     mapping(address => Beneficiary) public beneficiary;
 
-    constructor(IERC20 _token) {
+    bool public changeBenificiaryAllowed;
+    bool public earlyWithdrawAllowed;
+
+    constructor(
+        IERC20 _token,
+        bool _changeBenificiaryAllowed,
+        bool _earlyWithdrawAllowed
+    ) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
+
+        changeBenificiaryAllowed = _changeBenificiaryAllowed;
+        earlyWithdrawAllowed = _earlyWithdrawAllowed;
     }
 
     function setSeller(address _addr) external onlyOwner {
@@ -109,7 +119,6 @@ contract MultiVesting is IVesting, Ownable {
         view
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
-        // maxAmount = token.balanceOf(address(this)) + _released;
         maxAmount = beneficiary[_beneficiary].amount;
         (, vestedAmount) = _vestingSchedule(
             _beneficiary,
@@ -147,6 +156,7 @@ contract MultiVesting is IVesting, Ownable {
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
     {
+        require(changeBenificiaryAllowed, "Option not allowed");
         require(
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
@@ -160,8 +170,14 @@ contract MultiVesting is IVesting, Ownable {
     }
 
     function emergencyVest(IERC20 _token) external override onlyOwner {
+        require(earlyWithdrawAllowed, "Option not allowed");
+
         uint256 amount = _token.balanceOf(address(this));
         _token.safeTransfer(owner(), amount);
         emit EmergencyVest(amount);
+    }
+
+    function disableEarlyWithdraw() external onlyOwner {
+        earlyWithdrawAllowed = false;
     }
 }
