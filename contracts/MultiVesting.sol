@@ -22,12 +22,16 @@ contract MultiVesting is IVesting, Ownable {
     bool public changeBenificiaryAllowed;
     bool public earlyWithdrawAllowed;
 
-    constructor(IERC20 _token) {
+    constructor(
+        IERC20 _token,
+        bool _changeBenificiaryAllowed,
+        bool _earlyWithdrawAllowed
+    ) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
-        changeBenificiaryAllowed = true;
-        earlyWithdrawAllowed = true;
+        changeBenificiaryAllowed = _changeBenificiaryAllowed;
+        earlyWithdrawAllowed = _earlyWithdrawAllowed;
     }
 
     function setSeller(address _addr) external onlyOwner {
@@ -115,7 +119,6 @@ contract MultiVesting is IVesting, Ownable {
         view
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
-        // maxAmount = token.balanceOf(address(this)) + _released;
         maxAmount = beneficiary[_beneficiary].amount;
         (, vestedAmount) = _vestingSchedule(
             _beneficiary,
@@ -174,10 +177,7 @@ contract MultiVesting is IVesting, Ownable {
         emit EmergencyVest(amount);
     }
 
-    function setChangeBenificiaryAllowed() external onlyOwner {
-        changeBenificiaryAllowed = !changeBenificiaryAllowed;
-    }
-    function setEarlyWithdrawAllowed() external onlyOwner {
-        earlyWithdrawAllowed = !earlyWithdrawAllowed;
+    function disableEarlyWithdraw() external onlyOwner {
+        earlyWithdrawAllowed = false;
     }
 }
