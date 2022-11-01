@@ -13,6 +13,9 @@ contract NFTSale is EIP712, Ownable {
     event Withdraw(uint256 amount);
     event Pause(address owner);
     event Redeem(address owner);
+    event SetRedeemSupply(uint256 newRedeemSupply);
+    event SetPurchaseSupply(uint256 newPurchaseSupply);
+    event SetSigner(address newSigner);
 
     string public constant NAME = "NFTSale";
     string public constant EIP712_VERSION = "1";
@@ -60,10 +63,14 @@ contract NFTSale is EIP712, Ownable {
 
     function setRedeemSupply(uint256 _newRedeemSupply) external onlyOwner {
         redeemSupply = _newRedeemSupply;
+
+        emit SetRedeemSupply(_newRedeemSupply);
     }
 
     function setPurchaseSupply(uint256 _newPurchaseSupply) external onlyOwner {
         purchaseSupply = _newPurchaseSupply;
+
+        emit SetPurchaseSupply(_newPurchaseSupply);
     }
 
     function verifySignatureRedeem(
@@ -170,5 +177,7 @@ contract NFTSale is EIP712, Ownable {
         require(_newSigner != address(0), "Can't set zero address");
 
         signer = _newSigner;
+
+        emit SetSigner(_newSigner);
     }
 }

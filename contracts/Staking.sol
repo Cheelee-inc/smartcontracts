@@ -8,6 +8,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Staking is Ownable {
     using SafeERC20 for IERC20;
 
+    event SetOptionState(uint256 option, bool state);
+    event SetOption(uint256 option, uint256 lockPeriod, uint256 apy, uint256 minValue, uint256 maxValue);
+    event AddOption(uint256 lockPeriod, uint256 apy, uint256 minValue, uint256 maxValue);
+
     IERC20 public immutable token;
 
     struct Status {
@@ -61,6 +65,8 @@ contract Staking is Ownable {
 
     function setOptionState(uint256 _option, bool _state) external onlyOwner {
         optionPaused[_option] = _state;
+
+        emit SetOptionState(_option, _state);
     }
 
     function setOption(
@@ -76,6 +82,8 @@ contract Staking is Ownable {
         apy[_option] = _apy;
         minAmount[_option] = _minValue;
         maxAmount[_option] = _maxValue;
+
+        emit SetOption(_option, _lockPeriod, _apy, _minValue, _maxValue);
     }
 
     function addOption(
@@ -88,6 +96,8 @@ contract Staking is Ownable {
         apy.push(_apy);
         minAmount.push(_minValue);
         maxAmount.push(_maxValue);
+        
+        emit AddOption(_lockPeriod, _apy, _minValue, _maxValue);
     }
 
     function getRegisteredUsers() external view returns (address[] memory) {

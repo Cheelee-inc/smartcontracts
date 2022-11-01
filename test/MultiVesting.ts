@@ -77,7 +77,7 @@ describe("MultiVesting", function () {
   })
 
   it("change beneficiary works", async() => {
-    await vesting.vest(await receiver2.getAddress(), await currentTimestamp(), 1, 1000, 0)
+    await vesting.vest(await receiver2.getAddress(), await currentTimestamp(), 1, 1000, 1)
     expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
     await vesting.updateBeneficiary(receiver2.address, receiver3.address)
 

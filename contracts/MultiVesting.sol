@@ -12,6 +12,7 @@ contract MultiVesting is IVesting, Ownable {
     event SetSeller(address newSeller);
     event Vested(address beneficiary, uint256 amount);
     event EmergencyVest(uint256 amount);
+    event UpdateBeneficiary(address oldBeneficiary, address newBeneficiary);
 
     IERC20 public immutable token;
     address public seller;
@@ -60,6 +61,8 @@ contract MultiVesting is IVesting, Ownable {
         );
 
         require(_durationSeconds > 0, "Duration must be above 0");
+        require(_amount > 0, "Amount must be above 0");
+        require(_cliff > 0, "Cliff must be above 0");
 
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
         beneficiary[_beneficiaryAddress].duration = _durationSeconds;
@@ -167,6 +170,8 @@ contract MultiVesting is IVesting, Ownable {
 
         delete released[_oldBeneficiary];
         delete beneficiary[_oldBeneficiary];
+
+        emit UpdateBeneficiary(_oldBeneficiary, _newBeneficiary);
     }
 
     function emergencyVest(IERC20 _token) external override onlyOwner {
