@@ -10,7 +10,7 @@ contract LEE is ERC20, ERC20Permit, Ownable {
 
     constructor()
         ERC20("CHEELE Attention Token", "LEE")
-        ERC20Permit("MyToken")
+        ERC20Permit("LEE")
     {}
 
     function mint(address _to, uint256 _amount) external onlyOwner {

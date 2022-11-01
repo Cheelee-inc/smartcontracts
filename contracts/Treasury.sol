@@ -16,15 +16,23 @@ contract Treasury is
     OwnableUpgradeable
 {
     event Withdrawed(
-        address indexed _user,
-        uint256 _amount,
-        uint256 indexed _option
+        address indexed user,
+        uint256 amount,
+        uint256 indexed option
     );
     event WithdrawedNFT(
-        address indexed _user,
-        uint256 _id,
-        uint256 indexed _option
+        address indexed user,
+        uint256 id,
+        uint256 indexed option
     );
+    event SetSigner(address signer);
+    event SetTokenLimit(uint256 index, uint256 newLimit);
+    event SetNftLimit(uint256 index, uint256 newLimit);
+    event AddToken(address addr, uint256 limit);
+    event AddNFT(address addr, uint256 limit);
+    event DisableToken(uint256 index);
+    event DisableNFT(uint256 index);
+    event WithdrawToken(address token, uint256 amount);
 
     string public NAME;
     string public EIP712_VERSION;
@@ -192,6 +200,8 @@ contract Treasury is
 
     function setSigner(address _signer) external onlyOwner {
         signer = _signer;
+
+        emit SetSigner(_signer);
     }
 
     function setTokenLimit(uint256 _index, uint256 _newLimit)
@@ -199,10 +209,14 @@ contract Treasury is
         onlyOwner
     {
         maxTokenTransferPerDay[_index] = _newLimit;
+
+        emit SetTokenLimit(_index, _newLimit);
     }
 
     function setNftLimit(uint256 _index, uint256 _newLimit) external onlyOwner {
         maxNftTransfersPerDay[_index] = _newLimit;
+
+        emit SetNftLimit(_index, _newLimit);
     }
 
     function addToken(IERC20Upgradeable _addr, uint256 _limit)
@@ -212,6 +226,8 @@ contract Treasury is
         require(address(_addr) != address(0), "Zero address not acceptable");
         tokens.push(_addr);
         maxTokenTransferPerDay.push(_limit);
+
+        emit AddToken(address(_addr), _limit);
     }
 
     function addNFT(CustomNFT _addr, uint256 _limit) external onlyOwner {
@@ -220,14 +236,20 @@ contract Treasury is
         maxNftTransfersPerDay.push(_limit);
 
         _addr.setApprovalForAll(address(_addr), true);
+
+        emit AddNFT(address(_addr), _limit);
     }
 
     function disableToken(uint256 _index) external onlyOwner {
         tokens[_index] = IERC20Upgradeable(address(0));
+
+        emit DisableToken(_index);
     }
 
     function disableNFT(uint256 _index) external onlyOwner {
         nfts[_index] = CustomNFT(address(0));
+
+        emit DisableNFT(_index);
     }
 
     function withdrawToken(IERC20Upgradeable _token, uint256 _amount)
@@ -235,5 +257,7 @@ contract Treasury is
         onlyOwner
     {
         SafeERC20Upgradeable.safeTransfer(_token, msg.sender, _amount);
+
+        emit WithdrawToken(address(_token), _amount);
     }
 }
