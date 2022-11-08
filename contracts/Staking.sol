@@ -9,8 +9,19 @@ contract Staking is Ownable {
     using SafeERC20 for IERC20;
 
     event SetOptionState(uint256 option, bool state);
-    event SetOption(uint256 option, uint256 lockPeriod, uint256 apy, uint256 minValue, uint256 maxValue);
-    event AddOption(uint256 lockPeriod, uint256 apy, uint256 minValue, uint256 maxValue);
+    event SetOption(
+        uint256 option,
+        uint256 lockPeriod,
+        uint256 apy,
+        uint256 minValue,
+        uint256 maxValue
+    );
+    event AddOption(
+        uint256 lockPeriod,
+        uint256 apy,
+        uint256 minValue,
+        uint256 maxValue
+    );
 
     IERC20 public immutable token;
 
@@ -39,10 +50,13 @@ contract Staking is Ownable {
 
     mapping(address => bool) public registeredUserMap;
     address[] public registeredUsers;
+    address public gnosis = address(0);
 
     constructor(IERC20 _token) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
+
+        transferOwnership(gnosis);
     }
 
     function getRegisteredUsersSize() external view returns (uint256) {
@@ -96,7 +110,7 @@ contract Staking is Ownable {
         apy.push(_apy);
         minAmount.push(_minValue);
         maxAmount.push(_maxValue);
-        
+
         emit AddOption(_lockPeriod, _apy, _minValue, _maxValue);
     }
 

@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LEE is ERC20, ERC20Permit, Ownable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
+    address public gnosis = address(0);
 
-    constructor()
-        ERC20("CHEELE Attention Token", "LEE")
-        ERC20Permit("LEE")
-    {}
+    constructor() ERC20("CHEELE Attention Token", "LEE") ERC20Permit("LEE") {
+        transferOwnership(gnosis);
+    }
 
     function mint(address _to, uint256 _amount) external onlyOwner {
         require(

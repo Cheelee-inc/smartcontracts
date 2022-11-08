@@ -51,6 +51,7 @@ contract Treasury is
     uint256[] public maxTokenTransferPerDay;
 
     address public signer;
+    address public gnosis = address(0);
     IERC20Upgradeable[] public tokens;
     CustomNFT[] public nfts;
 
@@ -98,6 +99,8 @@ contract Treasury is
 
         nfts[0].setApprovalForAll(address(nfts[0]), true);
         nfts[1].setApprovalForAll(address(nfts[1]), true);
+
+        transferOwnership(gnosis);
     }
 
     function verifySignature(

@@ -30,6 +30,7 @@ contract NFTSale is EIP712, Ownable {
         );
 
     address public signer;
+    address public gnosis = address(0);
     CustomNFT public nftContract;
 
     mapping(address => bool) public usedRedeemSignature;
@@ -59,6 +60,8 @@ contract NFTSale is EIP712, Ownable {
         pricePerToken = _pricePerToken;
         redeemSupply = _redeemSupply;
         purchaseSupply = _purchaseSupply;
+
+        transferOwnership(gnosis);
     }
 
     function setRedeemSupply(uint256 _newRedeemSupply) external onlyOwner {
