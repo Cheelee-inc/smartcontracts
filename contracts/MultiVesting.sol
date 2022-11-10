@@ -13,26 +13,30 @@ contract MultiVesting is IVesting, Ownable {
     event Vested(address beneficiary, uint256 amount);
     event EmergencyVest(uint256 amount);
     event UpdateBeneficiary(address oldBeneficiary, address newBeneficiary);
+    event DisableEarlyWithdraw(address owner);
 
     IERC20 public immutable token;
     address public seller;
+    address public gnosis = 0x42DA5e446453319d4076c91d745E288BFef264D0;
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;
 
-    bool public changeBenificiaryAllowed;
+    bool public changeBeneficiaryAllowed;
     bool public earlyWithdrawAllowed;
 
     constructor(
         IERC20 _token,
-        bool _changeBenificiaryAllowed,
+        bool _changeBeneficiaryAllowed,
         bool _earlyWithdrawAllowed
     ) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
-        changeBenificiaryAllowed = _changeBenificiaryAllowed;
+        changeBeneficiaryAllowed = _changeBeneficiaryAllowed;
         earlyWithdrawAllowed = _earlyWithdrawAllowed;
+
+        transferOwnership(gnosis);
     }
 
     function setSeller(address _addr) external onlyOwner {
@@ -159,7 +163,7 @@ contract MultiVesting is IVesting, Ownable {
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
     {
-        require(changeBenificiaryAllowed, "Option not allowed");
+        require(changeBeneficiaryAllowed, "Option not allowed");
         require(
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
@@ -184,5 +188,7 @@ contract MultiVesting is IVesting, Ownable {
 
     function disableEarlyWithdraw() external onlyOwner {
         earlyWithdrawAllowed = false;
+
+        emit DisableEarlyWithdraw(msg.sender);
     }
 }
