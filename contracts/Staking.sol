@@ -50,13 +50,13 @@ contract Staking is Ownable {
 
     mapping(address => bool) public registeredUserMap;
     address[] public registeredUsers;
-    address public gnosis = 0x440637BBacBee76cc009A5C400fC9477a9e4F6Fc;
+    address public constant GNOSIS = 0x440637BBacBee76cc009A5C400fC9477a9e4F6Fc;
 
     constructor(IERC20 _token) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
-        transferOwnership(gnosis);
+        transferOwnership(GNOSIS);
     }
 
     function getRegisteredUsersSize() external view returns (uint256) {

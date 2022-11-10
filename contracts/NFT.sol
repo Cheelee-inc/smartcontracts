@@ -17,7 +17,7 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
 
     address public nftSale;
     address public treasury;
-    address public gnosis = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
+    address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
 
     string public baseUri;
 
@@ -27,7 +27,7 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
         NAME = _name;
         VERSION = _version;
 
-        transferOwnership(gnosis);
+        transferOwnership(constant GNOSIS);
     }
 
     function receiveNFT(address _to, uint256 _tokenId) external override {
