@@ -30,7 +30,7 @@ contract NFTSale is EIP712, Ownable {
         );
 
     address public signer;
-    address public gnosis = address(0);
+    address public gnosis = 0x841005214049dcE3168CF8a323DD742BcfbF1dc4;
     CustomNFT public nftContract;
 
     mapping(address => bool) public usedRedeemSignature;

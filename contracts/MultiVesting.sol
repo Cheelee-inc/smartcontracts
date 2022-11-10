@@ -17,7 +17,7 @@ contract MultiVesting is IVesting, Ownable {
 
     IERC20 public immutable token;
     address public seller;
-    address public gnosis = address(0);
+    address public gnosis = 0x42DA5e446453319d4076c91d745E288BFef264D0;
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;

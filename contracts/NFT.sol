@@ -17,7 +17,7 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
 
     address public nftSale;
     address public treasury;
-    address public gnosis = address(0);
+    address public gnosis = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
 
     string public baseUri;
 

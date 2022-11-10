@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 contract CHEEL is ERC20, Ownable, ERC20Permit, ERC20Votes {
     uint256 public constant MAX_AMOUNT = 10**9 * 10**18;
-    address public gnosis = address(0);
+    address public gnosis = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
 
     constructor() ERC20("CHEELEE", "CHEEL") ERC20Permit("CHEELEE") {
         transferOwnership(gnosis);
