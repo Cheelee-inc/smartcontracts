@@ -9,7 +9,7 @@ contract LEE is ERC20, ERC20Permit, Ownable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
 
-    constructor() ERC20("CHEELE Attention Token", "LEE") ERC20Permit("LEE") {
+    constructor() ERC20("CHEELEE Attention Token", "LEE") ERC20Permit("LEE") {
         transferOwnership(GNOSIS);
     }
 
