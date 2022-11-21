@@ -1,3 +1,4 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
@@ -20,7 +21,7 @@ describe("Test", function () {
 
   it("Deposit works", async() => {
     let amount = "150000000000000000000"
-    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
     await cheel.connect(user).approve(staking.address, amount);
 
     expect(await cheel.balanceOf(await user.getAddress())).to.be.equal(amount)
@@ -37,7 +38,7 @@ describe("Test", function () {
 
   it("Earned works", async() => {
     let amount = "150000000000000000000"
-    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
     await cheel.connect(user).approve(staking.address, amount);
     await staking.connect(user).deposit(amount, 0)
     await increaseTime(5 * 60 * 60 / 2)
@@ -56,7 +57,7 @@ describe("Test", function () {
     let amount2Incorrect =   "100000000000000000000"
     let amount3Incorrect =   "450000000000000000000"
     let amountSum = "5650000000000000000000"  
-    await cheel.mint(await user.getAddress(), amountSum)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amountSum)
     await cheel.connect(user).approve(staking.address, amountSum);
 
     await expect(staking.connect(user).deposit(amountIncorrect, 0)).to.be.reverted
@@ -78,9 +79,9 @@ describe("Test", function () {
   })
 
   it("Earning works correctly after 1 year", async() => {
-    await cheel.mint(staking.address, "1000000000000000000000000")
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, "1000000000000000000000000")
     let amount  =    "200000000000000000000"
-    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
     await cheel.connect(user).approve(staking.address, amount);
 
     await staking.connect(user).deposit(amount, 0)
@@ -93,9 +94,9 @@ describe("Test", function () {
   })
 
   it("Claim and Withdraw works", async() => {
-    await cheel.mint(staking.address, "1000000000000000000000000")
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, "1000000000000000000000000")
     let amount  =    "150000000000000000000"
-    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
     await cheel.connect(user).approve(staking.address, amount);
     await staking.connect(user).deposit(amount, 0)
 
@@ -126,23 +127,28 @@ describe("Test", function () {
     let secondsPerYear = 8766 * 60 * 60
     let maxValue = "1000000000000000000000000"
 
-    await cheel.mint(staking.address, maxValue)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, maxValue)
     let amount  =    "100000000000000000000"
-    await cheel.mint(await user.getAddress(), amount)
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
     await cheel.connect(user).approve(staking.address, amount);
 
     await expect(staking.connect(user).deposit(amount, 3)).to.be.reverted
 
-    await staking.addOption(0, 200, 0, maxValue)
+    await staking.connect(await getGnosisWithEther(staking)).addOption(0, 200, 0, maxValue)
     await staking.connect(user).deposit(amount, 3)
 
-    await increaseTime(secondsPerYear)
+    await increaseTime(secondsPerYear)                                                                                                        
     console.log(await staking.earned(await user.getAddress(), 3));
 
     console.log(await staking.getRegisteredUsersSample(0,1,0));
     console.log(await staking.getRegisteredUsersSample(0,1,1));
     console.log(await staking.getRegisteredUsersSample(0,1,2));
     console.log(await staking.getRegisteredUsersSample(0,1,3));
-    
   })
+
+  async function getGnosisWithEther(from: any): Promise<SignerWithAddress> {
+    let gnosis = await ethers.getImpersonatedSigner(await from.GNOSIS())
+    await owner.sendTransaction({to: gnosis.address,value: ethers.utils.parseEther("0.1")})
+    return gnosis
+  }
 });

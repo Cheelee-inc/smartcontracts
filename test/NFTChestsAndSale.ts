@@ -15,7 +15,6 @@ describe("Test", function () {
   let owner: SignerWithAddress
   let user1: SignerWithAddress
   let user2: SignerWithAddress
-  let user3: SignerWithAddress
   let nftSale: NFTSale
   let nft: NFT
   let treasury: Treasury
@@ -25,7 +24,7 @@ describe("Test", function () {
   let erc20: CHEEL
 
   before(async () => {
-    [owner, user1, user2, user3] = await ethers.getSigners()
+    [owner, user1, user2] = await ethers.getSigners()
 
     price = ethers.utils.parseEther("1")
     wrongPrice = ethers.utils.parseEther("0.1")
@@ -37,7 +36,7 @@ describe("Test", function () {
     erc20 = await deployCHEEL()
 
     treasury = await deployTreasury(nft.address, nft.address, owner.address, erc20.address, erc20.address, erc20.address)
-    await erc20.mint(treasury.address, "10000000000")
+    await erc20.connect(await getGnosisWithEther(erc20)).mint(treasury.address, "10000000000")
 
     console.log("nft: ", nft.address);
     console.log("nftSale: ", nftSale.address);
@@ -46,7 +45,7 @@ describe("Test", function () {
     console.log("user1: ", user1.address);
     console.log("user2: ", user2.address);
     
-    await nft.setNftSaleAndTreasury(nftSale.address, treasury.address)
+    await nft.connect(await getGnosisWithEther(nft)).setNftSaleAndTreasury(nftSale.address, treasury.address)
   })
 
   it("purchase & redeem", async () => {
@@ -99,19 +98,19 @@ describe("Test", function () {
   it("transfers per day work", async() => {
     let id = 12345
     let nonce = 123456
-    await treasury.setNftLimit(1, 3)
+    await treasury.connect(await getGnosisWithEther(treasury)).setNftLimit(1, 3)
     await nft.transferFrom(owner.address, treasury.address, id)
    
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
     
     await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Too many transfers")
 
-    await treasury.setNftLimit(1, 4)
+    await treasury.connect(await getGnosisWithEther(treasury)).setNftLimit(1, 4)
     await treasury.withdrawNFT(nonce++, id, owner.address, timestamp, 1, sig)
 
-    expect(await treasury.nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(4)
+    expect(await treasury.connect(await getGnosisWithEther(treasury)).nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(4)
     await increaseTimeDays(1)
-    expect(await treasury.nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(0)
+    expect(await treasury.connect(await getGnosisWithEther(treasury)).nftTransfersPerDay(owner.address, await treasury.getCurrentDay(), 1)).to.be.equal(0)
   })
 
   it("disable and add token works", async()=>{
@@ -121,13 +120,13 @@ describe("Test", function () {
 
     await nft.transferFrom(owner.address, treasury.address, id)
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
-    await treasury.disableNFT(1)
+    await treasury.connect(await getGnosisWithEther(treasury)).disableNFT(1)
     
     await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Option disabled")
 
     let newNFT = await deployNFT("it", "it")
-    await newNFT.setNftSaleAndTreasury(nftSale.address, treasury.address)
-    await treasury.addNFT(newNFT.address, 2)
+    await newNFT.connect(await getGnosisWithEther(newNFT)).setNftSaleAndTreasury(nftSale.address, treasury.address)
+    await treasury.connect(await getGnosisWithEther(treasury)).addNFT(newNFT.address, 2)
 
     let newSig = await getTreasurySignature(nonce, id, owner.address, timestamp, 2)
     await treasury.withdrawNFT(nonce++, id, owner.address, timestamp, 2, newSig)
@@ -143,11 +142,11 @@ describe("Test", function () {
 
   it("erc20 works", async()=>{
       let token = await deployCHEEL()
-      await treasury.addToken(token.address, 100000)
+      await treasury.connect(await getGnosisWithEther(treasury)).addToken(token.address, 100000)
 
       let amount = 10000
 
-      await token.mint(treasury.address, 100000)
+      await token.connect(await getGnosisWithEther(token)).mint(treasury.address, 100000)
 
       let nonce = 321
       timestamp = await currentTimestamp() + 1000
@@ -167,7 +166,7 @@ describe("Test", function () {
 
   it("withdraw works", async()=> {
     console.log(await erc20.balanceOf(owner.address));
-    await treasury.withdrawToken(erc20.address, 100)
+    await treasury.connect(await getGnosisWithEther(treasury)).withdrawToken(erc20.address, 100)
     console.log(await erc20.balanceOf(owner.address));
   })
 
@@ -190,5 +189,11 @@ describe("Test", function () {
   async function getTreasuryErc20Signature(nonce: any, tokenId: any, to: any, ttl: any, option: any) {
     let domain = TrTokenSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
     return await owner._signTypedData(domain, TrTokenSig.Pass, {nonce: nonce, amount: tokenId, address_to: to, ttl: ttl, option: option})
+  }
+
+  async function getGnosisWithEther(from: any): Promise<SignerWithAddress> {
+    let gnosis = await ethers.getImpersonatedSigner(await from.GNOSIS())
+    await owner.sendTransaction({to: gnosis.address,value: ethers.utils.parseEther("0.1")})
+    return gnosis
   }
 })
