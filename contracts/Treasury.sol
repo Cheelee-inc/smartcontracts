@@ -51,7 +51,7 @@ contract Treasury is
     uint256[] public maxTokenTransferPerDay;
 
     address public signer;
-    address public GNOSIS;
+    address public constant GNOSIS = 0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70;
     IERC20Upgradeable[] public tokens;
     CustomNFT[] public nfts;
 
@@ -100,7 +100,6 @@ contract Treasury is
         nfts[0].setApprovalForAll(address(nfts[0]), true);
         nfts[1].setApprovalForAll(address(nfts[1]), true);
 
-        GNOSIS = 0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70;
         transferOwnership(GNOSIS);
     }
 
