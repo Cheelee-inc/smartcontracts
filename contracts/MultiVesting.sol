@@ -17,7 +17,7 @@ contract MultiVesting is IVesting, Ownable {
 
     IERC20 public immutable token;
     address public seller;
-    address public gnosis = 0x42DA5e446453319d4076c91d745E288BFef264D0;
+    address public constant GNOSIS = 0x42DA5e446453319d4076c91d745E288BFef264D0;
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;
@@ -36,7 +36,7 @@ contract MultiVesting is IVesting, Ownable {
         changeBeneficiaryAllowed = _changeBeneficiaryAllowed;
         earlyWithdrawAllowed = _earlyWithdrawAllowed;
 
-        transferOwnership(gnosis);
+        transferOwnership(GNOSIS);
     }
 
     function setSeller(address _addr) external onlyOwner {

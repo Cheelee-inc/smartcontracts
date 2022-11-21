@@ -27,7 +27,7 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
         NAME = _name;
         VERSION = _version;
 
-        transferOwnership(constant GNOSIS);
+        transferOwnership(GNOSIS);
     }
 
     function receiveNFT(address _to, uint256 _tokenId) external override {
