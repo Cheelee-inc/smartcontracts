@@ -11,8 +11,8 @@ import "./interfaces/CustomNFT.sol";
 contract NFTSale is EIP712, Ownable {
     event SetPrice(uint256 price);
     event Withdraw(uint256 amount);
-    event Pause(address owner);
-    event Redeem(address owner);
+    event PauseRedemption(address owner);
+    event PausePurchase(address owner);
     event SetRedeemSupply(uint256 newRedeemSupply);
     event SetPurchaseSupply(uint256 newPurchaseSupply);
     event SetSigner(address newSigner);
@@ -31,7 +31,7 @@ contract NFTSale is EIP712, Ownable {
 
     address public signer;
     address public constant GNOSIS = 0x841005214049dcE3168CF8a323DD742BcfbF1dc4;
-    CustomNFT public nftContract;
+    CustomNFT public immutable nftContract;
 
     mapping(address => bool) public usedRedeemSignature;
     mapping(address => bool) public usedPurchaseSignature;
@@ -121,8 +121,8 @@ contract NFTSale is EIP712, Ownable {
 
         usedRedeemSignature[msg.sender] = true;
 
-        nftContract.receiveNFT(msg.sender, _tokenId);
         redeemed++;
+        nftContract.receiveNFT(msg.sender, _tokenId);
     }
 
     function purchase(
@@ -147,8 +147,8 @@ contract NFTSale is EIP712, Ownable {
 
         usedPurchaseSignature[msg.sender] = true;
 
-        nftContract.receiveNFT(msg.sender, _tokenId);
         purchased++;
+        nftContract.receiveNFT(msg.sender, _tokenId);
     }
 
     function setPrice(uint256 _price) external onlyOwner {
@@ -167,13 +167,13 @@ contract NFTSale is EIP712, Ownable {
     function pauseRedeem() external onlyOwner {
         redeemPaused = !redeemPaused;
 
-        emit Pause(msg.sender);
+        emit PauseRedemption(msg.sender);
     }
 
     function pausePurchase() external onlyOwner {
         purchasePaused = !purchasePaused;
 
-        emit Redeem(msg.sender);
+        emit PausePurchase(msg.sender);
     }
 
     function setSigner(address _newSigner) external onlyOwner {

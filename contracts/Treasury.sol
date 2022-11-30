@@ -34,11 +34,15 @@ contract Treasury is
     event DisableNFT(uint256 index);
     event WithdrawToken(address token, uint256 amount);
 
-    string public NAME;
-    string public EIP712_VERSION;
+    string public constant NAME = "TREASURY";
+    string public constant EIP712_VERSION = "1";
 
-    bytes32 public NFT_PASS_TYPEHASH;
-    bytes32 public PASS_TYPEHASH;
+    bytes32 public constant NFT_PASS_TYPEHASH = keccak256(
+            "WithdrawNFTSignature(uint256 nonce,uint256 id,address address_to,uint256 ttl,uint256 option)"
+        );
+    bytes32 public constant PASS_TYPEHASH = keccak256(
+            "WithdrawSignature(uint256 nonce,uint256 amount,address address_to,uint256 ttl,uint256 option)"
+        );
 
     mapping(uint256 => bool) private usedSignature;
 
@@ -71,29 +75,19 @@ contract Treasury is
         require(address(_cheel) != address(0), "Can't set zero address");
         require(address(_usdt) != address(0), "Can't set zero address");
 
-        NAME = "TREASURY";
-        EIP712_VERSION = "1";
-
         __EIP712_init(NAME, EIP712_VERSION);
-
-        NFT_PASS_TYPEHASH = keccak256(
-            "WithdrawNFTSignature(uint256 nonce,uint256 id,address address_to,uint256 ttl,uint256 option)"
-        );
-        PASS_TYPEHASH = keccak256(
-            "WithdrawSignature(uint256 nonce,uint256 amount,address address_to,uint256 ttl,uint256 option)"
-        );
 
         nfts.push(_chests);
         nfts.push(_glasses);
-        maxNftTransfersPerDay.push(7);
-        maxNftTransfersPerDay.push(7);
+        maxNftTransfersPerDay.push(5);
+        maxNftTransfersPerDay.push(5);
 
         tokens.push(_lee);
         tokens.push(_cheel);
         tokens.push(_usdt);
         maxTokenTransferPerDay.push(100 * 10**18);
-        maxTokenTransferPerDay.push(100 * 10**18);
-        maxTokenTransferPerDay.push(100 * 10**18);
+        maxTokenTransferPerDay.push(500 * 10**18);
+        maxTokenTransferPerDay.push(1000 * 10**18);
 
         signer = _signer;
 

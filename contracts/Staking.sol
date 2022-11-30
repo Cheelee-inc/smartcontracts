@@ -119,7 +119,7 @@ contract Staking is Ownable {
     }
 
     function deposit(uint256 _amount, uint256 _option) external {
-        require(!optionPaused[_option], "Deposit for this option paused");
+        require(!optionPaused[_option], "Deposit for this option p aused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
 
         if (!registeredUserMap[msg.sender]) {
@@ -173,7 +173,7 @@ contract Staking is Ownable {
 
     function _collect(uint256 _option) internal {
         (uint256 _amount, ) = earned(msg.sender, _option);
-        status[_option][msg.sender].alreadyCollected = _amount;
+        status[_option][msg.sender].alreadyCollected += _amount;
         token.safeTransfer(msg.sender, _amount);
     }
 

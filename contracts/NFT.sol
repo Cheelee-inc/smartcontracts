@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/CustomNFT.sol";
 
-contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
+contract NFT is ERC721Enumerable, CustomNFT, Ownable {
     event SetSaleAndTreasury(address sale, address treasury);
-    event ReceiveNFT(address receiver, uint256 tokenId);
+    event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
     string public NAME;
@@ -26,7 +26,6 @@ contract NFT is ERC721, ERC721Enumerable, CustomNFT, Ownable {
     {
         NAME = _name;
         VERSION = _version;
-
         transferOwnership(GNOSIS);
     }
 

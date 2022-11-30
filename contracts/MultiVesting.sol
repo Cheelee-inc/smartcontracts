@@ -10,12 +10,13 @@ contract MultiVesting is IVesting, Ownable {
     using SafeERC20 for IERC20;
 
     event SetSeller(address newSeller);
-    event Vested(address beneficiary, uint256 amount);
+    event Vested(address indexed beneficiary, uint256 amount);
     event EmergencyVest(uint256 amount);
-    event UpdateBeneficiary(address oldBeneficiary, address newBeneficiary);
+    event UpdateBeneficiary(address indexed oldBeneficiary, address indexed newBeneficiary);
     event DisableEarlyWithdraw(address owner);
 
     IERC20 public immutable token;
+    uint256 public sumVesting;
     address public seller;
     address public constant GNOSIS = 0x42DA5e446453319d4076c91d745E288BFef264D0;
 
@@ -58,6 +59,8 @@ contract MultiVesting is IVesting, Ownable {
         uint256 _amount,
         uint256 _cliff
     ) external override {
+        require(sumVesting + _amount <= token.balanceOf(address(this)), "Not enough tokens");
+        sumVesting += _amount;
         require(msg.sender == seller, "Only sale contract can call");
         require(
             _beneficiaryAddress != address(0),
@@ -76,18 +79,18 @@ contract MultiVesting is IVesting, Ownable {
         emit Vested(_beneficiaryAddress, _amount);
     }
 
-    function release(address _beneficiaryAddress) external override {
+    function release(address _beneficiary) external override {
         (uint256 _releasableAmount, ) = _releasable(
-            msg.sender,
+            _beneficiary,
             block.timestamp
         );
 
         require(_releasableAmount > 0, "Can't claim yet!");
 
-        released[_beneficiaryAddress] += _releasableAmount;
-        token.safeTransfer(_beneficiaryAddress, _releasableAmount);
+        released[_beneficiary] += _releasableAmount;
+        token.safeTransfer(_beneficiary, _releasableAmount);
 
-        emit Released(_releasableAmount, msg.sender);
+        emit Released(_releasableAmount, _beneficiary);
     }
 
     function releasable(address _beneficiary, uint256 _timestamp)
@@ -168,6 +171,9 @@ contract MultiVesting is IVesting, Ownable {
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
         );
+
+        require(beneficiary[_oldBeneficiary].amount > 0, "Not a beneficiary");
+        require(beneficiary[_newBeneficiary].amount == 0, "Already a beneficiary");
 
         released[_newBeneficiary] = released[_oldBeneficiary];
         beneficiary[_newBeneficiary] = beneficiary[_oldBeneficiary];

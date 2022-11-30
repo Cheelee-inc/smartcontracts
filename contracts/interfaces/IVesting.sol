@@ -21,7 +21,7 @@ interface IVesting {
         uint256 cliff
     ) external;
 
-    function release(address beneficiaryAddress) external;
+    function release(address _beneficiary) external;
 
     function releasable(address _beneficiary, uint256 _timestamp)
         external
