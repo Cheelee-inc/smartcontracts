@@ -86,6 +86,9 @@ describe("MultiVesting", function () {
   })
 
   it("change beneficiary works", async() => {
+    console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
+    await cheel.connect(gnosisCheel).mint(vesting.address, 2000)
+    console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
     await vesting.vest(await receiver2.getAddress(), await currentTimestamp(), 1, 1000, 1)
     expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
     await vesting.connect(gnosisMV).updateBeneficiary(receiver2.address, receiver3.address)

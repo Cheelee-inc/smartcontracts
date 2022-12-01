@@ -91,9 +91,6 @@ contract Treasury is
 
         signer = _signer;
 
-        nfts[0].setApprovalForAll(address(nfts[0]), true);
-        nfts[1].setApprovalForAll(address(nfts[1]), true);
-
         transferOwnership(GNOSIS);
     }
 
@@ -231,8 +228,6 @@ contract Treasury is
         require(address(_addr) != address(0), "Zero address not acceptable");
         nfts.push(_addr);
         maxNftTransfersPerDay.push(_limit);
-
-        _addr.setApprovalForAll(address(_addr), true);
 
         emit AddNFT(address(_addr), _limit);
     }

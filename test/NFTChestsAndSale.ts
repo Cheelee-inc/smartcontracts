@@ -31,7 +31,7 @@ describe("Test", function () {
     timestamp = await currentTimestamp() + 1000
   
     nft = await deployNFT("it", "it")
-    nftSale = await deployNFTSale(nft. address, owner.address, price, 1000, 1000)
+    nftSale = await deployNFTSale(nft.address, owner.address, price, 1000, 1000)
     
     erc20 = await deployCHEEL()
 
@@ -51,11 +51,17 @@ describe("Test", function () {
   it("purchase & redeem", async () => {
     let sale1 = await getSaleSignature(123, owner.address, timestamp)
     let sale2 = await getSaleSignature(234, user1.address, timestamp)
+    let sale3 = await getSaleSignature(123454321, user2.address, timestamp)
 
     let redeem1 = await getRedeemSignature(456, owner.address, timestamp)
     let redeem2 = await getRedeemSignature(567, user1.address, timestamp)
 
+    await expect(nftSale.connect(user1).pausePurchase()).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).pausePurchase()
+    await expect(nftSale.purchase(123, timestamp, sale1, {value: price})).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).pausePurchase()
     await nftSale.purchase(123, timestamp, sale1, {value: price})
+
     expect(await nft.balanceOf(owner.address)).to.be.equal(1);
 
     await expect(nftSale.purchase(123,timestamp,sale1,{value: price})).to.be.reverted
@@ -64,13 +70,36 @@ describe("Test", function () {
     await expect(nftSale.purchase(234,timestamp,sale1,{value: price})).to.be.reverted
     await expect(nftSale.purchase(234,timestamp,sale2,{value: price})).to.be.reverted
 
+    await expect(nftSale.connect(owner).setPurchaseSupply(0)).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setPurchaseSupply(0)
+    await expect(nftSale.connect(user1).purchase(234, timestamp, sale2, {value: price})).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setPurchaseSupply(1000)
     await nftSale.connect(user1).purchase(234, timestamp, sale2, {value: price})
+
     expect(await nft.balanceOf(user1.address)).to.be.equal(1);
 
+    await expect(nftSale.connect(owner).setRedeemSupply(0)).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setRedeemSupply(0)
+    await expect(nftSale.redeem(456, timestamp, redeem1)).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setRedeemSupply(1000)
     await nftSale.redeem(456, timestamp, redeem1)
+
+    await expect(nftSale.connect(owner).pauseRedeem()).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).pauseRedeem()
+    await expect(nftSale.connect(user1).redeem(567, timestamp, redeem2)).to.be.reverted
+    await nftSale.connect(await getGnosisWithEther(nftSale)).pauseRedeem()
     await nftSale.connect(user1).redeem(567, timestamp, redeem2)
+
     expect(await nft.balanceOf(owner.address)).to.be.equal(2);
     expect(await nft.balanceOf(user1.address)).to.be.equal(2);
+
+    expect(await nft.balanceOf(user2.address)).to.be.equal(0);
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setPrice(ethers.utils.parseEther("2"))
+    await nftSale.connect(user2).purchase(123454321, timestamp, sale3, {value: ethers.utils.parseEther("2")})
+    expect(await nft.balanceOf(user2.address)).to.be.equal(1);
+    await nftSale.connect(await getGnosisWithEther(nftSale)).setPrice(ethers.utils.parseEther("1"))
+
+    await nftSale.connect(await getGnosisWithEther(nftSale)).withdraw()
   })
 
   it("mint and transfer from and to treasury", async () => {
@@ -170,6 +199,27 @@ describe("Test", function () {
     console.log(await erc20.balanceOf(owner.address));
   })
 
+  it("mint works", async()=>{
+    await nft.connect(await getGnosisWithEther(nft)).safeMint(owner.address, 777)
+    expect(await nft.ownerOf(777)).to.be.equal(owner.address)
+  })
+
+  it("setURI works", async() => {
+    // expect(await nft.tokenURI(777)).to.be.equal("777")
+    await nft.connect(await getGnosisWithEther(nft)).setUri("ipfs://test/")
+    expect(await nft.tokenURI(777)).to.be.equal("ipfs://test/777")
+  })
+
+  it("tokens by owner", async()=>{
+    let newNFT = await deployNFT("it", "it")
+    await newNFT.connect(await getGnosisWithEther(newNFT)).setNftSaleAndTreasury(nftSale.address, treasury.address)
+
+    await newNFT.connect(await getGnosisWithEther(newNFT)).safeMint(owner.address, 1)
+    await newNFT.connect(await getGnosisWithEther(newNFT)).safeMint(owner.address, 2)
+    await newNFT.connect(await getGnosisWithEther(newNFT)).safeMint(owner.address, 3)
+
+    expect((await newNFT.tokensOwnedByUser(owner.address)).length).to.be.equal(3)
+  })
 
   async function getSaleSignature(tokenId: any, to: any, ttl: any) {
     let domain = Sale.eip712Domain(nftSale.address, (await ethers.provider.getNetwork()).chainId)

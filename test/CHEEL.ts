@@ -24,6 +24,7 @@ describe("CHEEL", function () {
   it("Cheel Mint and Burn work", async() => {
     await expect(cheel.connect(badguy).mint(receiver.address, 1000)).to.be.revertedWith("Ownable: caller is not the owner")
     await expect(cheel.connect(owner).mint(receiver.address, 1000)).to.be.revertedWith("Ownable: caller is not the owner")
+    await expect(cheel.connect(gnosis).mint(receiver.address, "100000000000000000000000000000")).to.be.revertedWith("Can't mint more than max amount")
     expect(await cheel.connect(gnosis).mint(receiver.address, 1000)).to.be.ok
     expect(await cheel.totalSupply()).to.be.equal(1000)
 

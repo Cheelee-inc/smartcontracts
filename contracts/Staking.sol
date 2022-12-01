@@ -68,6 +68,9 @@ contract Staking is Ownable {
         uint256 _to,
         uint256 _option
     ) external view returns (Status[] memory) {
+        require(_from <= _to, "from can't be less then to");
+        require(_from <= registeredUsers.length, "from too big");
+        
         Status[] memory arr = new Status[](_to - _from);
 
         for (uint256 i = _from; i < _to; i++) {
@@ -106,6 +109,9 @@ contract Staking is Ownable {
         uint256 _minValue,
         uint256 _maxValue
     ) external onlyOwner {
+        require(_maxValue >= _minValue, "maxValue must be => minValue");
+        require(_apy > 100, "apy too low");
+
         lockPeriod.push(_lockPeriod);
         apy.push(_apy);
         minAmount.push(_minValue);
@@ -119,8 +125,9 @@ contract Staking is Ownable {
     }
 
     function deposit(uint256 _amount, uint256 _option) external {
-        require(!optionPaused[_option], "Deposit for this option p aused");
+        require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
+        require(_amount > 0, "amount can't be 0");
 
         if (!registeredUserMap[msg.sender]) {
             registeredUserMap[msg.sender] = true;
