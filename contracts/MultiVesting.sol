@@ -68,7 +68,10 @@ contract MultiVesting is IVesting, Ownable {
         );
 
         require(_durationSeconds > 0, "Duration must be above 0");
-        require(_amount > 0, "Amount must be above 0");
+        require(
+            (_amount > 0 && beneficiary[_beneficiaryAddress].amount == 0) ||
+            (_amount == 0 && beneficiary[_beneficiaryAddress].amount != 0), 
+            "Can't update benificiary");
         require(_cliff > 0, "Cliff must be above 0");
 
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
