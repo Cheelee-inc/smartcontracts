@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
+/// @title Staking
+/// @title Smart contract used to stake tokens
 contract Staking is Ownable {
     using SafeERC20 for IERC20;
 
@@ -59,10 +62,12 @@ contract Staking is Ownable {
         transferOwnership(GNOSIS);
     }
 
+    /// @notice Returns number of users that user that have staked
     function getRegisteredUsersSize() external view returns (uint256) {
         return registeredUsers.length;
     }
 
+    /// @notice Returns staking info on users [_from, _to] within given option
     function getRegisteredUsersSample(
         uint256 _from,
         uint256 _to,
@@ -80,12 +85,14 @@ contract Staking is Ownable {
         return arr;
     }
 
+    /// @notice Enable/disable option, only for owner
     function setOptionState(uint256 _option, bool _state) external onlyOwner {
         optionPaused[_option] = _state;
 
         emit SetOptionState(_option, _state);
     }
 
+    /// @notice Update option, only for owner
     function setOption(
         uint256 _option,
         uint256 _lockPeriod,
@@ -103,6 +110,7 @@ contract Staking is Ownable {
         emit SetOption(_option, _lockPeriod, _apy, _minValue, _maxValue);
     }
 
+    /// @notice Change settings for an option, only for owner
     function addOption(
         uint256 _lockPeriod,
         uint256 _apy,
@@ -124,6 +132,7 @@ contract Staking is Ownable {
         return registeredUsers;
     }
 
+    /// @notice stake tokens for selected option
     function deposit(uint256 _amount, uint256 _option) external {
         require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
@@ -145,6 +154,7 @@ contract Staking is Ownable {
         token.safeTransferFrom(msg.sender, address(this), _amount);
     }
 
+    /// @notice return staked tokens
     function withdraw(uint256 _option) external {
         require(
             block.timestamp - status[_option][msg.sender].depositTimestamp >
@@ -160,6 +170,7 @@ contract Staking is Ownable {
         token.safeTransfer(msg.sender, amount);
     }
 
+    /// @notice Returns amount of tokens earned
     function earned(address _addr, uint256 _option)
         public
         view
@@ -184,6 +195,7 @@ contract Staking is Ownable {
         token.safeTransfer(msg.sender, _amount);
     }
 
+    /// @notice Collect tokens earned from staking, only on Fridays!
     function collect(uint256 _option) external {
         require(
             ((block.timestamp / SECONDS_PER_DAY) + 4) % 7 == 5,

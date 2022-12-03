@@ -10,6 +10,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgra
 
 import "./interfaces/CustomNFT.sol";
 
+
+/// @title Treasury
+/// @title Smart contract used to transfer tokens from inner to outter wallet
 contract Treasury is
     EIP712Upgradeable,
     ERC721HolderUpgradeable,
@@ -94,6 +97,7 @@ contract Treasury is
         transferOwnership(GNOSIS);
     }
 
+    /// @notice Used to verify erc20 withdrawal signature
     function verifySignature(
         uint256 _nonce,
         uint256 _amount,
@@ -110,6 +114,7 @@ contract Treasury is
         return ECDSAUpgradeable.recover(_digest, _signature);
     }
 
+    /// @notice Used to verify NFT withdrawal signature
     function verifySignatureNFT(
         uint256 _nonce,
         uint256 _id,
@@ -126,6 +131,7 @@ contract Treasury is
         return ECDSAUpgradeable.recover(_digest, _signature);
     }
 
+    /// @notice Withdraw erc20 using signature
     function withdraw(
         uint256 _nonce,
         uint256 _amount,
@@ -157,6 +163,7 @@ contract Treasury is
         emit Withdrawed(_to, _amount, _option);
     }
 
+    /// @notice Withdraw NFT using signature
     function withdrawNFT(
         uint256 _nonce,
         uint256 _id,
@@ -188,16 +195,22 @@ contract Treasury is
         emit WithdrawedNFT(_to, _id, _option);
     }
 
+    /// @notice Functin returns current day in format:
+    /// 1 - monday
+    /// 2 - tuesday
+    /// etc..
     function getCurrentDay() public view returns (uint256) {
         return (block.timestamp / 86400) + 4;
     }
 
+    /// @notice Set signer used to verify signatures
     function setSigner(address _signer) external onlyOwner {
         signer = _signer;
 
         emit SetSigner(_signer);
     }
 
+    /// @notice Set limit for erc20 withdrawals(sum)
     function setTokenLimit(uint256 _index, uint256 _newLimit)
         external
         onlyOwner
@@ -207,12 +220,14 @@ contract Treasury is
         emit SetTokenLimit(_index, _newLimit);
     }
 
+    /// @notice Set limit for NFT withdrawals
     function setNftLimit(uint256 _index, uint256 _newLimit) external onlyOwner {
         maxNftTransfersPerDay[_index] = _newLimit;
 
         emit SetNftLimit(_index, _newLimit);
     }
 
+    /// @notice Add support for new erc20 token
     function addToken(IERC20Upgradeable _addr, uint256 _limit)
         external
         onlyOwner
@@ -224,6 +239,7 @@ contract Treasury is
         emit AddToken(address(_addr), _limit);
     }
 
+    /// @notice Add support for new NFT
     function addNFT(CustomNFT _addr, uint256 _limit) external onlyOwner {
         require(address(_addr) != address(0), "Zero address not acceptable");
         nfts.push(_addr);
@@ -232,18 +248,21 @@ contract Treasury is
         emit AddNFT(address(_addr), _limit);
     }
 
+    /// @notice Disable erc20 token by index
     function disableToken(uint256 _index) external onlyOwner {
         tokens[_index] = IERC20Upgradeable(address(0));
 
         emit DisableToken(_index);
     }
 
+    /// @notice Disable nft by index
     function disableNFT(uint256 _index) external onlyOwner {
         nfts[_index] = CustomNFT(address(0));
 
         emit DisableNFT(_index);
     }
 
+    /// @notice Withdraw tokens for owner
     function withdrawToken(IERC20Upgradeable _token, uint256 _amount)
         external
         onlyOwner

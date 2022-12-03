@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IVesting.sol";
 
+
+/// @title MultiVesting
+/// @notice Smart contract used to create vesting schedules
 contract MultiVesting is IVesting, Ownable {
     using SafeERC20 for IERC20;
 
@@ -40,6 +43,7 @@ contract MultiVesting is IVesting, Ownable {
         transferOwnership(GNOSIS);
     }
 
+    /// @notice Sets seller, who can call vest function
     function setSeller(address _addr) external onlyOwner {
         require(_addr != address(0), "Can't set zero address");
         seller = _addr;
@@ -47,11 +51,12 @@ contract MultiVesting is IVesting, Ownable {
         emit SetSeller(seller);
     }
 
-    /**
-        _cliff = duration in seconds
-        _duration = duration in seconds
-        _startTimestamp = timestamp
-    */
+    /// @notice Creates vesting schedule for one person or updates existing one
+    /// @param _cliff Duration in seconds
+    /// @param _durationSeconds Duration in seconds
+    /// @param _startTimestamp Timestamp
+    /// @param _amount Amount of tokens, if 0, it can update existing schedule, 
+    /// if more than 0, and vesting doesn't exist for user it creates it.
     function vest(
         address _beneficiaryAddress,
         uint256 _startTimestamp,
@@ -68,11 +73,12 @@ contract MultiVesting is IVesting, Ownable {
         );
 
         require(_durationSeconds > 0, "Duration must be above 0");
-        require(
-            (_amount > 0 && beneficiary[_beneficiaryAddress].amount == 0) ||
-            (_amount == 0 && beneficiary[_beneficiaryAddress].amount != 0), 
-            "Can't update benificiary");
         require(_cliff > 0, "Cliff must be above 0");
+
+        if(_amount > 0)
+            require(beneficiary[_beneficiaryAddress].amount == 0, "Can update vest when amount==0");
+        else
+            require(beneficiary[_beneficiaryAddress].amount > 0, "Can create vest when amount>=0");
 
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
         beneficiary[_beneficiaryAddress].duration = _durationSeconds;
@@ -82,6 +88,7 @@ contract MultiVesting is IVesting, Ownable {
         emit Vested(_beneficiaryAddress, _amount);
     }
 
+    /// @notice Returns tokens that can be released from vesting.
     function release(address _beneficiary) external override {
         (uint256 _releasableAmount, ) = _releasable(
             _beneficiary,
@@ -96,6 +103,9 @@ contract MultiVesting is IVesting, Ownable {
         emit Released(_releasableAmount, _beneficiary);
     }
 
+    /// @notice Returns amount of tokens that can be released from vesting at given timestamp.
+    /// @return canClaim how much user can claim if they call release function
+    /// @return earnedAmount how much user has earned
     function releasable(address _beneficiary, uint256 _timestamp)
         external
         view
@@ -118,6 +128,9 @@ contract MultiVesting is IVesting, Ownable {
         canClaim -= released[_beneficiary];
     }
 
+    /// @notice Returns amount of tokens that can be released from vesting at given timestamp.
+    /// @return vestedAmount how much was earned
+    /// @return maxAmount how much tokens can be earned
     function vestedAmountBeneficiary(address _beneficiary, uint256 _timestamp)
         external
         view
@@ -166,6 +179,7 @@ contract MultiVesting is IVesting, Ownable {
         }
     }
 
+    /// @notice Update beneficiary
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
     {
@@ -187,6 +201,7 @@ contract MultiVesting is IVesting, Ownable {
         emit UpdateBeneficiary(_oldBeneficiary, _newBeneficiary);
     }
 
+    /// @notice Emergency withdrawal for tokens
     function emergencyVest(IERC20 _token) external override onlyOwner {
         require(earlyWithdrawAllowed, "Option not allowed");
 
@@ -195,6 +210,7 @@ contract MultiVesting is IVesting, Ownable {
         emit EmergencyVest(amount);
     }
 
+    /// @notice Disable withdrawal for tokens
     function disableEarlyWithdraw() external onlyOwner {
         earlyWithdrawAllowed = false;
 

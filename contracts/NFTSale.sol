@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/CustomNFT.sol";
 
+/// @title NFTSale
+/// @title Smart contract used to sell and gift NFT with signatures
 contract NFTSale is EIP712, Ownable {
     event SetPrice(uint256 price);
     event Withdraw(uint256 amount);
@@ -64,18 +66,21 @@ contract NFTSale is EIP712, Ownable {
         transferOwnership(GNOSIS);
     }
 
+    /// @notice Set redeem supply, only for owner
     function setRedeemSupply(uint256 _newRedeemSupply) external onlyOwner {
         redeemSupply = _newRedeemSupply;
 
         emit SetRedeemSupply(_newRedeemSupply);
     }
 
+    /// @notice Set purchase supply, only for owner
     function setPurchaseSupply(uint256 _newPurchaseSupply) external onlyOwner {
         purchaseSupply = _newPurchaseSupply;
 
         emit SetPurchaseSupply(_newPurchaseSupply);
     }
-
+    
+    /// @notice verify signature for redeem
     function verifySignatureRedeem(
         uint256 _id,
         address _to,
@@ -87,7 +92,8 @@ contract NFTSale is EIP712, Ownable {
         );
         return ECDSA.recover(_digest, _signature);
     }
-
+    
+    /// @notice verify signature for purchase
     function verifySignaturePurchase(
         uint256 _id,
         address _to,
@@ -100,6 +106,7 @@ contract NFTSale is EIP712, Ownable {
         return ECDSA.recover(_digest, _signature);
     }
 
+    /// @notice Redeem token with signature
     function redeem(
         uint256 _tokenId,
         uint256 ttlTimestamp,
@@ -125,6 +132,7 @@ contract NFTSale is EIP712, Ownable {
         nftContract.receiveNFT(msg.sender, _tokenId);
     }
 
+    /// @notice Purchase token with signature
     function purchase(
         uint256 _tokenId,
         uint256 ttlTimestamp,
@@ -151,12 +159,14 @@ contract NFTSale is EIP712, Ownable {
         nftContract.receiveNFT(msg.sender, _tokenId);
     }
 
+    /// @notice Set price for nft, only for owner
     function setPrice(uint256 _price) external onlyOwner {
         pricePerToken = _price;
 
         emit SetPrice(_price);
     }
 
+    /// @notice Withdraw tokens, only for owner
     function withdraw() external onlyOwner {
         uint256 amount = address(this).balance;
         payable(msg.sender).transfer(amount);
@@ -164,18 +174,21 @@ contract NFTSale is EIP712, Ownable {
         emit Withdraw(amount);
     }
 
+    /// @notice Pause/Unpause redeems
     function pauseRedeem() external onlyOwner {
         redeemPaused = !redeemPaused;
 
         emit PauseRedemption(msg.sender);
     }
 
+    /// @notice Pause/Unpause purchases
     function pausePurchase() external onlyOwner {
         purchasePaused = !purchasePaused;
 
         emit PausePurchase(msg.sender);
     }
 
+    /// @notice Set signer used to verify signatures
     function setSigner(address _newSigner) external onlyOwner {
         require(_newSigner != address(0), "Can't set zero address");
 
