@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
+/// @title Staking
+/// @title Smart contract used to stake tokens
 contract Staking is Ownable {
     using SafeERC20 for IERC20;
 
@@ -59,15 +62,20 @@ contract Staking is Ownable {
         transferOwnership(GNOSIS);
     }
 
+    /// @notice Returns number of users that user that have staked
     function getRegisteredUsersSize() external view returns (uint256) {
         return registeredUsers.length;
     }
 
+    /// @notice Returns staking info on users [_from, _to] within given option
     function getRegisteredUsersSample(
         uint256 _from,
         uint256 _to,
         uint256 _option
     ) external view returns (Status[] memory) {
+        require(_from <= _to, "from can't be less then to");
+        require(_from <= registeredUsers.length, "from too big");
+        
         Status[] memory arr = new Status[](_to - _from);
 
         for (uint256 i = _from; i < _to; i++) {
@@ -77,12 +85,14 @@ contract Staking is Ownable {
         return arr;
     }
 
+    /// @notice Enable/disable option, only for owner
     function setOptionState(uint256 _option, bool _state) external onlyOwner {
         optionPaused[_option] = _state;
 
         emit SetOptionState(_option, _state);
     }
 
+    /// @notice Update option, only for owner
     function setOption(
         uint256 _option,
         uint256 _lockPeriod,
@@ -100,12 +110,16 @@ contract Staking is Ownable {
         emit SetOption(_option, _lockPeriod, _apy, _minValue, _maxValue);
     }
 
+    /// @notice Change settings for an option, only for owner
     function addOption(
         uint256 _lockPeriod,
         uint256 _apy,
         uint256 _minValue,
         uint256 _maxValue
     ) external onlyOwner {
+        require(_maxValue >= _minValue, "maxValue must be => minValue");
+        require(_apy > 100, "apy too low");
+
         lockPeriod.push(_lockPeriod);
         apy.push(_apy);
         minAmount.push(_minValue);
@@ -118,9 +132,11 @@ contract Staking is Ownable {
         return registeredUsers;
     }
 
+    /// @notice stake tokens for selected option
     function deposit(uint256 _amount, uint256 _option) external {
         require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
+        require(_amount > 0, "amount can't be 0");
 
         if (!registeredUserMap[msg.sender]) {
             registeredUserMap[msg.sender] = true;
@@ -138,6 +154,7 @@ contract Staking is Ownable {
         token.safeTransferFrom(msg.sender, address(this), _amount);
     }
 
+    /// @notice return staked tokens
     function withdraw(uint256 _option) external {
         require(
             block.timestamp - status[_option][msg.sender].depositTimestamp >
@@ -153,6 +170,7 @@ contract Staking is Ownable {
         token.safeTransfer(msg.sender, amount);
     }
 
+    /// @notice Returns amount of tokens earned
     function earned(address _addr, uint256 _option)
         public
         view
@@ -173,10 +191,11 @@ contract Staking is Ownable {
 
     function _collect(uint256 _option) internal {
         (uint256 _amount, ) = earned(msg.sender, _option);
-        status[_option][msg.sender].alreadyCollected = _amount;
+        status[_option][msg.sender].alreadyCollected += _amount;
         token.safeTransfer(msg.sender, _amount);
     }
 
+    /// @notice Collect tokens earned from staking, only on Fridays!
     function collect(uint256 _option) external {
         require(
             ((block.timestamp / SECONDS_PER_DAY) + 4) % 7 == 5,

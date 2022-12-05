@@ -129,21 +129,33 @@ describe("Test", function () {
 
     await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, maxValue)
     let amount  =    "100000000000000000000"
-    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
-    await cheel.connect(user).approve(staking.address, amount);
+    let amount10Percentage_half  =    "5000000000000000000"
+    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount + "0")
+    await cheel.connect(user).approve(staking.address, amount + "0");
 
     await expect(staking.connect(user).deposit(amount, 3)).to.be.reverted
 
-    await staking.connect(await getGnosisWithEther(staking)).addOption(0, 200, 0, maxValue)
+    await staking.connect(await getGnosisWithEther(staking)).addOption(0, 110, 0, maxValue)
     await staking.connect(user).deposit(amount, 3)
+    await increaseTime(secondsPerYear / 2)
+    expect((await staking.earned(await user.getAddress(), 3))._earned).to.be.equal(amount10Percentage_half)
 
-    await increaseTime(secondsPerYear)                                                                                                        
-    console.log(await staking.earned(await user.getAddress(), 3));
+    await staking.connect(await getGnosisWithEther(staking)).setOption(3, 0, 200, 0, maxValue)
+    await increaseTime(secondsPerYear / 2 - 2)
 
-    console.log(await staking.getRegisteredUsersSample(0,1,0));
-    console.log(await staking.getRegisteredUsersSample(0,1,1));
-    console.log(await staking.getRegisteredUsersSample(0,1,2));
-    console.log(await staking.getRegisteredUsersSample(0,1,3));
+    expect((await staking.earned(await user.getAddress(), 3))._earned).to.be.equal(amount)
+
+    await staking.connect(await getGnosisWithEther(staking)).addOption(0, 110, 0, maxValue)
+    await staking.connect(await getGnosisWithEther(staking)).setOptionState(4, true)
+    await expect(staking.connect(user).deposit(amount, 4)).to.be.revertedWith("Deposit for this option paused")
+    
+    let it = await staking.getRegisteredUsersSample(0,1,3)
+    it = it[0].balance
+    expect(it).to.be.equal(amount);
+    
+    it = await staking.getRegisteredUsersSample(0,1,4)
+    it = it[0].balance
+    expect(it).to.be.equal("0");
   })
 
   async function getGnosisWithEther(from: any): Promise<SignerWithAddress> {
