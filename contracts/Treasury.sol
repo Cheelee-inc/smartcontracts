@@ -195,7 +195,7 @@ contract Treasury is
         emit WithdrawedNFT(_to, _id, _option);
     }
 
-    /// @notice Functin returns current day in format:
+    /// @notice Function returns current day in format:
     /// 1 - monday
     /// 2 - tuesday
     /// etc..
