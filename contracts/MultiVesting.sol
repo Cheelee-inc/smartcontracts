@@ -22,6 +22,7 @@ contract MultiVesting is IVesting, Ownable {
     uint256 public sumVesting;
     address public seller;
     address public constant GNOSIS = 0x42DA5e446453319d4076c91d745E288BFef264D0;
+    uint256 immutable DELTA_TIME;    
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;
@@ -29,16 +30,26 @@ contract MultiVesting is IVesting, Ownable {
     bool public changeBeneficiaryAllowed;
     bool public earlyWithdrawAllowed;
 
+    struct UpdateBeneficiaryLock {
+        address newBeneficiary;
+        address oldBeneficiary;
+        uint256 timestamp;
+    }
+
+    mapping(address => UpdateBeneficiaryLock) public updateBeneficiaryLock;
+
     constructor(
         IERC20 _token,
         bool _changeBeneficiaryAllowed,
-        bool _earlyWithdrawAllowed
+        bool _earlyWithdrawAllowed,
+        uint256 _deltatime
     ) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
         changeBeneficiaryAllowed = _changeBeneficiaryAllowed;
         earlyWithdrawAllowed = _earlyWithdrawAllowed;
+        DELTA_TIME = _deltatime;
 
         transferOwnership(GNOSIS);
     }
@@ -75,8 +86,10 @@ contract MultiVesting is IVesting, Ownable {
         require(_durationSeconds > 0, "Duration must be above 0");
         require(_cliff > 0, "Cliff must be above 0");
 
-        if(_amount > 0)
+        if(_amount > 0) {
             require(beneficiary[_beneficiaryAddress].amount == 0, "Can update vest when amount==0");
+            require(beneficiary[_beneficiaryAddress].start + beneficiary[_beneficiaryAddress].cliff > _startTimestamp + _cliff, "New cliff bigger then older");
+        }
         else
             require(beneficiary[_beneficiaryAddress].amount > 0, "Can create vest when amount>=0");
 
@@ -99,6 +112,8 @@ contract MultiVesting is IVesting, Ownable {
 
         released[_beneficiary] += _releasableAmount;
         token.safeTransfer(_beneficiary, _releasableAmount);
+
+        sumVesting -= _releasableAmount;
 
         emit Released(_releasableAmount, _beneficiary);
     }
@@ -188,17 +203,27 @@ contract MultiVesting is IVesting, Ownable {
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
         );
+        require(updateBeneficiaryLock[msg.sender].timestamp == 0, "Update pending");
 
         require(beneficiary[_oldBeneficiary].amount > 0, "Not a beneficiary");
         require(beneficiary[_newBeneficiary].amount == 0, "Already a beneficiary");
 
-        released[_newBeneficiary] = released[_oldBeneficiary];
-        beneficiary[_newBeneficiary] = beneficiary[_oldBeneficiary];
+        updateBeneficiaryLock[msg.sender] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp + DELTA_TIME);
+    }
 
-        delete released[_oldBeneficiary];
-        delete beneficiary[_oldBeneficiary];
+    function finishUpdateBeneficiary() external {
+        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[msg.sender];
 
-        emit UpdateBeneficiary(_oldBeneficiary, _newBeneficiary);
+        require(it.timestamp != 0, "No pending updates");
+        require(it.timestamp >= block.timestamp, "Required time hasn't passed");
+
+        released[it.newBeneficiary] = released[it.oldBeneficiary];
+        beneficiary[it.newBeneficiary] = beneficiary[it.oldBeneficiary];
+
+        delete released[it.oldBeneficiary];
+        delete beneficiary[it.oldBeneficiary];
+
+        emit UpdateBeneficiary(it.oldBeneficiary, it.newBeneficiary);
     }
 
     /// @notice Emergency withdrawal for tokens
@@ -207,6 +232,9 @@ contract MultiVesting is IVesting, Ownable {
 
         uint256 amount = _token.balanceOf(address(this));
         _token.safeTransfer(owner(), amount);
+
+        sumVesting -= amount;
+
         emit EmergencyVest(amount);
     }
 

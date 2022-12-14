@@ -100,6 +100,7 @@ contract Staking is Ownable {
         uint256 _minValue,
         uint256 _maxValue
     ) public onlyOwner {
+        require(_maxValue >= _minValue, "maxValue must be => minValue");
         require(_apy > 100, "apy too low");
 
         lockPeriod[_option] = _lockPeriod;
