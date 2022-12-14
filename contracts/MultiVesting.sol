@@ -211,9 +211,10 @@ contract MultiVesting is IVesting, Ownable {
         updateBeneficiaryLock[msg.sender] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp + DELTA_TIME);
     }
 
-    function finishUpdateBeneficiary() external {
-        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[msg.sender];
+    function finishUpdateBeneficiary(address _oldBeneficiary) external {
+        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[_oldBeneficiary];
 
+        require(msg.sender == owner() || msg.sender == _oldBeneficiary, "Not allowed to change");
         require(it.timestamp != 0, "No pending updates");
         require(it.timestamp >= block.timestamp, "Required time hasn't passed");
 
@@ -222,6 +223,7 @@ contract MultiVesting is IVesting, Ownable {
 
         delete released[it.oldBeneficiary];
         delete beneficiary[it.oldBeneficiary];
+        delete updateBeneficiaryLock[it.oldBeneficiary];
 
         emit UpdateBeneficiary(it.oldBeneficiary, it.newBeneficiary);
     }
