@@ -210,22 +210,25 @@ contract MultiVesting is IVesting, Ownable {
             "Not allowed to change"
         );
 
-        require(updateBeneficiaryLock[_oldBeneficiary].timestamp > block.timestamp + updateBeneficiaryMax, "Update pending");
+        require(updateBeneficiaryLock[_oldBeneficiary].timestamp == 0 ||
+            updateBeneficiaryLock[_oldBeneficiary].timestamp + updateBeneficiaryMax > block.timestamp, "Update pending");
         require(beneficiary[_oldBeneficiary].amount > 0, "Not a beneficiary");
         require(beneficiary[_newBeneficiary].amount == 0, "Already a beneficiary");
 
-        updateBeneficiaryLock[_newBeneficiary] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp);
+        updateBeneficiaryLock[_oldBeneficiary] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp);
     }
 
-    function finishUpdateBeneficiary(address _newBenificiary) external {
+    function finishUpdateBeneficiary(address _oldBeneficiary) external {
         require(changeBeneficiaryAllowed, "Option not allowed");
         
-        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[_newBenificiary];
-        require(msg.sender == owner() || msg.sender == _newBenificiary, "Not allowed to change");
+        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[_oldBeneficiary];
+        require(beneficiary[it.oldBeneficiary].amount > 0, "Not a beneficiary");
+        require(beneficiary[it.newBeneficiary].amount == 0, "Already a beneficiary");
 
         require(it.timestamp != 0, "No pending updates");
-        require(block.timestamp < it.timestamp + updateBeneficiaryMin, "Required time hasn't passed");
-        require(block.timestamp > it.timestamp + updateBeneficiaryMax, "Time passed, request new update");
+        require(block.timestamp > it.timestamp + updateBeneficiaryMin, "Required time hasn't passed");
+        require(block.timestamp < it.timestamp + updateBeneficiaryMax, "Time passed, request new update");
+        require(msg.sender == owner() || msg.sender == it.newBeneficiary, "Not allowed to change");
 
         released[it.newBeneficiary] = released[it.oldBeneficiary];
         beneficiary[it.newBeneficiary] = beneficiary[it.oldBeneficiary];
