@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IVesting.sol";
+import "hardhat/console.sol";
 
 
 /// @title MultiVesting
@@ -91,7 +92,7 @@ contract MultiVesting is IVesting, Ownable {
 
         if(_amount > 0) {
             require(beneficiary[_beneficiaryAddress].amount == 0, "Can update vest when amount==0");
-            require(beneficiary[_beneficiaryAddress].start + beneficiary[_beneficiaryAddress].cliff > _startTimestamp + _cliff, "New cliff must be no later than older one");
+            require(beneficiary[_beneficiaryAddress].start + beneficiary[_beneficiaryAddress].cliff <= _startTimestamp + _cliff, "New cliff must be no later than older one");
         }
         else
             require(beneficiary[_beneficiaryAddress].amount > 0, "Can create vest when amount>=0");
@@ -241,13 +242,13 @@ contract MultiVesting is IVesting, Ownable {
     }
                                                                                                                                                                                                                                                     
     /// @notice Emergency withdrawal for tokens
-    function emergencyVest(IERC20 _token) external override onlyOwner {
+    function emergencyVest() external override onlyOwner {
         require(earlyWithdrawAllowed, "Option not allowed");
 
-        uint256 amount = _token.balanceOf(address(this));
-        _token.safeTransfer(owner(), amount);
-
-        sumVesting -= amount;
+        uint256 amount = token.balanceOf(address(this));
+        token.safeTransfer(owner(), amount);
+        
+        sumVesting = 0;
 
         emit EmergencyVest(amount);
     }
