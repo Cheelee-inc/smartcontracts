@@ -22,7 +22,8 @@ contract MultiVesting is IVesting, Ownable {
     uint256 public sumVesting;
     address public seller;
     address public constant GNOSIS = 0x42DA5e446453319d4076c91d745E288BFef264D0;
-    uint256 immutable DELTA_TIME;    
+    uint256 public immutable updateBeneficiaryMin;
+    uint256 public immutable updateBeneficiaryMax;
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;
@@ -31,8 +32,8 @@ contract MultiVesting is IVesting, Ownable {
     bool public earlyWithdrawAllowed;
 
     struct UpdateBeneficiaryLock {
-        address newBeneficiary;
         address oldBeneficiary;
+        address newBeneficiary;
         uint256 timestamp;
     }
 
@@ -42,15 +43,17 @@ contract MultiVesting is IVesting, Ownable {
         IERC20 _token,
         bool _changeBeneficiaryAllowed,
         bool _earlyWithdrawAllowed,
-        uint256 _deltatime
-    ) {
+        uint256 _updateBeneficiaryMin,
+        uint256 _updateBeneficiaryMax
+        ) {
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
         changeBeneficiaryAllowed = _changeBeneficiaryAllowed;
         earlyWithdrawAllowed = _earlyWithdrawAllowed;
-        DELTA_TIME = _deltatime;
-
+        updateBeneficiaryMin = _updateBeneficiaryMin;
+        updateBeneficiaryMax = _updateBeneficiaryMax;
+        
         transferOwnership(GNOSIS);
     }
 
@@ -88,7 +91,7 @@ contract MultiVesting is IVesting, Ownable {
 
         if(_amount > 0) {
             require(beneficiary[_beneficiaryAddress].amount == 0, "Can update vest when amount==0");
-            require(beneficiary[_beneficiaryAddress].start + beneficiary[_beneficiaryAddress].cliff > _startTimestamp + _cliff, "New cliff bigger then older");
+            require(beneficiary[_beneficiaryAddress].start + beneficiary[_beneficiaryAddress].cliff > _startTimestamp + _cliff, "New cliff must be no later than older one");
         }
         else
             require(beneficiary[_beneficiaryAddress].amount > 0, "Can create vest when amount>=0");
@@ -203,20 +206,23 @@ contract MultiVesting is IVesting, Ownable {
             msg.sender == owner() || msg.sender == _oldBeneficiary,
             "Not allowed to change"
         );
-        require(updateBeneficiaryLock[msg.sender].timestamp == 0, "Update pending");
 
+        require(updateBeneficiaryLock[_oldBeneficiary].timestamp > block.timestamp + updateBeneficiaryMax, "Update pending");
         require(beneficiary[_oldBeneficiary].amount > 0, "Not a beneficiary");
         require(beneficiary[_newBeneficiary].amount == 0, "Already a beneficiary");
 
-        updateBeneficiaryLock[msg.sender] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp + DELTA_TIME);
+        updateBeneficiaryLock[_newBeneficiary] = UpdateBeneficiaryLock(_oldBeneficiary, _newBeneficiary, block.timestamp);
     }
 
-    function finishUpdateBeneficiary(address _oldBeneficiary) external {
-        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[_oldBeneficiary];
+    function finishUpdateBeneficiary(address _newBenificiary) external {
+        require(changeBeneficiaryAllowed, "Option not allowed");
+        
+        UpdateBeneficiaryLock memory it = updateBeneficiaryLock[_newBenificiary];
+        require(msg.sender == owner() || msg.sender == _newBenificiary, "Not allowed to change");
 
-        require(msg.sender == owner() || msg.sender == _oldBeneficiary, "Not allowed to change");
         require(it.timestamp != 0, "No pending updates");
-        require(it.timestamp >= block.timestamp, "Required time hasn't passed");
+        require(block.timestamp < it.timestamp + updateBeneficiaryMin, "Required time hasn't passed");
+        require(block.timestamp > it.timestamp + updateBeneficiaryMax, "Time passed, request new update");
 
         released[it.newBeneficiary] = released[it.oldBeneficiary];
         beneficiary[it.newBeneficiary] = beneficiary[it.oldBeneficiary];
@@ -227,7 +233,7 @@ contract MultiVesting is IVesting, Ownable {
 
         emit UpdateBeneficiary(it.oldBeneficiary, it.newBeneficiary);
     }
-
+                                                                                                                                                                                                                                                    
     /// @notice Emergency withdrawal for tokens
     function emergencyVest(IERC20 _token) external override onlyOwner {
         require(earlyWithdrawAllowed, "Option not allowed");
