@@ -143,7 +143,10 @@ contract MultiVesting is IVesting, Ownable {
             beneficiary[_beneficiary].amount,
             _timestamp
         );
-        canClaim -= released[_beneficiary];
+        if (released[_beneficiary] > canClaim)
+            canClaim = 0;
+        else
+            canClaim -= released[_beneficiary];
     }
 
     /// @notice Returns amount of tokens that can be released from vesting at given timestamp.
