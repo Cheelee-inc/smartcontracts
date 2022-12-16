@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 /// @title Staking
 /// @title Smart contract used to stake tokens
 contract Staking is Ownable {
@@ -75,7 +74,7 @@ contract Staking is Ownable {
     ) external view returns (Status[] memory) {
         require(_from <= _to, "from can't be less then to");
         require(_from <= registeredUsers.length, "from too big");
-        
+
         Status[] memory arr = new Status[](_to - _from);
 
         for (uint256 i = _from; i < _to; i++) {

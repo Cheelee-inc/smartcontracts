@@ -10,7 +10,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgra
 
 import "./interfaces/CustomNFT.sol";
 
-
 /// @title Treasury
 /// @title Smart contract used to transfer tokens from inner to outter wallet
 contract Treasury is
@@ -40,10 +39,12 @@ contract Treasury is
     string public constant NAME = "TREASURY";
     string public constant EIP712_VERSION = "1";
 
-    bytes32 public constant NFT_PASS_TYPEHASH = keccak256(
+    bytes32 public constant NFT_PASS_TYPEHASH =
+        keccak256(
             "WithdrawNFTSignature(uint256 nonce,uint256 id,address address_to,uint256 ttl,uint256 option)"
         );
-    bytes32 public constant PASS_TYPEHASH = keccak256(
+    bytes32 public constant PASS_TYPEHASH =
+        keccak256(
             "WithdrawSignature(uint256 nonce,uint256 amount,address address_to,uint256 ttl,uint256 option)"
         );
 
