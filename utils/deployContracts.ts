@@ -49,9 +49,10 @@ export async function deployVesting(beneficiaryAddress: any, startTimestamp: any
     return contract
 }
 
-export async function deployMultiVesting(token: any, _changeBenificiaryAllowed: boolean, _earlyWithdrawAllowed: boolean) {
+export async function deployMultiVesting(token: any, _changeBeneficiaryAllowed: boolean, _earlyWithdrawAllowed: boolean,
+                                        updateMin: number = 100, updateMax: number = 200) {
     const Contract = await ethers.getContractFactory("MultiVesting");
-    const contract = await Contract.deploy(token, _changeBenificiaryAllowed, _earlyWithdrawAllowed);
+    const contract = await Contract.deploy(token, _changeBeneficiaryAllowed, _earlyWithdrawAllowed, updateMin, updateMax);
     await contract.deployed();
     return contract
 }

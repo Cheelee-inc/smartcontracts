@@ -20,7 +20,6 @@ contract NFT is ERC721Enumerable, CustomNFT, Ownable {
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
 
-
     constructor(string memory _name, string memory _version)
         ERC721(_name, _version)
     {

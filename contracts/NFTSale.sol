@@ -79,7 +79,7 @@ contract NFTSale is EIP712, Ownable {
 
         emit SetPurchaseSupply(_newPurchaseSupply);
     }
-    
+
     /// @notice verify signature for redeem
     function verifySignatureRedeem(
         uint256 _id,
@@ -92,7 +92,7 @@ contract NFTSale is EIP712, Ownable {
         );
         return ECDSA.recover(_digest, _signature);
     }
-    
+
     /// @notice verify signature for purchase
     function verifySignaturePurchase(
         uint256 _id,
