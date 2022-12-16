@@ -33,5 +33,5 @@ interface IVesting {
         view
         returns (uint256 vestedAmount, uint256 maxAmount);
 
-    function emergencyVest() external;
+    function emergencyVest(IERC20 _token) external;
 }

@@ -242,13 +242,14 @@ contract MultiVesting is IVesting, Ownable {
     }
                                                                                                                                                                                                                                                     
     /// @notice Emergency withdrawal for tokens
-    function emergencyVest() external override onlyOwner {
+    function emergencyVest(IERC20 _token) external override onlyOwner {
         require(earlyWithdrawAllowed, "Option not allowed");
 
-        uint256 amount = token.balanceOf(address(this));
-        token.safeTransfer(owner(), amount);
+        uint256 amount = _token.balanceOf(address(this));
+        _token.safeTransfer(owner(), amount);
         
-        sumVesting = 0;
+        if(address(token) == address(_token))
+            sumVesting = 0;
 
         emit EmergencyVest(amount);
     }

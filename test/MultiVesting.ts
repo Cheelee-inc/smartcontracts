@@ -28,8 +28,9 @@ describe("MultiVesting", function () {
     gnosisCheel = await ethers.getImpersonatedSigner(await cheel.GNOSIS())
     await owner.sendTransaction({to: gnosisCheel.address,value: ethers.utils.parseEther("0.3")})
     
-    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
     await vesting.connect(gnosisMV).setSeller(await owner.getAddress())
+    await expect(vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)).to.be.revertedWith("Not enough tokens")
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)
   })
 
@@ -76,13 +77,24 @@ describe("MultiVesting", function () {
     let amount = 1000
 
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
+    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, 1000, 100)
+
+    let fakeToken = await deployCHEEL()
+    await fakeToken.connect(gnosisCheel).mint(vesting.address, 1000)
+    expect(await fakeToken.balanceOf(gnosisMV.address)).to.be.equal(0)
+    expect(await fakeToken.balanceOf(vesting.address)).to.be.equal(1000)
+    expect(await vesting.sumVesting()).to.be.not.equal(0)
+    await vesting.connect(gnosisMV).emergencyVest(fakeToken.address)
+    expect(await vesting.sumVesting()).to.be.not.equal(0)
+    expect(await fakeToken.balanceOf(gnosisMV.address)).to.be.equal(1000)
+    expect(await fakeToken.balanceOf(vesting.address)).to.be.equal(0)
 
     expect(await cheel.balanceOf(vesting.address)).to.be.equal(amount)
-    expect(await vesting.connect(gnosisMV).emergencyVest()).to.be.ok
+    expect(await vesting.connect(gnosisMV).emergencyVest(cheel.address)).to.be.ok
     expect(await cheel.balanceOf(vesting.address)).to.be.equal(0)
 
     await vesting.connect(gnosisMV).disableEarlyWithdraw()
-    await expect(vesting.connect(gnosisMV).emergencyVest()).to.be.revertedWith("Option not allowed")
+    await expect(vesting.connect(gnosisMV).emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
   })
 
   it("change beneficiary works", async() => {
