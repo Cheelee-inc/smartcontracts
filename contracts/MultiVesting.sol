@@ -99,17 +99,18 @@ contract MultiVesting is IVesting, Ownable {
                 beneficiary[_beneficiaryAddress].amount == 0,
                 "Can update vest when amount==0"
             );
+        } else {
+            require(
+                beneficiary[_beneficiaryAddress].amount > 0,
+                "Can create vest when amount>=0"
+            );
             require(
                 beneficiary[_beneficiaryAddress].start +
                     beneficiary[_beneficiaryAddress].cliff >=
                     _startTimestamp + _cliff,
                 "New cliff must be no later than older one"
             );
-        } else
-            require(
-                beneficiary[_beneficiaryAddress].amount > 0,
-                "Can create vest when amount>=0"
-            );
+        }
 
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
         beneficiary[_beneficiaryAddress].duration = _durationSeconds;
