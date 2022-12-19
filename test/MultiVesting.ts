@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { setDefaultResultOrder } from "dns";
 import { BigNumber, Signer } from "ethers";
 import { ethers } from "hardhat";
 import { exit } from "process";
@@ -14,11 +15,12 @@ describe("MultiVesting", function () {
   let receiver: SignerWithAddress
   let receiver2: SignerWithAddress
   let receiver3: SignerWithAddress
+  let receiver4: SignerWithAddress
   let gnosisCheel: SignerWithAddress
   let gnosisMV: SignerWithAddress
 
   before(async()=>{
-    [owner, receiver, receiver2, receiver3] = await ethers.getSigners()
+    [owner, receiver, receiver2, receiver3, receiver4] = await ethers.getSigners()
 
     cheel = await deployCHEEL()
     vesting = await deployMultiVesting(cheel.address, true, true)
@@ -101,13 +103,19 @@ describe("MultiVesting", function () {
     console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
     await cheel.connect(gnosisCheel).mint(vesting.address, 2000)
     console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
+    await expect(vesting.connect(receiver2).updateBeneficiary(receiver2.address, receiver4.address)).to.be.revertedWith("Not a beneficiary")
+    await vesting.connect(owner).updateBeneficiary(owner.address, receiver4.address)
     await vesting.vest(await receiver2.getAddress(), await currentTimestamp(), 1, 1000, 1)
+    await expect(vesting.connect(receiver2).updateBeneficiary(receiver2.address, owner.address)).to.be.revertedWith("Already a beneficiary")
     expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
-    
+        
     await vesting.connect(receiver2).updateBeneficiary(receiver2.address, receiver3.address)
+    await vesting.connect(receiver2).updateBeneficiary(receiver2.address, receiver3.address) 
+
     await expect(vesting.connect(receiver3).finishUpdateBeneficiary(receiver2.address)).to.be.revertedWith("Required time hasn't passed")
     await expect(vesting.connect(receiver3).finishUpdateBeneficiary(receiver3.address)).to.be.revertedWith("Not a beneficiary")
     await increaseTime(100)
+
     await expect(vesting.connect(receiver3).finishUpdateBeneficiary(receiver3.address)).to.be.revertedWith("Not a beneficiary")
     await vesting.connect(receiver3).finishUpdateBeneficiary(receiver2.address)
 
@@ -118,6 +126,29 @@ describe("MultiVesting", function () {
     await expect(vesting.connect(receiver2).finishUpdateBeneficiary(receiver3.address)).to.be.revertedWith("Time passed, request new update")
 
     expect((await vesting.releasable(await receiver2.getAddress(), await currentTimestamp()))[1]).to.be.equal(0)    
-    expect((await vesting.releasable(await receiver3.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
+    expect((await vesting.releasable(await receiver3.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
+    await increaseTime(1000)
+    await expect(vesting.connect(owner).updateBeneficiary(owner.address, receiver3.address)).to.be.revertedWith("Update pending")
+    await expect(vesting.connect(owner).finishUpdateBeneficiary(owner.address)).to.be.revertedWith("Time passed, request new update")
+
+  })
+
+  it("vesting update and create", async()=>{
+    console.log("can't update non-existing");
+    await expect(vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 0, 50)).to.be.revertedWith("User is not beneficiary")
+
+    console.log("create vesting");
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 1000, 100)
+    
+    console.log("can't update vesting when balance and _amount > 0");
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await expect(vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 1000, 50)).to.be.revertedWith("User is already a beneficiary")
+
+    console.log("can't update vest when cliff more than older and _amount = 0");
+    await expect(vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 0, 150)).to.be.revertedWith("New cliff must be no later than older one")
+
+    console.log("can update vest when cliff less than older and amount = 0");
+    await vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 0, 50)
   })
 })

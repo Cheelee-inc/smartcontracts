@@ -71,8 +71,10 @@ contract MultiVesting is IVesting, Ownable {
     /// @param _cliff Duration in seconds
     /// @param _durationSeconds Duration in seconds
     /// @param _startTimestamp Timestamp
-    /// @param _amount Amount of tokens, if 0, it can update existing schedule,
-    /// if more than 0, and vesting doesn't exist for user it creates it.
+    /// @param _amount Amount of tokens, 
+    /// if _amount is 0, we update existing schedule
+    /// if _amount  > 0, we create new vesting schedule
+    
     function vest(
         address _beneficiaryAddress,
         uint256 _startTimestamp,
@@ -94,10 +96,15 @@ contract MultiVesting is IVesting, Ownable {
         require(_durationSeconds > 0, "Duration must be above 0");
         require(_cliff > 0, "Cliff must be above 0");
 
-        if (_amount > 0) {
+        if (_amount > 0) { //trying to create new schedule
             require(
                 beneficiary[_beneficiaryAddress].amount == 0,
-                "Can update vest when amount==0"
+                "User is already a beneficiary"
+            );
+        } else { //trying to update existing one
+            require(
+                beneficiary[_beneficiaryAddress].amount > 0,
+                "User is not beneficiary"
             );
             require(
                 beneficiary[_beneficiaryAddress].start +
@@ -105,11 +112,7 @@ contract MultiVesting is IVesting, Ownable {
                     _startTimestamp + _cliff,
                 "New cliff must be no later than older one"
             );
-        } else
-            require(
-                beneficiary[_beneficiaryAddress].amount > 0,
-                "Can create vest when amount>=0"
-            );
+        }
 
         beneficiary[_beneficiaryAddress].start = _startTimestamp;
         beneficiary[_beneficiaryAddress].duration = _durationSeconds;
