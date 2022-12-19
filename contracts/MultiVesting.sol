@@ -101,7 +101,7 @@ contract MultiVesting is IVesting, Ownable {
             );
             require(
                 beneficiary[_beneficiaryAddress].start +
-                    beneficiary[_beneficiaryAddress].cliff <=
+                    beneficiary[_beneficiaryAddress].cliff >=
                     _startTimestamp + _cliff,
                 "New cliff must be no later than older one"
             );
