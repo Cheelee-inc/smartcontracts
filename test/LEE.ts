@@ -6,10 +6,10 @@ import { deployLEE } from "../utils/deployContracts"
 
 describe("CHEEL", function () {
   let lee: LEE
-  let owner = SignerWithAddress
-  let gnosis = SignerWithAddress
-  let receiver = SignerWithAddress
-  let badguy = SignerWithAddress
+  let owner: SignerWithAddress
+  let gnosis: SignerWithAddress
+  let receiver: SignerWithAddress
+  let badguy: SignerWithAddress
 
   before(async()=>{
     [owner, receiver, badguy] = await ethers.getSigners()
