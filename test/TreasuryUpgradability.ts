@@ -4,9 +4,8 @@ import { Signer, BigNumber } from "ethers";
 import { ethers, upgrades } from "hardhat";
 import { NFT, Treasury, TreasuryV2 } from "../typechain";
 import { deployLEE, deployNFT } from "../utils/deployContracts"
-import { currentTimestamp } from "../utils/helpers"
 
-describe("Test", function () {
+describe("Treasury upgradeability", function () {
   let treasury: Treasury
   let treasuryV2: TreasuryV2
   let timestamp: number

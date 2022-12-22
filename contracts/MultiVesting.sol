@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IVesting.sol";
 
 /// @title MultiVesting
 /// @notice Smart contract used to create vesting schedules
-contract MultiVesting is IVesting, Ownable {
-    using SafeERC20 for IERC20;
+contract MultiVesting is IVesting, OwnableUpgradeable {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     event SetSeller(address newSeller);
     event Vested(address indexed beneficiary, uint256 amount);
@@ -20,12 +20,12 @@ contract MultiVesting is IVesting, Ownable {
     );
     event DisableEarlyWithdraw(address owner);
 
-    IERC20 public immutable token;
+    IERC20Upgradeable public token;
     uint256 public sumVesting;
     address public seller;
     address public constant GNOSIS = 0x42DA5e446453319d4076c91d745E288BFef264D0;
-    uint256 public immutable updateBeneficiaryMin;
-    uint256 public immutable updateBeneficiaryMax;
+    uint256 public updateBeneficiaryMin;
+    uint256 public updateBeneficiaryMax;
 
     mapping(address => uint256) public released;
     mapping(address => Beneficiary) public beneficiary;
@@ -41,13 +41,15 @@ contract MultiVesting is IVesting, Ownable {
 
     mapping(address => UpdateBeneficiaryLock) public updateBeneficiaryLock;
 
-    constructor(
-        IERC20 _token,
+    function initialize(
+        IERC20Upgradeable _token,
         bool _changeBeneficiaryAllowed,
         bool _earlyWithdrawAllowed,
         uint256 _updateBeneficiaryMin,
         uint256 _updateBeneficiaryMax
-    ) {
+    ) external initializer {
+        __Ownable_init();
+
         require(address(_token) != address(0), "Can't set zero address");
         token = _token;
 
@@ -71,17 +73,17 @@ contract MultiVesting is IVesting, Ownable {
     /// @param _cliff Duration in seconds
     /// @param _durationSeconds Duration in seconds
     /// @param _startTimestamp Timestamp
-    /// @param _amount Amount of tokens, 
+    /// @param _amount Amount of tokens,
     /// if _amount is 0, we update existing schedule
     /// if _amount  > 0, we create new vesting schedule
-    
+
     function vest(
         address _beneficiaryAddress,
         uint256 _startTimestamp,
         uint256 _durationSeconds,
         uint256 _amount,
         uint256 _cliff
-    ) external override {
+    ) external virtual override {
         require(
             sumVesting + _amount <= token.balanceOf(address(this)),
             "Not enough tokens"
@@ -96,12 +98,14 @@ contract MultiVesting is IVesting, Ownable {
         require(_durationSeconds > 0, "Duration must be above 0");
         require(_cliff > 0, "Cliff must be above 0");
 
-        if (_amount > 0) { //trying to create new schedule
+        if (_amount > 0) {
+            //trying to create new schedule
             require(
                 beneficiary[_beneficiaryAddress].amount == 0,
                 "User is already a beneficiary"
             );
-        } else { //trying to update existing one
+        } else {
+            //trying to update existing one
             require(
                 beneficiary[_beneficiaryAddress].amount > 0,
                 "User is not beneficiary"
@@ -123,7 +127,7 @@ contract MultiVesting is IVesting, Ownable {
     }
 
     /// @notice Returns tokens that can be released from vesting.
-    function release(address _beneficiary) external override {
+    function release(address _beneficiary) external virtual override {
         (uint256 _releasableAmount, ) = _releasable(
             _beneficiary,
             block.timestamp
@@ -145,6 +149,7 @@ contract MultiVesting is IVesting, Ownable {
     function releasable(address _beneficiary, uint256 _timestamp)
         external
         view
+        virtual
         override
         returns (uint256 canClaim, uint256 earnedAmount)
     {
@@ -171,6 +176,7 @@ contract MultiVesting is IVesting, Ownable {
     function vestedAmountBeneficiary(address _beneficiary, uint256 _timestamp)
         external
         view
+        virtual
         override
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
@@ -219,6 +225,7 @@ contract MultiVesting is IVesting, Ownable {
     /// @notice Update beneficiary
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
+        virtual
     {
         require(changeBeneficiaryAllowed, "Option not allowed");
         require(
@@ -246,7 +253,7 @@ contract MultiVesting is IVesting, Ownable {
         );
     }
 
-    function finishUpdateBeneficiary(address _oldBeneficiary) external {
+    function finishUpdateBeneficiary(address _oldBeneficiary) external virtual {
         require(changeBeneficiaryAllowed, "Option not allowed");
 
         UpdateBeneficiaryLock memory it = updateBeneficiaryLock[
@@ -283,7 +290,12 @@ contract MultiVesting is IVesting, Ownable {
     }
 
     /// @notice Emergency withdrawal for tokens
-    function emergencyVest(IERC20 _token) external override onlyOwner {
+    function emergencyVest(IERC20Upgradeable _token)
+        external
+        virtual
+        override
+        onlyOwner
+    {
         require(earlyWithdrawAllowed, "Option not allowed");
 
         uint256 amount = _token.balanceOf(address(this));

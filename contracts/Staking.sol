@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title Staking
 /// @title Smart contract used to stake tokens
-contract Staking is Ownable {
-    using SafeERC20 for IERC20;
+contract Staking is OwnableUpgradeable {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     event SetOptionState(uint256 option, bool state);
     event SetOption(
@@ -25,7 +26,7 @@ contract Staking is Ownable {
         uint256 maxValue
     );
 
-    IERC20 public immutable token;
+    IERC20Upgradeable public token;
 
     struct Status {
         uint256 balance;
@@ -37,14 +38,11 @@ contract Staking is Ownable {
     uint256 private constant SECONDS_PER_DAY = 86400;
     uint256 public constant DIVISOR = 100;
 
-    uint256[] public lockPeriod = [
-        30 * 24 * 60 * 60,
-        90 * 24 * 60 * 60,
-        180 * 24 * 60 * 60
-    ];
-    uint256[] public minAmount = [150 * 10**18, 1000 * 10**18, 4500 * 10**18];
-    uint256[] public maxAmount = [1000 * 10**18, 4500 * 10**18, 2**256 - 1];
-    uint256[] public apy = [109, 112, 116];
+    uint256[] public lockPeriod;
+    uint256[] public minAmount;
+    uint256[] public maxAmount;
+    uint256[] public apy;
+
     mapping(uint256 => bool) public optionPaused;
 
     //option -> status
@@ -54,8 +52,16 @@ contract Staking is Ownable {
     address[] public registeredUsers;
     address public constant GNOSIS = 0x440637BBacBee76cc009A5C400fC9477a9e4F6Fc;
 
-    constructor(IERC20 _token) {
+    function initialize(IERC20Upgradeable _token) external initializer {
         require(address(_token) != address(0), "Can't set zero address");
+
+        __Ownable_init();
+
+        lockPeriod = [30 * 24 * 60 * 60, 90 * 24 * 60 * 60, 180 * 24 * 60 * 60];
+        minAmount = [150 * 10**18, 1000 * 10**18, 4500 * 10**18];
+        maxAmount = [1000 * 10**18, 4500 * 10**18, 2**256 - 1];
+        apy = [109, 112, 116];
+
         token = _token;
 
         transferOwnership(GNOSIS);
@@ -133,7 +139,7 @@ contract Staking is Ownable {
     }
 
     /// @notice stake tokens for selected option
-    function deposit(uint256 _amount, uint256 _option) external {
+    function deposit(uint256 _amount, uint256 _option) external virtual {
         require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
         require(_amount > 0, "amount can't be 0");
@@ -155,7 +161,7 @@ contract Staking is Ownable {
     }
 
     /// @notice return staked tokens
-    function withdraw(uint256 _option) external {
+    function withdraw(uint256 _option) external virtual {
         require(
             block.timestamp - status[_option][msg.sender].depositTimestamp >
                 lockPeriod[_option],
@@ -174,6 +180,7 @@ contract Staking is Ownable {
     function earned(address _addr, uint256 _option)
         public
         view
+        virtual
         returns (uint256 _canCollect, uint256 _earned)
     {
         uint256 balance = status[_option][_addr].balance;
@@ -196,7 +203,7 @@ contract Staking is Ownable {
     }
 
     /// @notice Collect tokens earned from staking, only on Fridays!
-    function collect(uint256 _option) external {
+    function collect(uint256 _option) external virtual {
         require(
             ((block.timestamp / SECONDS_PER_DAY) + 4) % 7 == 5,
             "Can collect only on Fridays"

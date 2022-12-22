@@ -2,15 +2,15 @@ import { ethers, upgrades } from "hardhat";
 
 export async function deployLEE() {
     const Contract = await ethers.getContractFactory("LEE");
-    const contract = await Contract.deploy();
-    await contract.deployed();
+    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+    await contract.deployed()
     return contract
 }
 
 export async function deployCHEEL() {
     const Contract = await ethers.getContractFactory("CHEEL");
-    const contract = await Contract.deploy();
-    await contract.deployed();
+    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+    await contract.deployed()
     return contract
 }
 
@@ -23,7 +23,7 @@ export async function deployTreasury(chests: any, glasses: any, signer: any, lee
 
 export async function deployNFT(name: any, version: any) {
     const Contract = await ethers.getContractFactory("NFT");
-    const contract = await Contract.deploy(name, version);
+    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }
@@ -37,7 +37,7 @@ export async function deployUSDT() {
 
 export async function deployStaking(token: any) {
     const Contract = await ethers.getContractFactory("Staking");
-    const contract = await Contract.deploy(token);
+    const contract = await upgrades.deployProxy(Contract, [token], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }
@@ -52,7 +52,7 @@ export async function deployVesting(beneficiaryAddress: any, startTimestamp: any
 export async function deployMultiVesting(token: any, _changeBeneficiaryAllowed: boolean, _earlyWithdrawAllowed: boolean,
                                         updateMin: number = 100, updateMax: number = 200) {
     const Contract = await ethers.getContractFactory("MultiVesting");
-    const contract = await Contract.deploy(token, _changeBeneficiaryAllowed, _earlyWithdrawAllowed, updateMin, updateMax);
+    const contract = await upgrades.deployProxy(Contract, [token, _changeBeneficiaryAllowed, _earlyWithdrawAllowed, updateMin, updateMax], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }

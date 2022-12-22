@@ -1,30 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/CustomNFT.sol";
 
-contract NFT is ERC721Enumerable, CustomNFT, Ownable {
+contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     event SetSaleAndTreasury(address sale, address treasury);
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
     string public NAME;
-    string public VERSION;
+    string public SYMBOL;
     string private baseURI;
 
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
 
-    constructor(string memory _name, string memory _version)
-        ERC721(_name, _version)
+    function initialize(string memory _name, string memory _symbol)
+        external
+        initializer
     {
+        __Ownable_init();
+        __ERC721_init(_name, _symbol);
+        __ERC721Enumerable_init();
+
         NAME = _name;
-        VERSION = _version;
+        SYMBOL = _symbol;
         transferOwnership(GNOSIS);
     }
 
@@ -76,7 +81,7 @@ contract NFT is ERC721Enumerable, CustomNFT, Ownable {
             tokenIds[i] = tokenOfOwnerByIndex(_addr, i);
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 }

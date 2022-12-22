@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-contract CHEEL is ERC20Votes, Ownable {
+contract CHEEL is ERC20VotesUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 10**9 * 10**18;
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
 
-    constructor() ERC20("CHEELEE", "CHEEL") ERC20Permit("CHEELEE") {
+    function initialize() external initializer {
+        __ERC20_init("CHEELEE", "CHEEL");
+        __ERC20Permit_init("CHEELEE");
+        __ERC20Votes_init();
+
+        __Ownable_init();
+
         transferOwnership(GNOSIS);
     }
 
