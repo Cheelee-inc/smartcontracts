@@ -18,7 +18,7 @@ contract CHEEL is ERC20VotesUpgradeable, OwnableUpgradeable {
         transferOwnership(GNOSIS);
     }
 
-    function mint(address _to, uint256 _amount) external virtual onlyOwner {
+    function mint(address _to, uint256 _amount) external onlyOwner {
         require(
             totalSupply() + _amount <= MAX_AMOUNT,
             "Can't mint more than max amount"
@@ -26,7 +26,7 @@ contract CHEEL is ERC20VotesUpgradeable, OwnableUpgradeable {
         _mint(_to, _amount);
     }
 
-    function burn(uint256 _amount) external virtual onlyOwner {
+    function burn(uint256 _amount) external onlyOwner {
         _burn(msg.sender, _amount);
     }
 }
