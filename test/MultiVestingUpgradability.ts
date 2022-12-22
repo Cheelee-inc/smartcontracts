@@ -21,7 +21,7 @@ describe("MultiVesting upgradeability", function () {
     multiVestingV2 = await upgrades.upgradeProxy(multiVesting.address, MultiVestingV2)
   })
 
-  it("New function added works", async()=>{   
+  it("Overridden functions work", async()=>{   
     let gnosisMultiVesting = await ethers.getImpersonatedSigner(await multiVesting.GNOSIS())
     await owner.sendTransaction({to: gnosisMultiVesting.address,value: ethers.utils.parseEther("0.3")})
 

@@ -4,7 +4,7 @@ import { Staking, StakingV2 } from "../typechain";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {currentTimestamp} from "../utils/helpers"
 
-describe("MultiVesting upgradeability", function () {
+describe("Staking upgradeability", function () {
   let staking: Staking
   let stakingv2: StakingV2
   let owner: SignerWithAddress
@@ -21,7 +21,7 @@ describe("MultiVesting upgradeability", function () {
     stakingv2 = await upgrades.upgradeProxy(staking.address, StakingV2)
   })
 
-  it("New function added works", async()=>{   
+  it("Overridden functions work", async()=>{   
     let gnosisMultiVesting = await ethers.getImpersonatedSigner(await staking.GNOSIS())
     await owner.sendTransaction({to: gnosisMultiVesting.address,value: ethers.utils.parseEther("0.3")})
 
