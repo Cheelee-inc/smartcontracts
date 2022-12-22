@@ -106,7 +106,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) public view returns (address) {
+    ) public view virtual returns (address) {
         bytes32 _digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(PASS_TYPEHASH, _nonce, _amount, _to, _ttl, _option)
@@ -123,7 +123,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) public view returns (address) {
+    ) public view virtual returns (address) {
         bytes32 _digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(NFT_PASS_TYPEHASH, _nonce, _id, _to, _ttl, _option)
@@ -140,7 +140,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) external {
+    ) external virtual {
         require(address(tokens[_option]) != address(0), "Option disabled");
         uint256 currentDay = getCurrentDay();
         require(
@@ -172,7 +172,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) external {
+    ) external virtual {
         require(address(nfts[_option]) != address(0), "Option disabled");
         uint256 currentDay = getCurrentDay();
         require(
@@ -266,6 +266,7 @@ contract Treasury is
     /// @notice Withdraw tokens for owner
     function withdrawToken(IERC20Upgradeable _token, uint256 _amount)
         external
+        virtual
         onlyOwner
     {
         SafeERC20Upgradeable.safeTransfer(_token, msg.sender, _amount);

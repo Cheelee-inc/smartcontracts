@@ -139,7 +139,7 @@ contract Staking is OwnableUpgradeable {
     }
 
     /// @notice stake tokens for selected option
-    function deposit(uint256 _amount, uint256 _option) external {
+    function deposit(uint256 _amount, uint256 _option) external virtual {
         require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
         require(_amount > 0, "amount can't be 0");
@@ -161,7 +161,7 @@ contract Staking is OwnableUpgradeable {
     }
 
     /// @notice return staked tokens
-    function withdraw(uint256 _option) external {
+    function withdraw(uint256 _option) external virtual {
         require(
             block.timestamp - status[_option][msg.sender].depositTimestamp >
                 lockPeriod[_option],
@@ -180,6 +180,7 @@ contract Staking is OwnableUpgradeable {
     function earned(address _addr, uint256 _option)
         public
         view
+        virtual
         returns (uint256 _canCollect, uint256 _earned)
     {
         uint256 balance = status[_option][_addr].balance;
@@ -202,7 +203,7 @@ contract Staking is OwnableUpgradeable {
     }
 
     /// @notice Collect tokens earned from staking, only on Fridays!
-    function collect(uint256 _option) external {
+    function collect(uint256 _option) external virtual {
         require(
             ((block.timestamp / SECONDS_PER_DAY) + 4) % 7 == 5,
             "Can collect only on Fridays"

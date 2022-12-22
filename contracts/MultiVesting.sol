@@ -83,7 +83,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
         uint256 _durationSeconds,
         uint256 _amount,
         uint256 _cliff
-    ) external override {
+    ) external virtual override {
         require(
             sumVesting + _amount <= token.balanceOf(address(this)),
             "Not enough tokens"
@@ -127,7 +127,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     }
 
     /// @notice Returns tokens that can be released from vesting.
-    function release(address _beneficiary) external override {
+    function release(address _beneficiary) external virtual override {
         (uint256 _releasableAmount, ) = _releasable(
             _beneficiary,
             block.timestamp
@@ -149,6 +149,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function releasable(address _beneficiary, uint256 _timestamp)
         external
         view
+        virtual
         override
         returns (uint256 canClaim, uint256 earnedAmount)
     {
@@ -175,6 +176,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function vestedAmountBeneficiary(address _beneficiary, uint256 _timestamp)
         external
         view
+        virtual
         override
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
@@ -223,6 +225,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     /// @notice Update beneficiary
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
+        virtual
     {
         require(changeBeneficiaryAllowed, "Option not allowed");
         require(
@@ -250,7 +253,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
         );
     }
 
-    function finishUpdateBeneficiary(address _oldBeneficiary) external {
+    function finishUpdateBeneficiary(address _oldBeneficiary) external virtual {
         require(changeBeneficiaryAllowed, "Option not allowed");
 
         UpdateBeneficiaryLock memory it = updateBeneficiaryLock[
@@ -289,6 +292,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     /// @notice Emergency withdrawal for tokens
     function emergencyVest(IERC20Upgradeable _token)
         external
+        virtual
         override
         onlyOwner
     {
