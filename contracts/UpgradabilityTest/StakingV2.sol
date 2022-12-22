@@ -69,7 +69,7 @@ contract StakingV2 is OwnableUpgradeable {
     }
 
     /// @notice Returns number of users that user that have staked
-    function getRegisteredUsersSize() external view virtual returns (uint256) {
+    function getRegisteredUsersSize() external view returns (uint256) {
         return registeredUsers.length;
     }
 
@@ -78,7 +78,7 @@ contract StakingV2 is OwnableUpgradeable {
         uint256 _from,
         uint256 _to,
         uint256 _option
-    ) external view virtual returns (Status[] memory) {
+    ) external view returns (Status[] memory) {
         require(_from <= _to, "from can't be less then to");
         require(_from <= registeredUsers.length, "from too big");
 
@@ -92,11 +92,7 @@ contract StakingV2 is OwnableUpgradeable {
     }
 
     /// @notice Enable/disable option, only for owner
-    function setOptionState(uint256 _option, bool _state)
-        external
-        virtual
-        onlyOwner
-    {
+    function setOptionState(uint256 _option, bool _state) external onlyOwner {
         optionPaused[_option] = _state;
 
         emit SetOptionState(_option, _state);
@@ -127,7 +123,7 @@ contract StakingV2 is OwnableUpgradeable {
         uint256 _apy,
         uint256 _minValue,
         uint256 _maxValue
-    ) external virtual onlyOwner {
+    ) external onlyOwner {
         require(_maxValue >= _minValue, "maxValue must be => minValue");
         require(_apy > 100, "apy too low");
 
@@ -139,17 +135,12 @@ contract StakingV2 is OwnableUpgradeable {
         emit AddOption(_lockPeriod, _apy, _minValue, _maxValue);
     }
 
-    function getRegisteredUsers()
-        external
-        view
-        virtual
-        returns (address[] memory)
-    {
+    function getRegisteredUsers() external view returns (address[] memory) {
         return registeredUsers;
     }
 
     /// @notice stake tokens for selected option
-    function deposit(uint256 _amount, uint256 _option) external virtual {
+    function deposit(uint256 _amount, uint256 _option) external {
         require(!optionPaused[_option], "Deposit for this option paused");
         require(status[_option][msg.sender].balance == 0, "Already staked");
         require(_amount > 0, "amount can't be 0");
@@ -169,7 +160,7 @@ contract StakingV2 is OwnableUpgradeable {
 
         token.safeTransferFrom(msg.sender, address(this), _amount);
     }
-    
+
     /// @notice return staked tokens
     function withdraw(uint256 _option) external {
         flag = true;
@@ -179,7 +170,6 @@ contract StakingV2 is OwnableUpgradeable {
     function earned(address _addr, uint256 _option)
         public
         view
-        virtual
         returns (uint256 _canCollect, uint256 _earned)
     {
         uint256 balance = status[_option][_addr].balance;
@@ -195,14 +185,14 @@ contract StakingV2 is OwnableUpgradeable {
         else _canCollect = 0;
     }
 
-    function _collect(uint256 _option) internal virtual {
+    function _collect(uint256 _option) internal {
         (uint256 _amount, ) = earned(msg.sender, _option);
         status[_option][msg.sender].alreadyCollected += _amount;
         token.safeTransfer(msg.sender, _amount);
     }
 
     /// @notice Collect tokens earned from staking, only on Fridays!
-    function collect(uint256 _option) external virtual {
+    function collect(uint256 _option) external {
         require(
             ((block.timestamp / SECONDS_PER_DAY) + 4) % 7 == 5,
             "Can collect only on Fridays"

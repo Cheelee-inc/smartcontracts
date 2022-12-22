@@ -62,7 +62,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     }
 
     /// @notice Sets seller, who can call vest function
-    function setSeller(address _addr) external virtual onlyOwner {
+    function setSeller(address _addr) external onlyOwner {
         require(_addr != address(0), "Can't set zero address");
         seller = _addr;
 
@@ -83,7 +83,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
         uint256 _durationSeconds,
         uint256 _amount,
         uint256 _cliff
-    ) external virtual override {
+    ) external override {
         require(
             sumVesting + _amount <= token.balanceOf(address(this)),
             "Not enough tokens"
@@ -127,7 +127,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     }
 
     /// @notice Returns tokens that can be released from vesting.
-    function release(address _beneficiary) external virtual override {
+    function release(address _beneficiary) external override {
         (uint256 _releasableAmount, ) = _releasable(
             _beneficiary,
             block.timestamp
@@ -149,7 +149,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function releasable(address _beneficiary, uint256 _timestamp)
         external
         view
-        virtual
         override
         returns (uint256 canClaim, uint256 earnedAmount)
     {
@@ -159,7 +158,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function _releasable(address _beneficiary, uint256 _timestamp)
         internal
         view
-        virtual
         returns (uint256 canClaim, uint256 earnedAmount)
     {
         (canClaim, earnedAmount) = _vestingSchedule(
@@ -177,7 +175,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function vestedAmountBeneficiary(address _beneficiary, uint256 _timestamp)
         external
         view
-        virtual
         override
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
@@ -187,7 +184,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     function _vestedAmountBeneficiary(address _beneficiary, uint256 _timestamp)
         internal
         view
-        virtual
         returns (uint256 vestedAmount, uint256 maxAmount)
     {
         maxAmount = beneficiary[_beneficiary].amount;
@@ -202,7 +198,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
         address _beneficiary,
         uint256 _totalAllocation,
         uint256 _timestamp
-    ) internal view virtual returns (uint256, uint256) {
+    ) internal view returns (uint256, uint256) {
         if (_timestamp < beneficiary[_beneficiary].start) {
             return (0, 0);
         } else if (
@@ -227,7 +223,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     /// @notice Update beneficiary
     function updateBeneficiary(address _oldBeneficiary, address _newBeneficiary)
         external
-        virtual
     {
         require(changeBeneficiaryAllowed, "Option not allowed");
         require(
@@ -255,7 +250,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
         );
     }
 
-    function finishUpdateBeneficiary(address _oldBeneficiary) external virtual {
+    function finishUpdateBeneficiary(address _oldBeneficiary) external {
         require(changeBeneficiaryAllowed, "Option not allowed");
 
         UpdateBeneficiaryLock memory it = updateBeneficiaryLock[
@@ -294,7 +289,6 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     /// @notice Emergency withdrawal for tokens
     function emergencyVest(IERC20Upgradeable _token)
         external
-        virtual
         override
         onlyOwner
     {
@@ -309,7 +303,7 @@ contract MultiVesting is IVesting, OwnableUpgradeable {
     }
 
     /// @notice Disable withdrawal for tokens
-    function disableEarlyWithdraw() external virtual onlyOwner {
+    function disableEarlyWithdraw() external onlyOwner {
         earlyWithdrawAllowed = false;
 
         emit DisableEarlyWithdraw(msg.sender);

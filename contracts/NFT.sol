@@ -33,11 +33,7 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
         transferOwnership(GNOSIS);
     }
 
-    function receiveNFT(address _to, uint256 _tokenId)
-        external
-        virtual
-        override
-    {
+    function receiveNFT(address _to, uint256 _tokenId) external override {
         require(
             msg.sender == nftSale || msg.sender == treasury,
             "Not allowed to call contract"
@@ -49,15 +45,11 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
         emit ReceiveNFT(_to, _tokenId);
     }
 
-    function safeMint(address _to, uint256 _tokenId)
-        external
-        virtual
-        onlyOwner
-    {
+    function safeMint(address _to, uint256 _tokenId) external onlyOwner {
         _safeMint(_to, _tokenId);
     }
 
-    function setUri(string memory _uri) external virtual onlyOwner {
+    function setUri(string memory _uri) external onlyOwner {
         baseURI = _uri;
 
         emit SetURI(_uri);
@@ -65,7 +57,6 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
 
     function setNftSaleAndTreasury(address _nftSale, address _treasury)
         external
-        virtual
         onlyOwner
     {
         require(
@@ -82,7 +73,6 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     function tokensOwnedByUser(address _addr)
         external
         view
-        virtual
         returns (uint256[] memory tokenIds)
     {
         uint256 balance = balanceOf(_addr);
@@ -91,7 +81,7 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
             tokenIds[i] = tokenOfOwnerByIndex(_addr, i);
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 }

@@ -106,7 +106,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) public view virtual returns (address) {
+    ) public view returns (address) {
         bytes32 _digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(PASS_TYPEHASH, _nonce, _amount, _to, _ttl, _option)
@@ -123,7 +123,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) public view virtual returns (address) {
+    ) public view returns (address) {
         bytes32 _digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(NFT_PASS_TYPEHASH, _nonce, _id, _to, _ttl, _option)
@@ -140,7 +140,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) external virtual {
+    ) external {
         require(address(tokens[_option]) != address(0), "Option disabled");
         uint256 currentDay = getCurrentDay();
         require(
@@ -172,7 +172,7 @@ contract Treasury is
         uint256 _ttl,
         uint256 _option,
         bytes memory _signature
-    ) external virtual {
+    ) external {
         require(address(nfts[_option]) != address(0), "Option disabled");
         uint256 currentDay = getCurrentDay();
         require(
@@ -200,12 +200,12 @@ contract Treasury is
     /// 1 - monday
     /// 2 - tuesday
     /// etc..
-    function getCurrentDay() public view virtual returns (uint256) {
+    function getCurrentDay() public view returns (uint256) {
         return (block.timestamp / 86400) + 4;
     }
 
     /// @notice Set signer used to verify signatures
-    function setSigner(address _signer) external virtual onlyOwner {
+    function setSigner(address _signer) external onlyOwner {
         signer = _signer;
 
         emit SetSigner(_signer);
@@ -214,7 +214,6 @@ contract Treasury is
     /// @notice Set limit for erc20 withdrawals(sum)
     function setTokenLimit(uint256 _index, uint256 _newLimit)
         external
-        virtual
         onlyOwner
     {
         maxTokenTransferPerDay[_index] = _newLimit;
@@ -223,11 +222,7 @@ contract Treasury is
     }
 
     /// @notice Set limit for NFT withdrawals
-    function setNftLimit(uint256 _index, uint256 _newLimit)
-        external
-        virtual
-        onlyOwner
-    {
+    function setNftLimit(uint256 _index, uint256 _newLimit) external onlyOwner {
         maxNftTransfersPerDay[_index] = _newLimit;
 
         emit SetNftLimit(_index, _newLimit);
@@ -236,7 +231,6 @@ contract Treasury is
     /// @notice Add support for new erc20 token
     function addToken(IERC20Upgradeable _addr, uint256 _limit)
         external
-        virtual
         onlyOwner
     {
         require(address(_addr) != address(0), "Zero address not acceptable");
@@ -247,11 +241,7 @@ contract Treasury is
     }
 
     /// @notice Add support for new NFT
-    function addNFT(CustomNFT _addr, uint256 _limit)
-        external
-        virtual
-        onlyOwner
-    {
+    function addNFT(CustomNFT _addr, uint256 _limit) external onlyOwner {
         require(address(_addr) != address(0), "Zero address not acceptable");
         nfts.push(_addr);
         maxNftTransfersPerDay.push(_limit);
@@ -260,14 +250,14 @@ contract Treasury is
     }
 
     /// @notice Disable erc20 token by index
-    function disableToken(uint256 _index) external virtual onlyOwner {
+    function disableToken(uint256 _index) external onlyOwner {
         tokens[_index] = IERC20Upgradeable(address(0));
 
         emit DisableToken(_index);
     }
 
     /// @notice Disable nft by index
-    function disableNFT(uint256 _index) external virtual onlyOwner {
+    function disableNFT(uint256 _index) external onlyOwner {
         nfts[_index] = CustomNFT(address(0));
 
         emit DisableNFT(_index);
@@ -276,7 +266,6 @@ contract Treasury is
     /// @notice Withdraw tokens for owner
     function withdrawToken(IERC20Upgradeable _token, uint256 _amount)
         external
-        virtual
         onlyOwner
     {
         SafeERC20Upgradeable.safeTransfer(_token, msg.sender, _amount);
