@@ -81,7 +81,7 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
             tokenIds[i] = tokenOfOwnerByIndex(_addr, i);
     }
 
-    function _baseURI() internal view override returns (string memory) {
+    function _baseURI() internal view override virtual returns (string memory) {
         return baseURI;
     }
 }
