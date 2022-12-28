@@ -68,6 +68,7 @@ contract Treasury is
     constructor() {
         _disableInitializers();
     }
+    
     function initialize(
         CustomNFT _chests,
         CustomNFT _glasses,

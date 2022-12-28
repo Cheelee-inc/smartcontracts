@@ -13,6 +13,7 @@ contract LEE is ERC20PermitUpgradeable, OwnableUpgradeable {
     constructor() {
         _disableInitializers();
     }
+    
     function initialize() external initializer {
         __ERC20_init("CHEELEE Attention Token", "LEE");
         __ERC20Permit_init("CHEELEE Attention Token");

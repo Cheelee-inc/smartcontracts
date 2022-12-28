@@ -25,6 +25,7 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     constructor() {
         _disableInitializers();
     }
+    
     function initialize(string memory _name, string memory _symbol)
         external
         initializer

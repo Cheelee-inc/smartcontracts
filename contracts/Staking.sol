@@ -57,6 +57,7 @@ contract Staking is OwnableUpgradeable {
     constructor() {
         _disableInitializers();
     }
+    
     function initialize(IERC20Upgradeable _token) external initializer {
         require(address(_token) != address(0), "Can't set zero address");
 
