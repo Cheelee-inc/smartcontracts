@@ -51,7 +51,13 @@ contract Staking is OwnableUpgradeable {
     mapping(address => bool) public registeredUserMap;
     address[] public registeredUsers;
     address public constant GNOSIS = 0x440637BBacBee76cc009A5C400fC9477a9e4F6Fc;
+    uint256[50] __gap;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     function initialize(IERC20Upgradeable _token) external initializer {
         require(address(_token) != address(0), "Can't set zero address");
 

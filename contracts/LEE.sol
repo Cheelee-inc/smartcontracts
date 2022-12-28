@@ -7,7 +7,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20Pe
 contract LEE is ERC20PermitUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
+    uint256[50] __gap;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
     function initialize() external initializer {
         __ERC20_init("CHEELEE Attention Token", "LEE");
         __ERC20Permit_init("CHEELEE Attention Token");
