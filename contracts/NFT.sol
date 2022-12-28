@@ -19,7 +19,12 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
+    uint256[50] __gap;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
     function initialize(string memory _name, string memory _symbol)
         external
         initializer
