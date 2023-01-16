@@ -71,10 +71,10 @@ contract MultiVesting is IVesting, Ownable {
     /// @param _cliff Duration in seconds
     /// @param _durationSeconds Duration in seconds
     /// @param _startTimestamp Timestamp
-    /// @param _amount Amount of tokens, 
+    /// @param _amount Amount of tokens,
     /// if _amount is 0, we update existing schedule
     /// if _amount  > 0, we create new vesting schedule
-    
+
     function vest(
         address _beneficiaryAddress,
         uint256 _startTimestamp,

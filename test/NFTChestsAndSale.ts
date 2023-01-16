@@ -2,26 +2,34 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Signer, BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { deployCHEEL, deployLEE, deployNFT, deployNFTSale, deployTreasury } from "../utils/deployContracts"
+import {
+  deployCHEEL,
+  deployCommonBlacklist,
+  deployLEE,
+  deployNFT,
+  deployNFTSale,
+  deployTreasury
+} from "../utils/deployContracts"
 import { currentTimestamp, increaseTimeDays } from "../utils/helpers"
-import { NFTSale, NFT, Treasury, CHEEL } from "../typechain";
+import { NFTSale, NFT, Treasury, CHEEL, CommonBlacklist } from "../typechain";
 
-import * as Sale from "./SaleEIP712" 
-import * as Redeem from "./RedeemEIP712" 
-import * as TrNftSig from "./TreasuryNftEIP712" 
+import * as Sale from "./SaleEIP712"
+import * as Redeem from "./RedeemEIP712"
+import * as TrNftSig from "./TreasuryNftEIP712"
 import * as TrTokenSig from "./TreasuryTokenEIP712"
 
 describe("Test", function () {
+  let commonBlacklist: any;
   let owner: SignerWithAddress
   let user1: SignerWithAddress
   let user2: SignerWithAddress
-  let nftSale: NFTSale
-  let nft: NFT
-  let treasury: Treasury
+  let nftSale: any
+  let nft: any
+  let treasury: any
   let timestamp: number
   let price: BigNumber
   let wrongPrice: BigNumber
-  let erc20: CHEEL
+  let erc20: any
 
   before(async () => {
     [owner, user1, user2] = await ethers.getSigners()
@@ -29,11 +37,12 @@ describe("Test", function () {
     price = ethers.utils.parseEther("1")
     wrongPrice = ethers.utils.parseEther("0.1")
     timestamp = await currentTimestamp() + 1000
-  
+
+    commonBlacklist = await deployCommonBlacklist()
     nft = await deployNFT("it", "it")
     nftSale = await deployNFTSale(nft.address, owner.address, price, 1000, 1000)
-    
-    erc20 = await deployCHEEL()
+
+    erc20 = await deployCHEEL(commonBlacklist.address)
 
     treasury = await deployTreasury(nft.address, nft.address, owner.address, erc20.address, erc20.address, erc20.address)
     await erc20.connect(await getGnosisWithEther(erc20)).mint(treasury.address, "10000000000")
@@ -44,7 +53,7 @@ describe("Test", function () {
 
     console.log("user1: ", user1.address);
     console.log("user2: ", user2.address);
-    
+
     await nft.connect(await getGnosisWithEther(nft)).setNftSaleAndTreasury(nftSale.address, treasury.address)
   })
 
@@ -109,29 +118,29 @@ describe("Test", function () {
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
     await treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)
     expect(await nft.balanceOf(owner.address)).to.be.equal(3);
-    
+
     //send to inner wallet
     await nft.transferFrom(owner.address, treasury.address, id)
     //withdraw from inner wallet
     sig = await getTreasurySignature(++nonce, id, owner.address, timestamp, 1)
     await treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)
-    
+
     //send to inner wallet
     await nft.transferFrom(owner.address, treasury.address, id)
     //withdraw from inner wallet
     sig = await getTreasurySignature(++nonce, id, owner.address, timestamp, 1)
     await treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)
     expect(await nft.balanceOf(owner.address)).to.be.equal(3);
-  }) 
+  })
 
   it("transfers per day work", async() => {
     let id = 12345
     let nonce = 123456
     await treasury.connect(await getGnosisWithEther(treasury)).setNftLimit(1, 3)
     await nft.transferFrom(owner.address, treasury.address, id)
-   
+
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
-    
+
     await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Too many transfers")
 
     await treasury.connect(await getGnosisWithEther(treasury)).setNftLimit(1, 4)
@@ -150,7 +159,7 @@ describe("Test", function () {
     await nft.transferFrom(owner.address, treasury.address, id)
     let sig = await getTreasurySignature(nonce, id, owner.address, timestamp, 1)
     await treasury.connect(await getGnosisWithEther(treasury)).disableNFT(1)
-    
+
     await expect(treasury.withdrawNFT(nonce, id, owner.address, timestamp, 1, sig)).to.be.revertedWith("Option disabled")
 
     let newNFT = await deployNFT("it", "it")
@@ -170,7 +179,7 @@ describe("Test", function () {
   })
 
   it("erc20 works", async()=>{
-      let token = await deployCHEEL()
+      let token = await deployCHEEL(commonBlacklist.address)
       await treasury.connect(await getGnosisWithEther(treasury)).addToken(token.address, 100000)
 
       let amount = 10000

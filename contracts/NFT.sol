@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/CustomNFT.sol";
 
-contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
+contract NFT is UUPSUpgradeable, ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     event SetSaleAndTreasury(address sale, address treasury);
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
@@ -25,7 +26,7 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     function initialize(string memory _name, string memory _symbol)
         external
         initializer
@@ -90,4 +91,8 @@ contract NFT is ERC721EnumerableUpgradeable, CustomNFT, OwnableUpgradeable {
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
+
+    receive() external payable {}
+    fallback() external payable {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

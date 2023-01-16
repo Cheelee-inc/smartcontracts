@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -13,6 +14,7 @@ import "./interfaces/CustomNFT.sol";
 /// @title Treasury
 /// @title Smart contract used to transfer tokens from inner to outter wallet
 contract Treasury is
+    UUPSUpgradeable,
     EIP712Upgradeable,
     ERC721HolderUpgradeable,
     OwnableUpgradeable
@@ -68,7 +70,7 @@ contract Treasury is
     constructor() {
         _disableInitializers();
     }
-    
+
     function initialize(
         CustomNFT _chests,
         CustomNFT _glasses,
@@ -279,4 +281,8 @@ contract Treasury is
 
         emit WithdrawToken(address(_token), _amount);
     }
+
+    receive() external payable {}
+    fallback() external payable {}
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

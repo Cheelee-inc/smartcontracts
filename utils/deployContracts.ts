@@ -1,29 +1,43 @@
 import { ethers, upgrades } from "hardhat";
+import {CHEELConfig, CommonBlacklistConfig} from "../config/ContractsConfig";
 
-export async function deployLEE() {
-    const Contract = await ethers.getContractFactory("LEE");
-    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+export async function deployCommonBlacklist() {
+    const Contract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
+    const contract = await upgrades.deployProxy(Contract, [CommonBlacklistConfig.multiSigAddress], { initializer: "initialize", kind: "uups" })
     await contract.deployed()
     return contract
 }
 
-export async function deployCHEEL() {
-    const Contract = await ethers.getContractFactory("CHEEL");
-    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+export async function deployLEE() {
+    const Contract = await ethers.getContractFactory("LEE");
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize", kind: "uups" })
+    await contract.deployed()
+    return contract
+}
+
+export async function deployCHEEL(commonBlacklist: string) {
+    const Contract = await ethers.getContractFactory(CHEELConfig.contractName);
+    const contract = await upgrades.deployProxy(Contract, [
+        CHEELConfig.tokenName,
+        CHEELConfig.tokenSymbol,
+        CHEELConfig.maxAmount,
+        commonBlacklist,
+        CHEELConfig.multiSigAddress,
+    ], { initializer: "initialize", kind: "uups" })
     await contract.deployed()
     return contract
 }
 
 export async function deployTreasury(chests: any, glasses: any, signer: any, lee: any, cheel: any, usdt: any) {
     const Contract = await ethers.getContractFactory("Treasury");
-    const contract = await upgrades.deployProxy(Contract, [chests, glasses, signer, lee, cheel, usdt], {initializer: "initialize"})
+    const contract = await upgrades.deployProxy(Contract, [chests, glasses, signer, lee, cheel, usdt], {initializer: "initialize", kind: "uups"})
     await contract.deployed()
     return contract
 }
 
 export async function deployNFT(name: any, version: any) {
     const Contract = await ethers.getContractFactory("NFT");
-    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize"})
+    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize", kind: "uups"})
     await contract.deployed();
     return contract
 }
@@ -37,7 +51,7 @@ export async function deployUSDT() {
 
 export async function deployStaking(token: any) {
     const Contract = await ethers.getContractFactory("Staking");
-    const contract = await upgrades.deployProxy(Contract, [token], {initializer: "initialize"})
+    const contract = await upgrades.deployProxy(Contract, [token], {initializer: "initialize", kind: "uups"})
     await contract.deployed();
     return contract
 }

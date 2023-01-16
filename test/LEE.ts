@@ -1,11 +1,10 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { LEE } from "../typechain";
 import { deployLEE } from "../utils/deployContracts"
 
 describe("CHEEL", function () {
-  let lee: LEE
+  let lee: any
   let owner: SignerWithAddress
   let gnosis: SignerWithAddress
   let receiver: SignerWithAddress
@@ -13,7 +12,7 @@ describe("CHEEL", function () {
 
   before(async()=>{
     [owner, receiver, badguy] = await ethers.getSigners()
-    
+
     lee = await deployLEE()
 
     gnosis = await ethers.getImpersonatedSigner(await lee.GNOSIS())

@@ -5,6 +5,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-solhint";
+import "@nomiclabs/hardhat-truffle5";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
@@ -27,7 +28,19 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {
+    version: "0.8.17",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
+  typechain: {
+    outDir: "typechain",
+    target: "ethers-v5",
+  },
   // defaultNetwork: "goerli",
   networks: {
     binanceTestnet: {
@@ -41,6 +54,11 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    truffle: {
+      url: "http://localhost:24012/rpc",
+      timeout: 60000,
+      gasMultiplier: 1,
     },
   },
   gasReporter: {
