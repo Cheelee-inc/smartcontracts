@@ -4,7 +4,7 @@ import {
   expectRevert,
   // @ts-ignore
 } from "@openzeppelin/test-helpers";
-import { formatUnits, parseEther } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import {artifacts, contract, ethers} from "hardhat";
 import {CHEELConfig, CommonBlacklistConfig} from '../config/ContractsConfig';
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";

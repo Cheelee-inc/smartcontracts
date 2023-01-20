@@ -20,7 +20,6 @@ contract CHEEL is ICHEEL, UUPSUpgradeable, ERC20VotesUpgradeable, OwnableUpgrade
 
     mapping(address => bool) public blacklist;
 
-
     // Modifier for roles
     modifier onlyBlacklistOperator() {
         require(hasRole(BLACKLIST_OPERATOR_ROLE, _msgSender()), "Not a blacklist operator");

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./interfaces/CustomNFT.sol";
+import "./interfaces/ICustomNFT.sol";
 
 /// @title NFTSale
 /// @title Smart contract used to sell and gift NFT with signatures
@@ -33,7 +33,7 @@ contract NFTSale is EIP712, Ownable {
 
     address public signer;
     address public constant GNOSIS = 0x841005214049dcE3168CF8a323DD742BcfbF1dc4;
-    CustomNFT public immutable nftContract;
+    ICustomNFT public immutable nftContract;
 
     mapping(address => bool) public usedRedeemSignature;
     mapping(address => bool) public usedPurchaseSignature;
@@ -49,7 +49,7 @@ contract NFTSale is EIP712, Ownable {
     uint256 public purchaseSupply;
 
     constructor(
-        CustomNFT _nftContract,
+        ICustomNFT _nftContract,
         address _signer,
         uint256 _pricePerToken,
         uint256 _redeemSupply,
