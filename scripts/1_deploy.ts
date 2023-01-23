@@ -38,7 +38,13 @@ async function main() {
 
   // We get the contract to deploy
   const LEEContract = await ethers.getContractFactory(LEEConfig.contractName);
-  const leeProxy = await upgrades.deployProxy(LEEContract, [], { initializer: 'initialize', kind: 'uups' }) as LEEContractType;
+  const leeProxy = await upgrades.deployProxy(LEEContract, [
+    LEEConfig.tokenName,
+    LEEConfig.tokenSymbol,
+    LEEConfig.maxAmount,
+    commonBlacklistProxy.address,
+    LEEConfig.multiSigAddress,
+  ], { initializer: 'initialize', kind: 'uups' }) as LEEContractType;
 
   await leeProxy.deployed();
 
@@ -73,6 +79,8 @@ async function main() {
   const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [
     NFTGlassesConfig.nftName,
     NFTGlassesConfig.nftSymbol,
+    commonBlacklistProxy.address,
+    NFTGlassesConfig.multiSigAddress,
   ], { initializer: 'initialize', kind: 'uups' }) as NFTContractType;
 
   await nftGlassesProxy.deployed();
@@ -89,6 +97,8 @@ async function main() {
   const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [
     NFTCasesConfig.nftName,
     NFTCasesConfig.nftSymbol,
+    commonBlacklistProxy.address,
+    NFTCasesConfig.multiSigAddress,
   ], { initializer: 'initialize', kind: 'uups' }) as NFTContractType;
 
   await nftCasesProxy.deployed();
