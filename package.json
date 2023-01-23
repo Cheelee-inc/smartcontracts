@@ -1,5 +1,5 @@
 {
-  "name": "NUTSon",
+  "name": "cheelee",
   "engines": {
     "npm": ">=7.0.0",
     "node": ">=16.0.0"
@@ -31,7 +31,6 @@
     "hardhat": "^2.9.7",
     "hardhat-gas-reporter": "^1.0.8",
     "prettier": "^2.6.2",
-    "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.7",
     "solidity-coverage": "^0.8.2",
     "ts-node": "^10.8.1",
