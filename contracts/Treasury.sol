@@ -70,7 +70,7 @@ contract Treasury is
     }
     
     function initialize(
-        CustomNFT _chests,
+        CustomNFT _cases,
         CustomNFT _glasses,
         address _signer,
         IERC20Upgradeable _lee,
@@ -79,7 +79,7 @@ contract Treasury is
     ) external initializer {
         __Ownable_init();
 
-        require(address(_chests) != address(0), "Can't set zero address");
+        require(address(_cases) != address(0), "Can't set zero address");
         require(address(_glasses) != address(0), "Can't set zero address");
         require(address(_lee) != address(0), "Can't set zero address");
         require(address(_cheel) != address(0), "Can't set zero address");
@@ -87,7 +87,7 @@ contract Treasury is
 
         __EIP712_init(NAME, EIP712_VERSION);
 
-        nfts.push(_chests);
+        nfts.push(_cases);
         nfts.push(_glasses);
         maxNftTransfersPerDay.push(5);
         maxNftTransfersPerDay.push(5);
@@ -95,9 +95,9 @@ contract Treasury is
         tokens.push(_lee);
         tokens.push(_cheel);
         tokens.push(_usdt);
+        maxTokenTransferPerDay.push(200 * 10**18);
         maxTokenTransferPerDay.push(100 * 10**18);
-        maxTokenTransferPerDay.push(500 * 10**18);
-        maxTokenTransferPerDay.push(1000 * 10**18);
+        maxTokenTransferPerDay.push(2000 * 10**18);
 
         signer = _signer;
 

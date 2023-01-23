@@ -28,8 +28,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
-  // defaultNetwork: "goerli",
   networks: {
+    binance: {
+      url: process.env.BINANCE_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     binanceTestnet: {
       url: process.env.ROPSTEN_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
@@ -42,6 +45,10 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    localhost: {
+      url: "http://192.168.50.100:8545" || "",
+      accounts: ["e08fe9e2c2556936b56246d6d70da20adcee0610a83e277e573534086f0b9ae7"]
+    }
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
