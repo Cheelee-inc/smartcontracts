@@ -1,6 +1,6 @@
 import {
   CHEELConfigInterface,
-  CommonBlacklistInterface, LEEConfigInterface, NFTConfigInterface
+  CommonBlacklistInterface, LEEConfigInterface, NFTConfigInterface, NFTSaleConfigInterface, TreasuryConfigInterface
 } from '../lib/ContractsConfigInterface';
 import * as Networks from '../lib/Networks';
 
@@ -59,6 +59,24 @@ export const NFTCasesConfig: NFTConfigInterface = {
   nftSymbol: 'CNFTC',
   blackList: 'blackList',
   multiSigAddress: '0xC40b7fBb7160B98323159BA800e122C9DeD0668D',
+  contractAddress: '0x0645E0F7eE8ED0F20F3fC1DBFE81829Dd33CbFf2',
+  proxyContractAddress: '0x252FE80eC028aAfEB3925f8233a9ef024aDfdDfA',
+};
+
+export const NFTSaleConfig: NFTSaleConfigInterface = {
+  testnet: Networks.bscTestnet,
+  mainnet: Networks.bscMainnet,
+  contractName: 'NFTSale',
+  multiSigAddress: '0x841005214049dcE3168CF8a323DD742BcfbF1dc4',
+  contractAddress: '0x0645E0F7eE8ED0F20F3fC1DBFE81829Dd33CbFf2',
+  proxyContractAddress: '0x252FE80eC028aAfEB3925f8233a9ef024aDfdDfA',
+};
+
+export const TreasuryConfig: TreasuryConfigInterface = {
+  testnet: Networks.bscTestnet,
+  mainnet: Networks.bscMainnet,
+  contractName: 'NFTSale',
+  multiSigAddress: '0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70',
   contractAddress: '0x0645E0F7eE8ED0F20F3fC1DBFE81829Dd33CbFf2',
   proxyContractAddress: '0x252FE80eC028aAfEB3925f8233a9ef024aDfdDfA',
 };

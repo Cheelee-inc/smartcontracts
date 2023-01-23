@@ -62,6 +62,10 @@ contract LEE is ILEE, UUPSUpgradeable, ERC20PermitUpgradeable, OwnableUpgradeabl
             totalSupply() + _amount <= MAX_AMOUNT,
             "Can't mint more than max amount"
         );
+
+        require(!blacklist[_to], "Recipient in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_to), "Recipient in common blacklist");
+
         _mint(_to, _amount);
     }
 

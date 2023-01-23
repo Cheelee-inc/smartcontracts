@@ -47,4 +47,22 @@ export interface NFTConfigInterface {
   proxyContractAddress: string|null;
 }
 
+export interface NFTSaleConfigInterface {
+  testnet: NetworkConfigInterface;
+  mainnet: NetworkConfigInterface;
+  contractName: string;
+  multiSigAddress: string;
+  contractAddress: string|null;
+  proxyContractAddress: string|null;
+}
+
+export interface TreasuryConfigInterface {
+  testnet: NetworkConfigInterface;
+  mainnet: NetworkConfigInterface;
+  contractName: string;
+  multiSigAddress: string;
+  contractAddress: string|null;
+  proxyContractAddress: string|null;
+}
+
 
