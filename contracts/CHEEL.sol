@@ -124,47 +124,24 @@ contract CHEEL is ICHEEL, UUPSUpgradeable, ERC20VotesUpgradeable, OwnableUpgrade
     }
 
     /**
-     * @dev See {IERC20-transfer}.
+    * @dev Moves `amount` of tokens from `from` to `to`.
+     *
+     * This internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
      *
      * Requirements:
      *
+     * - `from` cannot be the zero address.
      * - `to` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        require(!blacklist[to], "Recipient in internal blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "Recipient in common blacklist");
-
-        address owner = _msgSender();
-
-        require(!blacklist[owner], "Sender in internal blacklist");
-        require(!commonBlacklist.userIsBlacklisted(owner), "Sender in common blacklist");
-
-        _transfer(owner, to, amount);
-        return true;
-    }
-
-    /**
-     * @dev See {IERC20-transferFrom}.
-     *
-     * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {ERC20}.
-     *
-     * NOTE: Does not update the allowance if the current allowance
-     * is the maximum `uint256`.
-     *
-     * Requirements:
-     *
-     * - `from` and `to` cannot be the zero address.
      * - `from` must have a balance of at least `amount`.
-     * - the caller must have allowance for ``from``'s tokens of at least
-     * `amount`.
      */
-    function transferFrom(
+    function _transfer(
         address from,
         address to,
         uint256 amount
-    ) public virtual override returns (bool) {
+    ) internal virtual override {
         require(!blacklist[from], "Sender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(from), "Sender in common blacklist");
         require(!blacklist[to], "Recipient in internal blacklist");
@@ -175,32 +152,33 @@ contract CHEEL is ICHEEL, UUPSUpgradeable, ERC20VotesUpgradeable, OwnableUpgrade
         require(!blacklist[spender], "Spender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(spender), "Spender in common blacklist");
 
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
-        return true;
+        super._transfer(from, to, amount);
     }
 
     /**
-     * @dev See {IERC20-approve}.
+     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
      *
-     * NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on
-     * `transferFrom`. This is semantically equivalent to an infinite approval.
+     * This internal function is equivalent to `approve`, and can be used to
+     * e.g. set automatic allowances for certain subsystems, etc.
+     *
+     * Emits an {Approval} event.
      *
      * Requirements:
      *
+     * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual override {
         require(!blacklist[spender], "Spender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(spender), "Spender in common blacklist");
-
-        address owner = _msgSender();
-
         require(!blacklist[owner], "Sender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(owner), "Sender in common blacklist");
 
-        _approve(owner, spender, amount);
-        return true;
+        super._approve(owner, spender, amount);
     }
 
     receive() external payable {}

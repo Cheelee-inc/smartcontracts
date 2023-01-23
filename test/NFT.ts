@@ -28,7 +28,7 @@ const Treasury = artifacts.require("./Treasury.sol");
 const CommonBlacklist = artifacts.require("./CommonBlacklist.sol");
 const MockERC20 = artifacts.require("./test/MockERC20.sol");
 
-contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator, varybadguy, testmultisig]) => {
+contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator, varybadguy, tester, testmultisig]) => {
   let commonBlacklist: any;
   let cheel: any;
   let lee: any;
@@ -374,11 +374,151 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
     });
 
+    it("adding badguy for Internal Blacklist for glasses nft", async function () {
+      const domain = Sale.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
+      const timestamp = await currentTimestamp() + 1000
+      const signatureSigner = await ethers.getImpersonatedSigner(deployer)
+      const signature = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 3, address_to: badguy, ttl_timestamp: timestamp})
+
+      result = await nftGlasses.grantRole(
+        BLACKLIST_OPERATOR_ROLE,
+        moderator,
+        { from: nftGlassesGnosis.address }
+      );
+
+      expectEvent(result, "RoleGranted", {
+        role: BLACKLIST_OPERATOR_ROLE,
+        account: moderator,
+        sender: nftGlassesGnosis.address,
+      });
+
+      assert.equal(await nftGlasses.hasRole(BLACKLIST_OPERATOR_ROLE, moderator), true);
+
+      await nftGlasses.addUsersToBlacklist(
+        [badguy],
+        { from: moderator }
+      );
+
+      assert.equal(await nftGlasses.userInBlacklist(badguy), true);
+      assert.equal(await nftGlasses.userInBlacklist(deployer), false);
+
+      await expectRevert(
+        nftSaleGlasses.purchase(
+          3,
+          timestamp,
+          signature,
+          {
+            from: badguy,
+            value: price
+          }
+        ),
+        "NFT: Recipient in internal blacklist"
+      );
+
+      await nftGlasses.removeUsersFromBlacklist(
+        [badguy],
+        { from: moderator }
+      );
+
+      assert.equal(await nftGlasses.userInBlacklist(badguy), false);
+
+      await nftSaleGlasses.purchase(
+        3,
+        timestamp,
+        signature,
+        {
+          from: badguy,
+          value: price
+        }
+      );
+
+      assert.equal(
+        String(await nftGlasses.balanceOf(badguy)),
+        "1"
+      );
+
+      await nftGlasses.addUsersToBlacklist(
+        [badguy],
+        { from: moderator }
+      );
+    });
+
+    it("adding varybadguy for Common Blacklist", async function () {
+      const domain = Sale.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
+      const timestamp = await currentTimestamp() + 1000
+      const signatureSigner = await ethers.getImpersonatedSigner(deployer)
+      const signature = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 4, address_to: varybadguy, ttl_timestamp: timestamp})
+
+      result = await commonBlacklist.grantRole(
+        BLACKLIST_OPERATOR_ROLE,
+        moderator,
+        {from: blacklistGnosis.address}
+      );
+
+      expectEvent(result, "RoleGranted", {
+        role: BLACKLIST_OPERATOR_ROLE,
+        account: moderator,
+        sender: blacklistGnosis.address,
+      });
+
+      assert.equal(await commonBlacklist.hasRole(BLACKLIST_OPERATOR_ROLE, moderator), true);
+
+      await commonBlacklist.addUsersToBlacklist(
+        [varybadguy],
+        { from: moderator }
+      );
+
+      assert.equal(await commonBlacklist.userIsBlacklisted(badguy), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(deployer), false);
+      assert.equal(await cheel.userInBlacklist(varybadguy), false);
+
+      await expectRevert(
+        nftSaleGlasses.purchase(
+          4,
+          timestamp,
+          signature,
+          {
+            from: varybadguy,
+            value: price
+          }
+        ),
+        "NFT: Recipient in common blacklist"
+      );
+
+      await commonBlacklist.removeUsersFromBlacklist(
+        [varybadguy],
+        { from: moderator }
+      );
+
+      assert.equal(await nftGlasses.userInBlacklist(varybadguy), false);
+
+      await nftSaleGlasses.purchase(
+        4,
+        timestamp,
+        signature,
+        {
+          from: varybadguy,
+          value: price
+        }
+      );
+
+      assert.equal(
+        String(await nftGlasses.balanceOf(varybadguy)),
+        "1"
+      );
+
+      await commonBlacklist.addUsersToBlacklist(
+        [varybadguy],
+        { from: moderator }
+      );
+    });
+
     it("setting out of stock", async function () {
       const domain = Sale.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature3 = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 3, address_to: badguy, ttl_timestamp: timestamp})
+      const signature3 = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 5, address_to: moderator, ttl_timestamp: timestamp})
 
       await expectRevert(
         nftSaleGlasses.setPurchaseSupply(
@@ -395,11 +535,11 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       await expectRevert(
         nftSaleGlasses.purchase(
-          3,
+          5,
           timestamp,
           signature3,
           {
-            from: badguy,
+            from: moderator,
             value: price
           }
         ),
@@ -412,17 +552,17 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
 
       await nftSaleGlasses.purchase(
-        3,
+        5,
         timestamp,
         signature3,
         {
-          from: badguy,
+          from: moderator,
           value: price
         }
       );
 
       assert.equal(
-        String(await nftGlasses.balanceOf(badguy)),
+        String(await nftGlasses.balanceOf(moderator)),
         "1"
       );
     });
@@ -431,7 +571,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = Sale.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature4 = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 4, address_to: varybadguy, ttl_timestamp: timestamp})
+      const signature4 = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 6, address_to: tester, ttl_timestamp: timestamp})
 
       await expectRevert(
         nftSaleGlasses.setPrice(
@@ -448,11 +588,11 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       await expectRevert(
         nftSaleGlasses.purchase(
-          4,
+          6,
           timestamp,
           signature4,
           {
-            from: varybadguy,
+            from: tester,
             value: price
           }
         ),
@@ -460,17 +600,17 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
 
       await nftSaleGlasses.purchase(
-        4,
+        6,
         timestamp,
         signature4,
         {
-          from: varybadguy,
+          from: tester,
           value: parseEther("2")
         }
       );
 
       assert.equal(
-        String(await nftGlasses.balanceOf(badguy)),
+        String(await nftGlasses.balanceOf(tester)),
         "1"
       );
 
@@ -486,10 +626,12 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = Redeem.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 5, address_to: deployer, ttl_timestamp: timestamp})
+      const signature = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 7, address_to: deployer, ttl_timestamp: timestamp})
+      const signature2 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 8, address_to: badguy, ttl_timestamp: timestamp})
+      const signature3 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 9, address_to: varybadguy, ttl_timestamp: timestamp})
 
       await nftSaleGlasses.redeem(
-        5,
+        7,
         timestamp,
         signature,
         { from: deployer }
@@ -499,13 +641,33 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
         String(await nftGlasses.balanceOf(deployer)),
         "2"
       );
+
+      await expectRevert(
+        nftSaleGlasses.redeem(
+          8,
+          timestamp,
+          signature2,
+          { from: badguy }
+        ),
+        "NFT: Recipient in internal blacklist"
+      );
+
+      await expectRevert(
+        nftSaleGlasses.redeem(
+          9,
+          timestamp,
+          signature3,
+          { from: varybadguy }
+        ),
+        "NFT: Recipient in common blacklist"
+      );
     });
 
     it("Testing out of stock", async function () {
       const domain = Redeem.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature2 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 6, address_to: receiver, ttl_timestamp: timestamp})
+      const signature2 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 8, address_to: receiver, ttl_timestamp: timestamp})
 
       await expectRevert(
         nftSaleGlasses.setRedeemSupply(
@@ -522,7 +684,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       await expectRevert(
         nftSaleGlasses.redeem(
-          6,
+          8,
           timestamp,
           signature2,
           { from: receiver }
@@ -536,7 +698,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
 
       await nftSaleGlasses.redeem(
-        6,
+        8,
         timestamp,
         signature2,
         { from: receiver }
@@ -552,7 +714,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = Redeem.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature3 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 7, address_to: badguy, ttl_timestamp: timestamp})
+      const signature3 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 9, address_to: moderator, ttl_timestamp: timestamp})
 
       await expectRevert(
         nftSaleGlasses.pauseRedeem(
@@ -567,10 +729,10 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       await expectRevert(
         nftSaleGlasses.redeem(
-          7,
+          9,
           timestamp,
           signature3,
-          { from: badguy }
+          { from: moderator }
         ),
         "Redeeming paused"
       );
@@ -580,14 +742,14 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
 
       await nftSaleGlasses.redeem(
-        7,
+        9,
         timestamp,
         signature3,
-        { from: badguy }
+        { from: moderator }
       );
 
       assert.equal(
-        String(await nftGlasses.balanceOf(badguy)),
+        String(await nftGlasses.balanceOf(moderator)),
         "2"
       );
     });
@@ -605,7 +767,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       );
 
       expectEvent(result, "Withdraw", {
-        amount: parseEther("5").toString(),
+        amount: parseEther("7").toString(),
       });
 
     });
@@ -616,11 +778,13 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 8, id: 8, address_to: deployer, ttl: timestamp, option: 1})
+      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 8, id: 10, address_to: deployer, ttl: timestamp, option: 1})
+      const signature2 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 9, id: 11, address_to: badguy, ttl: timestamp, option: 1})
+      const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 10, id: 12, address_to: varybadguy, ttl: timestamp, option: 1})
 
       result = await treasury.withdrawNFT(
         8,
-        8,
+        10,
         deployer,
         timestamp,
         1,
@@ -630,7 +794,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       expectEvent(result, "WithdrawedNFT", {
         user: deployer,
-        id: "8",
+        id: "10",
         option: "1",
       });
 
@@ -638,19 +802,65 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
         String(await nftGlasses.balanceOf(deployer)),
         "3"
       );
+
+      await expectRevert(
+        treasury.withdrawNFT(
+          9,
+          11,
+          badguy,
+          timestamp,
+          1,
+          signature2,
+          { from: badguy }
+        ),
+        "NFT: Recipient in internal blacklist"
+      );
+
+      await expectRevert(
+        treasury.withdrawNFT(
+          10,
+          12,
+          varybadguy,
+          timestamp,
+          1,
+          signature3,
+          { from: varybadguy }
+        ),
+        "NFT: Recipient in common blacklist"
+      );
     });
 
     it("send nft to treasury", async function () {
       await nftGlasses.transferFrom(
         deployer,
         treasury.address,
-        8,
+        10,
         { from: deployer }
       );
 
       assert.equal(
-        String(await nftGlasses.balanceOf(badguy)),
+        String(await nftGlasses.balanceOf(deployer)),
         "2"
+      );
+
+      await expectRevert(
+        nftGlasses.transferFrom(
+          badguy,
+          treasury.address,
+          3,
+          { from: badguy }
+        ),
+        "NFT: Sender in internal blacklist"
+      );
+
+      await expectRevert(
+        nftGlasses.transferFrom(
+          varybadguy,
+          treasury.address,
+          4,
+          { from: varybadguy }
+        ),
+        "NFT: Sender in common blacklist"
       );
     });
 
@@ -658,11 +868,11 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 9, id: 8, address_to: deployer, ttl: timestamp, option: 1})
+      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 9, id: 10, address_to: deployer, ttl: timestamp, option: 1})
 
       result = await treasury.withdrawNFT(
         9,
-        8,
+        10,
         deployer,
         timestamp,
         1,
@@ -672,7 +882,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       expectEvent(result, "WithdrawedNFT", {
         user: deployer,
-        id: "8",
+        id: "10",
         option: "1",
       });
 
@@ -686,7 +896,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 10, id: 8, address_to: deployer, ttl: timestamp, option: 1})
+      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 10, id: 10, address_to: deployer, ttl: timestamp, option: 1})
 
       result = await treasury.setNftLimit(
         1,
@@ -702,14 +912,14 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       await nftGlasses.transferFrom(
         deployer,
         treasury.address,
-        8,
+        10,
         { from: deployer }
       );
 
       await expectRevert(
         treasury.withdrawNFT(
           10,
-          8,
+          10,
           deployer,
           timestamp,
           1,
@@ -732,7 +942,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       result = await treasury.withdrawNFT(
         10,
-        8,
+        10,
         deployer,
         timestamp,
         1,
@@ -742,7 +952,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       expectEvent(result, "WithdrawedNFT", {
         user: deployer,
-        id: "8",
+        id: "10",
         option: "1",
       });
     });
@@ -767,12 +977,12 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 11, id: 8, address_to: deployer, ttl: timestamp, option: 1})
+      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 11, id: 10, address_to: deployer, ttl: timestamp, option: 1})
 
       await nftGlasses.transferFrom(
         deployer,
         treasury.address,
-        8,
+        10,
         { from: deployer }
       );
 
@@ -788,7 +998,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       await expectRevert(
         treasury.withdrawNFT(
           11,
-          8,
+          10,
           deployer,
           timestamp,
           1,
@@ -803,9 +1013,9 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
       const domain = TrNftSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer)
-      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 11, id: 9, address_to: deployer, ttl: timestamp, option: 2})
-      const signature2 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 10, address_to: deployer, ttl: timestamp, option: 2})
-      const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 10, address_to: deployer, ttl: timestamp, option: 2})
+      const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 11, id: 11, address_to: deployer, ttl: timestamp, option: 2})
+      const signature2 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 12, address_to: deployer, ttl: timestamp, option: 2})
+      const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 12, address_to: deployer, ttl: timestamp, option: 2})
 
       const newNftTest = await NFT.new({ from: deployer });
 
@@ -850,7 +1060,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       result = await treasury.withdrawNFT(
         11,
-        9,
+        11,
         deployer,
         timestamp,
         2,
@@ -860,20 +1070,20 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       expectEvent(result, "WithdrawedNFT", {
         user: deployer,
-        id: "9",
+        id: "11",
         option: "2",
       });
 
       await newNftTest.transferFrom(
         deployer,
         treasury.address,
-        9,
+        11,
         { from: deployer }
       );
 
       result = await treasury.withdrawNFT(
         12,
-        10,
+        12,
         deployer,
         timestamp,
         2,
@@ -883,21 +1093,21 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
 
       expectEvent(result, "WithdrawedNFT", {
         user: deployer,
-        id: "10",
+        id: "12",
         option: "2",
       });
 
       await newNftTest.transferFrom(
         deployer,
         treasury.address,
-        10,
+        12,
         { from: deployer }
       );
 
       await expectRevert(
         treasury.withdrawNFT(
           12,
-          10,
+          12,
           deployer,
           timestamp,
           2,
@@ -974,7 +1184,7 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
           parseEther("1000000"),
           { from: cheelGnosis.address }
         ),
-        "Sender in internal blacklist"
+        "ERC20: insufficient allowance"
       );
 
       await expectRevert(
@@ -997,6 +1207,45 @@ contract(NFTGlassesConfig.contractName, ([deployer, receiver, badguy, moderator,
           { from: badguy }
         ),
         "Recipient in internal blacklist"
+      );
+    });
+
+    it("Common Blacklist", async function () {
+      const domain = TrTokenSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
+      const timestamp = await currentTimestamp() + 1000
+      const signatureSigner = await ethers.getImpersonatedSigner(deployer)
+      const signature = await signatureSigner._signTypedData(domain, TrTokenSig.Pass, {nonce: 101, amount: 10000, address_to: varybadguy, ttl: timestamp, option: 1})
+
+      await expectRevert(
+        cheel.transferFrom(
+          varybadguy,
+          deployer,
+          parseEther("1000000"),
+          { from: cheelGnosis.address }
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      await expectRevert(
+        cheel.mint(
+          varybadguy,
+          parseEther("1000"),
+          { from: cheelGnosis.address }
+        ),
+        "Recipient in common blacklist"
+      );
+
+      await expectRevert(
+        treasury.withdraw(
+          101,
+          10000,
+          varybadguy,
+          timestamp,
+          1,
+          signature,
+          { from: varybadguy }
+        ),
+        "Recipient in common blacklist"
       );
     });
 

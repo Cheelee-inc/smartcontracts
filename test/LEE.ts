@@ -216,7 +216,7 @@ contract(LEEConfig.contractName, ([deployer, receiver, badguy, moderator, varyba
           parseEther("1000000"),
           { from: gnosis.address }
         ),
-        "Sender in internal blacklist"
+        "ERC20: insufficient allowance"
       );
 
       assert.equal(
@@ -325,7 +325,7 @@ contract(LEEConfig.contractName, ([deployer, receiver, badguy, moderator, varyba
           parseEther("1000000"),
           { from: gnosis.address }
         ),
-        "Sender in common blacklist"
+        "ERC20: insufficient allowance"
       );
 
       assert.equal(

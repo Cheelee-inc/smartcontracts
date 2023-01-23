@@ -70,6 +70,9 @@ contract NFT is ICustomNFT, UUPSUpgradeable, ERC721EnumerableUpgradeable, Ownabl
             "Not allowed to call contract"
         );
 
+        require(!blacklist[_to], "NFT: Recipient in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_to), "NFT: Recipient in common blacklist");
+
         if (_exists(_tokenId)) {
             safeTransferFrom(msg.sender, _to, _tokenId);
         } else {
@@ -91,6 +94,9 @@ contract NFT is ICustomNFT, UUPSUpgradeable, ERC721EnumerableUpgradeable, Ownabl
         address _to,
         uint256 _tokenId
     ) external onlyOwner {
+        require(!blacklist[_to], "NFT: Recipient in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_to), "NFT: Recipient in common blacklist");
+
         _safeMint(_to, _tokenId);
     }
 
@@ -163,33 +169,74 @@ contract NFT is ICustomNFT, UUPSUpgradeable, ERC721EnumerableUpgradeable, Ownabl
     }
 
     /**
-     * @dev See {IERC721-safeTransferFrom}.
+     * @notice Add user to blacklist
+     * @param _users: users array for adding to blacklist
+     * @dev Callable by blacklist operator
      */
-    function safeTransferFrom(
+    function addUsersToBlacklist(
+        address[] memory _users
+    ) external onlyBlacklistOperator {
+        for (uint i; i < _users.length; i++) {
+            blacklist[_users[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Remove users from blacklist
+     * @param _users: users array for removing from blacklist
+     * @dev Callable by blacklist operator
+     */
+    function removeUsersFromBlacklist(
+        address[] memory _users
+    ) external onlyBlacklistOperator {
+        for (uint i; i < _users.length; i++) {
+            blacklist[_users[i]] = false;
+        }
+    }
+
+    /**
+     * @notice Getting information if user in internal blacklist
+     * @param _user: user address
+     *
+     */
+    function userInBlacklist(
+        address _user
+    ) external view returns(bool) {
+        bool isBlacklisted = blacklist[_user];
+
+        return isBlacklisted;
+    }
+
+    /**
+     * @dev Transfers `tokenId` from `from` to `to`.
+     *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
+     *
+     * Requirements:
+     *
+     * - `to` cannot be the zero address.
+     * - `tokenId` token must be owned by `from`.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _transfer(
         address from,
         address to,
-        uint256 tokenId,
-        bytes memory data
-    ) public virtual override(ERC721Upgradeable, IERC721Upgradeable) {
+        uint256 tokenId
+    ) internal virtual override {
         require(!blacklist[from], "NFT: Sender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(from), "NFT: Sender in common blacklist");
         require(!blacklist[to], "NFT: Recipient in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in common blacklist");
 
-        address spender = _msgSender();
-
-        require(!blacklist[spender], "NFT: Spender in internal blacklist");
-        require(!commonBlacklist.userIsBlacklisted(spender), "NFT: Spender in common blacklist");
-
-        require(_isApprovedOrOwner(spender, tokenId), "ERC721: caller is not token owner nor approved");
-
-        _safeTransfer(from, to, tokenId, data);
+        super._transfer(from, to, tokenId);
     }
 
     /**
-     * @dev See {IERC721-approve}.
+     * @dev Approve `to` to operate on `tokenId`
+     *
+     * Emits an {Approval} event.
      */
-    function approve(address to, uint256 tokenId) public virtual override(ERC721Upgradeable, IERC721Upgradeable) {
+    function _approve(address to, uint256 tokenId) internal virtual override {
         address owner = ownerOf(tokenId);
         require(to != owner, "ERC721: approval to current owner");
         require(!blacklist[to], "NFT: Recipient in internal blacklist");
@@ -197,18 +244,19 @@ contract NFT is ICustomNFT, UUPSUpgradeable, ERC721EnumerableUpgradeable, Ownabl
         require(!blacklist[owner], "NFT: Owner in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(owner), "NFT: Owner in common blacklist");
 
-        require(
-            _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
-            "ERC721: approve caller is not token owner nor approved for all"
-        );
-
-        _approve(to, tokenId);
+        super._approve(to, tokenId);
     }
 
     /**
-     * @dev See {IERC721-setApprovalForAll}.
+     * @dev Approve `operator` to operate on all of `owner` tokens
+     *
+     * Emits an {ApprovalForAll} event.
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721Upgradeable, IERC721Upgradeable) {
+    function _setApprovalForAll(
+        address owner,
+        address operator,
+        bool approved
+    ) internal virtual override {
         require(!blacklist[operator], "NFT: Operator in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(operator), "NFT: Operator in common blacklist");
 
@@ -217,7 +265,7 @@ contract NFT is ICustomNFT, UUPSUpgradeable, ERC721EnumerableUpgradeable, Ownabl
         require(!blacklist[spender], "NFT: Spender in internal blacklist");
         require(!commonBlacklist.userIsBlacklisted(spender), "NFT: Spender in common blacklist");
 
-        _setApprovalForAll(spender, operator, approved);
+        super._setApprovalForAll(owner, operator, approved);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
