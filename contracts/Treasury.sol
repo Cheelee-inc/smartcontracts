@@ -14,7 +14,6 @@ import "./interfaces/ICustomNFT.sol";
 /// @title Treasury
 /// @title Smart contract used to transfer tokens from inner to outter wallet
 contract Treasury is
-    UUPSUpgradeable,
     EIP712Upgradeable,
     ERC721HolderUpgradeable,
     OwnableUpgradeable
@@ -276,8 +275,4 @@ contract Treasury is
 
         emit WithdrawToken(address(_token), _amount);
     }
-
-    receive() external payable {}
-    fallback() external payable {}
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

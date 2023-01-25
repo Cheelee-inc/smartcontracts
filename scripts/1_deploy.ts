@@ -25,7 +25,7 @@ async function main() {
 
   // We get the contract to deploy
   const CommonBlacklistContract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
-  const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [CommonBlacklistConfig.multiSigAddress], { initializer: 'initialize', kind: 'uups' }) as CommonBlacklistContractType;
+  const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [], { initializer: 'initialize' }) as CommonBlacklistContractType;
 
   await commonBlacklistProxy.deployed();
 
@@ -38,13 +38,7 @@ async function main() {
 
   // We get the contract to deploy
   const LEEContract = await ethers.getContractFactory(LEEConfig.contractName);
-  const leeProxy = await upgrades.deployProxy(LEEContract, [
-    LEEConfig.tokenName,
-    LEEConfig.tokenSymbol,
-    LEEConfig.maxAmount,
-    commonBlacklistProxy.address,
-    LEEConfig.multiSigAddress,
-  ], { initializer: 'initialize', kind: 'uups' }) as LEEContractType;
+  const leeProxy = await upgrades.deployProxy(LEEContract, [], { initializer: 'initialize' }) as LEEContractType;
 
   await leeProxy.deployed();
 
@@ -57,13 +51,7 @@ async function main() {
 
   // We get the contract to deploy
   const CHEELContract = await ethers.getContractFactory(CHEELConfig.contractName);
-  const cheelProxy = await upgrades.deployProxy(CHEELContract, [
-    CHEELConfig.tokenName,
-    CHEELConfig.tokenSymbol,
-    CHEELConfig.maxAmount,
-    commonBlacklistProxy.address,
-    CHEELConfig.multiSigAddress,
-  ], { initializer: 'initialize', kind: 'uups' }) as CHEELContractType;
+  const cheelProxy = await upgrades.deployProxy(CHEELContract, [], { initializer: 'initialize' }) as CHEELContractType;
 
   await cheelProxy.deployed();
 
@@ -76,12 +64,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTGlassesContract = await ethers.getContractFactory(NFTGlassesConfig.contractName);
-  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [
-    NFTGlassesConfig.nftName,
-    NFTGlassesConfig.nftSymbol,
-    commonBlacklistProxy.address,
-    NFTGlassesConfig.multiSigAddress,
-  ], { initializer: 'initialize', kind: 'uups' }) as NFTContractType;
+  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [], { initializer: 'initialize' }) as NFTContractType;
 
   await nftGlassesProxy.deployed();
 
@@ -94,12 +77,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTCasesContract = await ethers.getContractFactory(NFTCasesConfig.contractName);
-  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [
-    NFTCasesConfig.nftName,
-    NFTCasesConfig.nftSymbol,
-    commonBlacklistProxy.address,
-    NFTCasesConfig.multiSigAddress,
-  ], { initializer: 'initialize', kind: 'uups' }) as NFTContractType;
+  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [], { initializer: 'initialize' }) as NFTContractType;
 
   await nftCasesProxy.deployed();
 

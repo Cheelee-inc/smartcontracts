@@ -1,16 +1,15 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, Signer, Contract } from "ethers";
 import { ethers } from "hardhat";
-import { CHEEL, Staking } from "../typechain";
 import {deployCHEEL, deployCommonBlacklist, deployStaking} from "../utils/deployContracts"
 import { increaseTime, increaseTimeDays, currentTimestamp } from "../utils/helpers"
 
 
 describe("Test", function () {
-  let commonBlacklist: any;
-  let cheel: any
-  let staking: any
+  let commonBlacklist: Contract;
+  let cheel: Contract
+  let staking: Contract
   let owner: Signer
   let user: Signer
 
@@ -18,7 +17,7 @@ describe("Test", function () {
     [owner, user] = await ethers.getSigners()
 
     commonBlacklist = await deployCommonBlacklist();
-    cheel = await deployCHEEL(commonBlacklist.address);
+    cheel = await deployCHEEL();
     staking = await deployStaking(cheel.address);
   })
 

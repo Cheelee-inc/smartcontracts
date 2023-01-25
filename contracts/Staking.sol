@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -9,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /// @title Staking
 /// @title Smart contract used to stake tokens
-contract Staking is UUPSUpgradeable, OwnableUpgradeable {
+contract Staking is OwnableUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     event SetOptionState(uint256 option, bool state);
@@ -217,8 +216,4 @@ contract Staking is UUPSUpgradeable, OwnableUpgradeable {
         );
         _collect(_option);
     }
-
-    receive() external payable {}
-    fallback() external payable {}
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

@@ -8,7 +8,7 @@ export const CommonBlacklistConfig: CommonBlacklistInterface = {
   testnet: Networks.bscTestnet,
   mainnet: Networks.bscMainnet,
   contractName: 'CommonBlacklist',
-  multiSigAddress: '0xe69c24fa49fc2ff52305e4300d627a9094b648f5',
+  multiSigAddress: '0xe69C24fA49FC2fF52305E4300D627a9094b648f5',
   contractAddress: '0xcb6078492EBCFd3916945f5b9a33BAEFc305b8D3',
   proxyContractAddress: '0xA18aBFeB119eC4e7412994293b24bdD6B55f06B1',
 };
@@ -34,7 +34,7 @@ export const CHEELConfig: CHEELConfigInterface = {
   tokenSymbol: 'CHEEL',
   maxAmount: 1000000000,
   blackList: 'blackList',
-  multiSigAddress: '0xe69c24fa49fc2ff52305e4300d627a9094b648f5',
+  multiSigAddress: '0x126481E4E79cBc8b4199911342861F7535e76EE7',
   contractAddress: '0xf02AB9810c7bC496979165ccd24a1BBDFD0B1eAc',
   proxyContractAddress: '0x3587035541b61bF766c0d41E9e639329A41C48D0',
 };

@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import './interfaces/ICommonBlacklist.sol';
 
-contract CommonBlacklist is ICommonBlacklist, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
-    bytes32 public constant BLACKLIST_OPERATOR_ROLE = keccak256("BLACKLIST_OPERATOR_ROLE");
+contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlUpgradeable {
 
-    address public GNOSIS;
+    bytes32 public constant BLACKLIST_OPERATOR_ROLE = keccak256("BLACKLIST_OPERATOR_ROLE");
+    address public constant GNOSIS = 0xe69C24fA49FC2fF52305E4300D627a9094b648f5;
 
     mapping(address => bool) public blacklist;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     // Modifier for roles
     modifier onlyBlacklistOperator() {
@@ -20,16 +24,12 @@ contract CommonBlacklist is ICommonBlacklist, UUPSUpgradeable, OwnableUpgradeabl
         _;
     }
 
-    function initialize(
-        address _GNOSIS
-    ) external initializer {
+    function initialize() external initializer {
         __AccessControl_init();
         __Ownable_init();
 
-        GNOSIS = _GNOSIS;
-
-        transferOwnership(_GNOSIS);
-        _setupRole(DEFAULT_ADMIN_ROLE, _GNOSIS);
+        transferOwnership(GNOSIS);
+        _setupRole(DEFAULT_ADMIN_ROLE, GNOSIS);
     }
 
     /**
@@ -74,8 +74,4 @@ contract CommonBlacklist is ICommonBlacklist, UUPSUpgradeable, OwnableUpgradeabl
 
         return isBlacklisted;
     }
-
-    receive() external payable {}
-    fallback() external payable {}
-    function _authorizeUpgrade(address) internal override onlyOwner {}
 }

@@ -3,41 +3,35 @@ import {CHEELConfig, CommonBlacklistConfig} from "../config/ContractsConfig";
 
 export async function deployCommonBlacklist() {
     const Contract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
-    const contract = await upgrades.deployProxy(Contract, [CommonBlacklistConfig.multiSigAddress], { initializer: "initialize", kind: "uups" })
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
 
 export async function deployLEE() {
     const Contract = await ethers.getContractFactory("LEE");
-    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize", kind: "uups" })
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
 
-export async function deployCHEEL(commonBlacklist: string) {
+export async function deployCHEEL() {
     const Contract = await ethers.getContractFactory(CHEELConfig.contractName);
-    const contract = await upgrades.deployProxy(Contract, [
-        CHEELConfig.tokenName,
-        CHEELConfig.tokenSymbol,
-        CHEELConfig.maxAmount,
-        commonBlacklist,
-        CHEELConfig.multiSigAddress,
-    ], { initializer: "initialize", kind: "uups" })
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
 
 export async function deployTreasury(chests: any, glasses: any, signer: any, lee: any, cheel: any, usdt: any) {
     const Contract = await ethers.getContractFactory("Treasury");
-    const contract = await upgrades.deployProxy(Contract, [chests, glasses, signer, lee, cheel, usdt], {initializer: "initialize", kind: "uups"})
+    const contract = await upgrades.deployProxy(Contract, [chests, glasses, signer, lee, cheel, usdt], {initializer: "initialize"})
     await contract.deployed()
     return contract
 }
 
 export async function deployNFT(name: any, version: any) {
     const Contract = await ethers.getContractFactory("NFT");
-    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize", kind: "uups"})
+    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }
@@ -51,7 +45,7 @@ export async function deployUSDT() {
 
 export async function deployStaking(token: any) {
     const Contract = await ethers.getContractFactory("Staking");
-    const contract = await upgrades.deployProxy(Contract, [token], {initializer: "initialize", kind: "uups"})
+    const contract = await upgrades.deployProxy(Contract, [token], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }
