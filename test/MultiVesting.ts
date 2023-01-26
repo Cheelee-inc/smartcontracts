@@ -2,12 +2,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { MultiVesting } from "../typechain";
-import {deployCHEEL, deployCommonBlacklist, deployMultiVesting, deployVesting} from "../utils/deployContracts"
+import {deployCHEEL, deployCommonBlacklist, deployMultiVesting} from "../utils/deployContracts"
 import { currentTimestamp, increaseTime } from "../utils/helpers"
+import {Contract} from "ethers";
 
 describe("MultiVesting", function () {
-  let commonBlacklist: any;
-  let cheel: any
+  let commonBlacklist: Contract;
+  let cheel: Contract
   let vesting: MultiVesting
   let owner: SignerWithAddress
   let receiver: SignerWithAddress
@@ -21,13 +22,15 @@ describe("MultiVesting", function () {
     [owner, receiver, receiver2, receiver3, receiver4] = await ethers.getSigners()
 
     commonBlacklist = await deployCommonBlacklist()
-    cheel = await deployCHEEL(commonBlacklist.address)
+    cheel = await deployCHEEL()
     vesting = await deployMultiVesting(cheel.address, true, true)
 
     gnosisMV = await ethers.getImpersonatedSigner(await vesting.GNOSIS())
     await owner.sendTransaction({to: gnosisMV.address,value: ethers.utils.parseEther("0.3")})
     gnosisCheel = await ethers.getImpersonatedSigner(await cheel.GNOSIS())
     await owner.sendTransaction({to: gnosisCheel.address,value: ethers.utils.parseEther("0.3")})
+
+    await cheel.connect(gnosisCheel).updateGlobalBlacklist(commonBlacklist.address);
 
     await vesting.connect(gnosisMV).setSeller(await owner.getAddress())
     await expect(vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)).to.be.revertedWith("Not enough tokens")
@@ -80,7 +83,10 @@ describe("MultiVesting", function () {
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
     await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, 1000, 100)
 
-    let fakeToken = await deployCHEEL(commonBlacklist.address)
+    let fakeToken = await deployCHEEL()
+
+    await fakeToken.connect(gnosisCheel).updateGlobalBlacklist(commonBlacklist.address);
+
     await fakeToken.connect(gnosisCheel).mint(vesting.address, 1000)
     expect(await fakeToken.balanceOf(gnosisMV.address)).to.be.equal(0)
     expect(await fakeToken.balanceOf(vesting.address)).to.be.equal(1000)

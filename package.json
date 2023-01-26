@@ -52,6 +52,10 @@
     "ldeploy": "npx hardhat run --network localhost .\\scripts\\deploy.ts",
     "tdeploy": "npx hardhat run --network truffle scripts/1_deploy.ts",
     "tdeploy:blacklist": "npx hardhat run --network truffle scripts/2_deploy_blacklist.ts",
+    "tdeploy:lee": "npx hardhat run --network truffle scripts/3_deploy_lee.ts",
+    "tdeploy:cheel": "npx hardhat run --network truffle scripts/4_deploy_cheel.ts",
+    "tdeploy:glasses": "npx hardhat run --network truffle scripts/5_deploy_nft_glasses.ts",
+    "tdeploy:cases": "npx hardhat run --network truffle scripts/6_deploy_nft_cases.ts",
     "test": "hardhat test",
     "verify": "hardhat verify --constructor-args config/ContractArguments.ts"
   }

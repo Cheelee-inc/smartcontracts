@@ -1,6 +1,5 @@
 import {assert, expect} from "chai";
 import {
-  expectEvent,
   expectRevert,
   // @ts-ignore
 } from "@openzeppelin/test-helpers";

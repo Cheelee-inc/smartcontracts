@@ -12,6 +12,9 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
     uint256[50] __gap;
     ICommonBlacklist public commonBlacklist;
+    bool private applyBlacklist;
+
+    event GlobalBlacklistUpdated(address blacklist);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -71,6 +74,9 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address _commonBlacklist
     ) external onlyOwner {
         commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        applyBlacklist = true;
+
+        emit GlobalBlacklistUpdated(_commonBlacklist);
     }
 
     /**
@@ -92,9 +98,12 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(from), "LEE: Spender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "LEE: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "LEE: Sender in common blacklist");
+
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(from), "LEE: Spender in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(to), "LEE: Recipient in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(_msgSender()), "LEE: Sender in common blacklist");
+        }
 
         super._afterTokenTransfer(from, to, amount);
     }
@@ -117,8 +126,11 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(owner), "LEE: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(spender), "LEE: Spender in global blacklist");
+
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(owner), "LEE: Owner in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(spender), "LEE: Spender in global blacklist");
+        }
 
         super._approve(owner, spender, amount);
     }

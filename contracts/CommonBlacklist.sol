@@ -70,8 +70,6 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function userIsBlacklisted(
         address _user
     ) external view returns(bool) {
-        bool isBlacklisted = blacklist[_user];
-
-        return isBlacklisted;
+        return blacklist[_user];
     }
 }

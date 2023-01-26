@@ -18,14 +18,16 @@ async function main() {
 
   // We get the contract to deploy
   const CommonBlacklistContract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
-  const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [CommonBlacklistConfig.multiSigAddress], { initializer: 'initialize' }) as CommonBlacklistContractType;
+  const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [], { initializer: 'initialize' }) as CommonBlacklistContractType;
 
   await commonBlacklistProxy.deployed();
 
   const commonBlacklistContract = await upgrades.erc1967.getImplementationAddress(commonBlacklistProxy.address);
+  const commonBlacklistAdmin = await upgrades.erc1967.getAdminAddress(commonBlacklistProxy.address);
 
   console.log('Contract blacklist deployed to:', commonBlacklistContract);
   console.log('Proxy blacklist contract deployed to:', commonBlacklistProxy.address);
+  console.log('Admin blacklist contract deployed to:', commonBlacklistAdmin);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

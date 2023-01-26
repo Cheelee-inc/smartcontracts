@@ -13,6 +13,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
     uint256[50] __gap;
     ICommonBlacklist public commonBlacklist;
+    bool private applyBlacklist;
 
     event GlobalBlacklistUpdated(address blacklist);
 
@@ -75,6 +76,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         address _commonBlacklist
     ) external onlyOwner {
         commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        applyBlacklist = true;
 
         emit GlobalBlacklistUpdated(_commonBlacklist);
     }
@@ -99,9 +101,11 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
 
-        require(!commonBlacklist.userIsBlacklisted(from), "CHEEL: Spender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "CHEEL: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "CHEEL: Sender in common blacklist");
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(from), "CHEEL: Spender in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(to), "CHEEL: Recipient in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(_msgSender()), "CHEEL: Sender in common blacklist");
+        }
 
         super._afterTokenTransfer(from, to, amount);
     }
@@ -125,8 +129,10 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
 
-        require(!commonBlacklist.userIsBlacklisted(owner), "CHEEL: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(spender), "CHEEL: Spender in global blacklist");
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(owner), "CHEEL: Owner in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(spender), "CHEEL: Spender in global blacklist");
+        }
 
         super._approve(owner, spender, amount);
     }

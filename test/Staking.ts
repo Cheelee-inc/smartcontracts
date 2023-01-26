@@ -6,7 +6,7 @@ import {deployCHEEL, deployCommonBlacklist, deployStaking} from "../utils/deploy
 import { increaseTime, increaseTimeDays, currentTimestamp } from "../utils/helpers"
 
 
-describe("Test", function () {
+describe("Staking", function () {
   let commonBlacklist: Contract;
   let cheel: Contract
   let staking: Contract

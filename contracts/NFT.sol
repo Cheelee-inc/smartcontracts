@@ -12,8 +12,10 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event SetSaleAndTreasury(address sale, address treasury);
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
+    event GlobalBlacklistUpdated(address blacklist);
 
     ICommonBlacklist public commonBlacklist;
+    bool private applyBlacklist;
     string public NAME;
     string public SYMBOL;
     string private baseURI;
@@ -159,6 +161,9 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address _commonBlacklist
     ) external onlyOwner {
         commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        applyBlacklist = true;
+
+        emit GlobalBlacklistUpdated(_commonBlacklist);
     }
 
     /**
@@ -177,9 +182,11 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address to,
         uint256 tokenId
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(from), "NFT: Sender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "NFT: Sender in common blacklist");
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(from), "NFT: Sender in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(_msgSender()), "NFT: Sender in common blacklist");
+        }
 
         super._afterTokenTransfer(from, to, tokenId);
     }
@@ -190,7 +197,9 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
      * Emits an {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
+        }
 
         super._approve(to, tokenId);
     }
@@ -205,8 +214,11 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address operator,
         bool approved
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(owner), "NFT: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(operator), "NFT: Operator in global blacklist");
+
+        if (applyBlacklist) {
+            require(!commonBlacklist.userIsBlacklisted(owner), "NFT: Owner in global blacklist");
+            require(!commonBlacklist.userIsBlacklisted(operator), "NFT: Operator in global blacklist");
+        }
 
         super._setApprovalForAll(owner, operator, approved);
     }
