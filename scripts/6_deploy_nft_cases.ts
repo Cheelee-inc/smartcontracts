@@ -14,7 +14,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTCasesContract = await ethers.getContractFactory(NFTCasesConfig.contractName);
-  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol], { initializer: 'initialize' }) as NFTContractType;
+  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol, NFTCasesConfig.blackList], { initializer: 'initialize' }) as NFTContractType;
 
   await nftCasesProxy.deployed();
 

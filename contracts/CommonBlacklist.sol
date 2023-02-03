@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import './interfaces/ICommonBlacklist.sol';
@@ -12,6 +11,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     address public constant GNOSIS = 0xe69C24fA49FC2fF52305E4300D627a9094b648f5;
 
     mapping(address => bool) public blacklist;
+    mapping(address => mapping (address => User)) public internal_blacklist;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -33,7 +33,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
-     * @notice Add user to blacklist
+     * @notice Add user to global blacklist
      * @param _users: users array for adding to blacklist
      *
      * @dev Callable by blacklist operator
@@ -48,7 +48,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
-     * @notice Remove users from blacklist
+     * @notice Remove users from global blacklist
      * @param _users: users array for removing from blacklist
      *
      * @dev Callable by blacklist operator
@@ -63,6 +63,40 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
+     * @notice Add user to internal blacklist
+     * @param _token: address of token contract
+     * @param _users: users array for adding to blacklist
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function addUsersToInternalBlacklist(
+        address _token,
+        address[] memory _users
+    ) external onlyBlacklistOperator {
+        for (uint i; i < _users.length; i++) {
+            internal_blacklist[_token][_users[i]].is_blocked = true;
+        }
+    }
+
+    /**
+     * @notice Remove users from internal blacklist
+     * @param _token: address of token contract
+     * @param _users: users array for removing from blacklist
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function removeUsersFromInternalBlacklist(
+        address _token,
+        address[] memory _users
+    ) external onlyBlacklistOperator {
+        for (uint i; i < _users.length; i++) {
+            internal_blacklist[_token][_users[i]].is_blocked = false;
+        }
+    }
+
+    /**
      * @notice Getting information if user blacklisted
      * @param _user: user address
      *
@@ -71,5 +105,18 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _user
     ) external view returns(bool) {
         return blacklist[_user];
+    }
+
+    /**
+     * @notice Getting information if user in internal blacklist
+     * @param _token: address of token contract
+     * @param _user: user address
+     *
+     */
+    function userIsInternalBlacklisted(
+        address _token,
+        address _user
+    ) external view returns(bool) {
+        return internal_blacklist[_token][_user].is_blocked;
     }
 }

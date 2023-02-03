@@ -30,7 +30,7 @@ contract(CHEELConfig.contractName, () => {
     commonBlacklist = await deployCommonBlacklist();
 
     // Deploy CHEEL
-    cheel = await deployCHEEL();
+    cheel = await deployCHEEL(commonBlacklist.address);
 
     // Creating GNOSIS
     [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();
@@ -49,18 +49,6 @@ contract(CHEELConfig.contractName, () => {
   });
 
   describe("Normal cases:", async () => {
-    it("Setting Blacklist for CHEEL", async function () {
-      await expectRevert(
-        cheel.connect(deployer).updateGlobalBlacklist(commonBlacklist.address),
-        "Ownable: caller is not the owner"
-      );
-
-      result = await cheel.connect(gnosis).updateGlobalBlacklist(commonBlacklist.address);
-      resultWaited = await result.wait();
-
-      expect(resultWaited.events[0].args.blacklist).to.equal(commonBlacklist.address);
-    });
-
     it("Check initial data", async function () {
       expect(await cheel.name()).to.equal(CHEELConfig.tokenName);
       expect(await cheel.symbol()).to.equal(CHEELConfig.tokenSymbol);
@@ -275,6 +263,115 @@ contract(CHEELConfig.contractName, () => {
       );
     });
   });
+
+  describe("Internal Blacklist", async () => {
+    it("Adding badguy for internal blacklist", async function () {
+      await commonBlacklist.connect(moderator).addUsersToInternalBlacklist(
+        cheel.address,
+        [badguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(cheel.address, badguy.address), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(cheel.address, deployer.address), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(cheel.address, varybadguy.address), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), true);
+    });
+
+    it("Blocking transactions for users in internal blacklist", async function () {
+      await expectRevert(
+        cheel.connect(badguy).transfer(
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "CHEEL: Spender in internal blacklist"
+      );
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          badguy.address,
+          parseEther("1000000")
+        ),
+        "CHEEL: Recipient in internal blacklist"
+      );
+
+      await expectRevert(
+        cheel.connect(badguy).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      await expectRevert(
+        cheel.connect(gnosis).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(deployer.address)),
+        String(await cheel.balanceOf(deployer.address)),
+        parseEther("2000000").toString()
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(badguy.address)),
+        String(await cheel.balanceOf(badguy.address)),
+        parseEther("2000000").toString()
+      );
+    });
+
+    it("Removing badguy from internal blacklist", async function () {
+      await commonBlacklist.connect(moderator).removeUsersFromInternalBlacklist(
+        cheel.address,
+        [badguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(cheel.address, badguy.address), false);
+    });
+
+    it("UnBlocking transactions for users in internal blacklist and blocking again", async function () {
+      result = await cheel.connect(badguy).transfer(
+        deployer.address,
+        parseEther("1000000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(badguy.address);
+      expect(resultWaited.events[0].args.to).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("1000000").toString());
+
+      await expectRevert(
+        cheel.connect(gnosis).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(deployer.address)),
+        parseEther("4000000").toString()
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(badguy.address)),
+        parseEther("1000000").toString()
+      );
+
+      await commonBlacklist.connect(moderator).addUsersToInternalBlacklist(
+        cheel.address,
+        [badguy.address]
+      );
+    });
+  });
+
   describe("Restrictions:", async () => {
     it("Mint from users", async function () {
       await expectRevert(
@@ -287,7 +384,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(
@@ -311,7 +408,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(
@@ -331,7 +428,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(

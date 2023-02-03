@@ -30,7 +30,7 @@ contract(LEEConfig.contractName, () => {
     commonBlacklist = await deployCommonBlacklist();
 
     // Deploy LEE
-    lee = await deployLEE();
+    lee = await deployLEE(commonBlacklist.address);
 
     // Creating GNOSIS
     [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();
@@ -49,18 +49,6 @@ contract(LEEConfig.contractName, () => {
   });
 
   describe("Normal cases:", async () => {
-    it("Setting Blacklist for LEE", async function () {
-      await expectRevert(
-        lee.connect(deployer).updateGlobalBlacklist(commonBlacklist.address),
-        "Ownable: caller is not the owner"
-      );
-
-      result = await lee.connect(gnosis).updateGlobalBlacklist(commonBlacklist.address);
-      resultWaited = await result.wait();
-
-      expect(resultWaited.events[0].args.blacklist).to.equal(commonBlacklist.address);
-    });
-
     it("Check initial data", async function () {
       expect(await lee.name()).to.equal(LEEConfig.tokenName);
       expect(await lee.symbol()).to.equal(LEEConfig.tokenSymbol);
@@ -259,6 +247,115 @@ contract(LEEConfig.contractName, () => {
       );
     });
   });
+
+  describe("Internal Blacklist", async () => {
+    it("Adding badguy for internal blacklist", async function () {
+      await commonBlacklist.connect(moderator).addUsersToInternalBlacklist(
+        lee.address,
+        [badguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, deployer.address), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, varybadguy.address), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), true);
+    });
+
+    it("Blocking transactions for users in internal blacklist", async function () {
+      await expectRevert(
+        lee.connect(badguy).transfer(
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "LEE: Spender in internal blacklist"
+      );
+
+      await expectRevert(
+        lee.connect(deployer).transfer(
+          badguy.address,
+          parseEther("1000000")
+        ),
+        "LEE: Recipient in internal blacklist"
+      );
+
+      await expectRevert(
+        lee.connect(badguy).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      await expectRevert(
+        lee.connect(gnosis).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      assert.equal(
+        String(await lee.balanceOf(deployer.address)),
+        String(await lee.balanceOf(deployer.address)),
+        parseEther("2000000").toString()
+      );
+
+      assert.equal(
+        String(await lee.balanceOf(badguy.address)),
+        String(await lee.balanceOf(badguy.address)),
+        parseEther("2000000").toString()
+      );
+    });
+
+    it("Removing badguy from internal blacklist", async function () {
+      await commonBlacklist.connect(moderator).removeUsersFromInternalBlacklist(
+        lee.address,
+        [badguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address), false);
+    });
+
+    it("UnBlocking transactions for users in internal blacklist and blocking again", async function () {
+      result = await lee.connect(badguy).transfer(
+        deployer.address,
+        parseEther("1000000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(badguy.address);
+      expect(resultWaited.events[0].args.to).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("1000000").toString());
+
+      await expectRevert(
+        lee.connect(gnosis).transferFrom(
+          badguy.address,
+          deployer.address,
+          parseEther("1000000")
+        ),
+        "ERC20: insufficient allowance"
+      );
+
+      assert.equal(
+        String(await lee.balanceOf(deployer.address)),
+        parseEther("4000000").toString()
+      );
+
+      assert.equal(
+        String(await lee.balanceOf(badguy.address)),
+        parseEther("1000000").toString()
+      );
+
+      await commonBlacklist.connect(moderator).addUsersToInternalBlacklist(
+        lee.address,
+        [badguy.address]
+      );
+    });
+  });
+
   describe("Restrictions:", async () => {
     it("Mint from users", async function () {
       await expectRevert(
@@ -271,7 +368,7 @@ contract(LEEConfig.contractName, () => {
 
       assert.equal(
         String(await lee.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(
@@ -295,7 +392,7 @@ contract(LEEConfig.contractName, () => {
 
       assert.equal(
         String(await lee.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(
@@ -315,7 +412,7 @@ contract(LEEConfig.contractName, () => {
 
       assert.equal(
         String(await lee.balanceOf(deployer.address)),
-        parseEther("3000000").toString()
+        parseEther("4000000").toString()
       );
 
       assert.equal(

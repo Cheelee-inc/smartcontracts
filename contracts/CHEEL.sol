@@ -13,21 +13,24 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
     uint256[50] __gap;
     ICommonBlacklist public commonBlacklist;
-    bool private applyBlacklist;
 
-    event GlobalBlacklistUpdated(address blacklist);
+    event GlobalBlacklistUpdated(ICommonBlacklist blacklist);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize() external initializer {
+    function initialize(
+        address _commonBlacklist
+    ) external initializer {
         __ERC20_init("CHEELEE", "CHEEL");
         __ERC20Permit_init("CHEELEE");
         __ERC20Votes_init();
 
         __Ownable_init();
+
+        commonBlacklist = ICommonBlacklist(_commonBlacklist);
 
         transferOwnership(GNOSIS);
     }
@@ -66,48 +69,31 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @notice Update common blacklist address
-     * @param _commonBlacklist: amount of tokens
-     *
-     * @dev Callable by owner
-     *
-     */
-    function updateGlobalBlacklist(
-        address _commonBlacklist
-    ) external onlyOwner {
-        commonBlacklist = ICommonBlacklist(_commonBlacklist);
-        applyBlacklist = true;
-
-        emit GlobalBlacklistUpdated(_commonBlacklist);
-    }
-
-    /**
-     * @dev Hook that is called after any transfer of tokens. This includes
+     * @dev Hook that is called before any transfer of tokens. This includes
      * minting and burning.
      *
      * Calling conditions:
      *
      * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * has been transferred to `to`.
-     * - when `from` is zero, `amount` tokens have been minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens have been burned.
+     * will be transferred to `to`.
+     * - when `from` is zero, `amount` tokens will be minted for `to`.
+     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
      * - `from` and `to` are never both zero.
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _afterTokenTransfer(
+    function _beforeTokenTransfer(
         address from,
         address to,
         uint256 amount
     ) internal virtual override {
 
-        if (applyBlacklist) {
-            require(!commonBlacklist.userIsBlacklisted(from), "CHEEL: Spender in global blacklist");
-            require(!commonBlacklist.userIsBlacklisted(to), "CHEEL: Recipient in global blacklist");
-            require(!commonBlacklist.userIsBlacklisted(_msgSender()), "CHEEL: Sender in common blacklist");
-        }
-
-        super._afterTokenTransfer(from, to, amount);
+        require(!commonBlacklist.userIsBlacklisted(from), "CHEEL: Spender in global blacklist");
+        require(!commonBlacklist.userIsBlacklisted(to), "CHEEL: Recipient in global blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "CHEEL: Sender in global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), from), "CHEEL: Spender in internal blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "CHEEL: Recipient in internal blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender()), "CHEEL: Sender in internal blacklist");
     }
 
     /**
@@ -129,10 +115,10 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
 
-        if (applyBlacklist) {
-            require(!commonBlacklist.userIsBlacklisted(owner), "CHEEL: Owner in global blacklist");
-            require(!commonBlacklist.userIsBlacklisted(spender), "CHEEL: Spender in global blacklist");
-        }
+        require(!commonBlacklist.userIsBlacklisted(owner), "CHEEL: Owner in global blacklist");
+        require(!commonBlacklist.userIsBlacklisted(spender), "CHEEL: Spender in global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner), "CHEEL: Owner in internal blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), spender), "CHEEL: Spender in internal blacklist");
 
         super._approve(owner, spender, amount);
     }

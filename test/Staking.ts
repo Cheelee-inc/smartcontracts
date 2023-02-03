@@ -17,7 +17,7 @@ describe("Staking", function () {
     [owner, user] = await ethers.getSigners()
 
     commonBlacklist = await deployCommonBlacklist();
-    cheel = await deployCHEEL();
+    cheel = await deployCHEEL(commonBlacklist.address);
     staking = await deployStaking(cheel.address);
   })
 

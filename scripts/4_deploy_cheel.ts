@@ -14,7 +14,7 @@ async function main() {
 
   // We get the contract to deploy
   const CHEELContract = await ethers.getContractFactory(CHEELConfig.contractName);
-  const cheelProxy = await upgrades.deployProxy(CHEELContract, [], { initializer: 'initialize' }) as CHEELContractType;
+  const cheelProxy = await upgrades.deployProxy(CHEELContract, [CHEELConfig.blackList], { initializer: 'initialize' }) as CHEELContractType;
 
   await cheelProxy.deployed();
 

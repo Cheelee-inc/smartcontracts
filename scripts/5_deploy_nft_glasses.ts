@@ -14,7 +14,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTGlassesContract = await ethers.getContractFactory(NFTGlassesConfig.contractName);
-  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol], { initializer: 'initialize' }) as NFTContractType;
+  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol, NFTGlassesConfig.blackList], { initializer: 'initialize' }) as NFTContractType;
 
   await nftGlassesProxy.deployed();
 

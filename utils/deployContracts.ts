@@ -8,16 +8,16 @@ export async function deployCommonBlacklist() {
     return contract
 }
 
-export async function deployLEE() {
+export async function deployLEE(blacklist: string) {
     const Contract = await ethers.getContractFactory("LEE");
-    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
+    const contract = await upgrades.deployProxy(Contract, [blacklist], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
 
-export async function deployCHEEL() {
+export async function deployCHEEL(blacklist: string) {
     const Contract = await ethers.getContractFactory(CHEELConfig.contractName);
-    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
+    const contract = await upgrades.deployProxy(Contract, [blacklist], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
@@ -29,9 +29,9 @@ export async function deployTreasury(chests: any, glasses: any, signer: any, lee
     return contract
 }
 
-export async function deployNFT(name: any, version: any) {
+export async function deployNFT(name: any, version: any, blacklist: string) {
     const Contract = await ethers.getContractFactory("NFT");
-    const contract = await upgrades.deployProxy(Contract, [name, version], {initializer: "initialize"})
+    const contract = await upgrades.deployProxy(Contract, [name, version, blacklist], {initializer: "initialize"})
     await contract.deployed();
     return contract
 }
