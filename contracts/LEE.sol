@@ -21,14 +21,14 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     }
 
     function initialize(
-        address _commonBlacklist
+        ICommonBlacklist _commonBlacklist
     ) external initializer {
         __ERC20_init("CHEELEE Attention Token", "LEE");
         __ERC20Permit_init("CHEELEE Attention Token");
 
         __Ownable_init();
 
-        commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        commonBlacklist = _commonBlacklist;
 
         transferOwnership(GNOSIS);
     }

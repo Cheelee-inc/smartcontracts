@@ -32,7 +32,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        address _commonBlacklist
+        ICommonBlacklist _commonBlacklist
     )
     external
     initializer
@@ -43,7 +43,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
 
         NAME = _name;
         SYMBOL = _symbol;
-        commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        commonBlacklist = _commonBlacklist;
 
         transferOwnership(GNOSIS);
     }

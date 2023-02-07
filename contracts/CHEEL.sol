@@ -22,7 +22,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     }
 
     function initialize(
-        address _commonBlacklist
+        ICommonBlacklist _commonBlacklist
     ) external initializer {
         __ERC20_init("CHEELEE", "CHEEL");
         __ERC20Permit_init("CHEELEE");
@@ -30,7 +30,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
 
         __Ownable_init();
 
-        commonBlacklist = ICommonBlacklist(_commonBlacklist);
+        commonBlacklist = _commonBlacklist;
 
         transferOwnership(GNOSIS);
     }

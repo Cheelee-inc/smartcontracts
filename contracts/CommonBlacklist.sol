@@ -11,7 +11,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     address public constant GNOSIS = 0xe69C24fA49FC2fF52305E4300D627a9094b648f5;
 
     mapping(address => bool) public blacklist;
-    mapping(address => mapping (address => User)) public internal_blacklist;
+    mapping(address => mapping (address => bool)) public internal_blacklist;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -75,7 +75,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address[] memory _users
     ) external onlyBlacklistOperator {
         for (uint i; i < _users.length; i++) {
-            internal_blacklist[_token][_users[i]].is_blocked = true;
+            internal_blacklist[_token][_users[i]] = true;
         }
     }
 
@@ -92,7 +92,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address[] memory _users
     ) external onlyBlacklistOperator {
         for (uint i; i < _users.length; i++) {
-            internal_blacklist[_token][_users[i]].is_blocked = false;
+            internal_blacklist[_token][_users[i]] = false;
         }
     }
 
@@ -117,6 +117,6 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _token,
         address _user
     ) external view returns(bool) {
-        return internal_blacklist[_token][_user].is_blocked;
+        return internal_blacklist[_token][_user];
     }
 }

@@ -4,13 +4,6 @@ pragma solidity ^0.8.17;
 interface ICommonBlacklist {
 
     /**
-     * @notice User blacklist struct
-     */
-    struct User {
-        bool is_blocked;
-    }
-
-    /**
      * @notice Add user to blacklist
      * @param _users: users array for adding to blacklist
      *
