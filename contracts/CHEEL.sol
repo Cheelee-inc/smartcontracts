@@ -94,6 +94,8 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), from), "CHEEL: Spender in internal blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "CHEEL: Recipient in internal blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender()), "CHEEL: Sender in internal blacklist");
+        require(commonBlacklist.dayLimitIsReached(address(this), from, amount), "CHEEL: Spender has reached the day limit");
+        require(commonBlacklist.monthLimitIsReached(address(this), from, amount), "CHEEL: Spender has reached the month limit");
     }
 
     /**
@@ -121,5 +123,27 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), spender), "CHEEL: Spender in internal blacklist");
 
         super._approve(owner, spender, amount);
+    }
+
+    /**
+     * @dev Hook that is called after any transfer of tokens. This includes
+     * minting and burning.
+     *
+     * Calling conditions:
+     *
+     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
+     * has been transferred to `to`.
+     * - when `from` is zero, `amount` tokens have been minted for `to`.
+     * - when `to` is zero, `amount` of ``from``'s tokens have been burned.
+     * - `from` and `to` are never both zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override {
+        commonBlacklist.saveUserTransfers(from, amount);
     }
 }

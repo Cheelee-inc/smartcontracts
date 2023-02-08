@@ -372,6 +372,225 @@ contract(CHEELConfig.contractName, () => {
     });
   });
 
+  describe("Token Rate Limit", async () => {
+    it("Adding Token limit", async function () {
+      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+        cheel.address,
+        parseEther("1000000"),
+        parseEther("1500000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.token).to.equal(cheel.address);
+      expect(resultWaited.events[0].args.dayLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthLimit).to.equal(parseEther("1500000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getTokenLimits(cheel.address)),
+        `${parseEther("1000000").toString()},${parseEther("1500000").toString()}`,
+      );
+    });
+
+    it("Testing Day and Month limits", async function () {
+
+      // First transaction
+      result = await cheel.connect(deployer).transfer(
+        receiver.address,
+        parseEther("500000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.to).to.equal(receiver.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("500000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(cheel.address, deployer.address)),
+        parseEther("500000").toString()
+      );
+
+      // Second transaction
+      result = await cheel.connect(deployer).transfer(
+        receiver.address,
+        parseEther("500000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.to).to.equal(receiver.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("500000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(cheel.address, deployer.address)),
+        parseEther("1000000").toString()
+      );
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1")
+        ),
+        "CHEEL: Spender has reached the day limit"
+      );
+
+      // Next day
+      await ethers.provider.send('evm_increaseTime', [24 * 60 * 60]);
+
+      // Next Day transaction
+      result = await cheel.connect(deployer).transfer(
+        receiver.address,
+        parseEther("500000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.to).to.equal(receiver.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("500000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(cheel.address, deployer.address)),
+        parseEther("500000").toString()
+      );
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenMonthTransfers(cheel.address, deployer.address)),
+        parseEther("1500000").toString()
+      );
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1")
+        ),
+        "CHEEL: Spender has reached the month limit"
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(deployer.address)),
+        String(await cheel.balanceOf(deployer.address)),
+        parseEther("2000000").toString()
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(badguy.address)),
+        String(await cheel.balanceOf(badguy.address)),
+        parseEther("2000000").toString()
+      );
+    });
+
+    it("Increase limits", async function () {
+      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+        cheel.address,
+        parseEther("1000000"),
+        parseEther("3000000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.token).to.equal(cheel.address);
+      expect(resultWaited.events[0].args.dayLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthLimit).to.equal(parseEther("3000000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getTokenLimits(cheel.address)),
+        `${parseEther("1000000").toString()},${parseEther("3000000").toString()}`,
+      );
+    });
+
+    it("Testing Day and Month limits", async function () {
+
+      // First transaction
+      result = await cheel.connect(deployer).transfer(
+        receiver.address,
+        parseEther("500000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.to).to.equal(receiver.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("500000").toString());
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(cheel.address, deployer.address)),
+        parseEther("1000000").toString()
+      );
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1")
+        ),
+        "CHEEL: Spender has reached the day limit"
+      );
+
+      // Next day
+      await ethers.provider.send('evm_increaseTime', [24 * 60 * 60]);
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "CHEEL: Spender has reached the day limit"
+      );
+
+      // Next Day transaction
+      result = await cheel.connect(deployer).transfer(
+        receiver.address,
+        parseEther("1000000")
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.from).to.equal(deployer.address);
+      expect(resultWaited.events[0].args.to).to.equal(receiver.address);
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("1000000").toString());
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "CHEEL: Spender has reached the day limit"
+      );
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(cheel.address, deployer.address)),
+        parseEther("1000000").toString()
+      );
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenMonthTransfers(cheel.address, deployer.address)),
+        parseEther("3000000").toString()
+      );
+
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1000000")
+        ),
+        "CHEEL: Spender has reached the day limit"
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(deployer.address)),
+        String(await cheel.balanceOf(deployer.address)),
+        parseEther("2000000").toString()
+      );
+
+      assert.equal(
+        String(await cheel.balanceOf(badguy.address)),
+        String(await cheel.balanceOf(badguy.address)),
+        parseEther("2000000").toString()
+      );
+    });
+  });
+
   describe("Restrictions:", async () => {
     it("Mint from users", async function () {
       await expectRevert(
@@ -384,12 +603,12 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("4000000").toString()
+        parseEther("1000000").toString()
       );
 
       assert.equal(
         String(await cheel.balanceOf(receiver.address)),
-        parseEther("2000000").toString()
+        parseEther("5000000").toString()
       );
 
       assert.equal(
@@ -408,7 +627,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("4000000").toString()
+        parseEther("1000000").toString()
       );
 
       assert.equal(
@@ -428,7 +647,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),
-        parseEther("4000000").toString()
+        parseEther("1000000").toString()
       );
 
       assert.equal(
