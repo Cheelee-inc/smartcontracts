@@ -30,7 +30,7 @@ contract(CHEELConfig.contractName, () => {
     commonBlacklist = await deployCommonBlacklist();
 
     // Deploy CHEEL
-    cheel = await deployCHEEL(commonBlacklist.address);
+    cheel = await deployCHEEL();
 
     // Creating GNOSIS
     [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();

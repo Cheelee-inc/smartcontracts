@@ -68,16 +68,16 @@ contract(NFTGlassesConfig.contractName, () => {
     commonBlacklist = await deployCommonBlacklist();
 
     // Deploy CHEEL
-    cheel = await deployCHEEL(commonBlacklist.address);
+    cheel = await deployCHEEL();
 
     // Deploy LEE
-    lee = await deployLEE(commonBlacklist.address);
+    lee = await deployLEE();
 
     // Deploy NFT Glasses
-    nftGlasses = await deployNFT(NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol, commonBlacklist.address);
+    nftGlasses = await deployNFT(NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol);
 
     // Deploy NFT Cases
-    nftCases = await deployNFT(NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol, commonBlacklist.address);
+    nftCases = await deployNFT(NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol);
 
     // Deploy NFT SALE for Glasses
     nftSaleGlasses = await deployNFTSale(
@@ -860,7 +860,7 @@ contract(NFTGlassesConfig.contractName, () => {
       const signature2 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 13, address_to: deployer.address, ttl: timestamp, option: 2})
       const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 12, id: 13, address_to: deployer.address, ttl: timestamp, option: 2})
 
-      const newNftTest = await deployNFT("NFT Test NFT", "NTN", commonBlacklist.address);
+      const newNftTest = await deployNFT("NFT Test NFT", "NTN");
 
       const newNftSaleTest = await deployNFTSale(
         newNftTest.address,
@@ -1301,7 +1301,7 @@ contract(NFTGlassesConfig.contractName, () => {
       const signature = await signatureSigner._signTypedData(domain, TrTokenSig.Pass, {nonce: 3, amount: 10000, address_to: deployer.address, ttl: timestamp, option: 3})
       const signature2 = await signatureSigner._signTypedData(domain, TrTokenSig.Pass, {nonce: 4, amount: 1000000000000000, address_to: deployer.address, ttl: timestamp, option: 3})
 
-      const newTokenTest = await deployCHEEL(commonBlacklist.address);
+      const newTokenTest = await deployCHEEL();
 
       result = await treasury.connect(treasuryGnosis).addToken(
         newTokenTest.address,

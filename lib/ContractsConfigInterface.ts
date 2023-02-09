@@ -6,7 +6,8 @@ export interface CommonBlacklistInterface {
   contractName: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
+  adminContractAddress: string|null;
 }
 
 export interface LEEConfigInterface {
@@ -19,7 +20,8 @@ export interface LEEConfigInterface {
   blackList: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
+  adminContractAddress: string|null;
 }
 
 export interface CHEELConfigInterface {
@@ -32,7 +34,8 @@ export interface CHEELConfigInterface {
   blackList: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
+  adminContractAddress: string|null;
 }
 
 export interface NFTConfigInterface {
@@ -44,7 +47,8 @@ export interface NFTConfigInterface {
   blackList: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
+  adminContractAddress: string|null;
 }
 
 export interface NFTSaleConfigInterface {
@@ -54,6 +58,7 @@ export interface NFTSaleConfigInterface {
   multiSigAddress: string;
   contractAddress: string|null;
   proxyContractAddress: string|null;
+  adminContractAddress: string|null;
 }
 
 export interface TreasuryConfigInterface {
@@ -63,6 +68,7 @@ export interface TreasuryConfigInterface {
   multiSigAddress: string;
   contractAddress: string|null;
   proxyContractAddress: string|null;
+  adminContractAddress: string|null;
 }
 
 

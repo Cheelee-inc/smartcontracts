@@ -30,7 +30,7 @@ contract(LEEConfig.contractName, () => {
     commonBlacklist = await deployCommonBlacklist();
 
     // Deploy LEE
-    lee = await deployLEE(commonBlacklist.address);
+    lee = await deployLEE();
 
     // Creating GNOSIS
     [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();

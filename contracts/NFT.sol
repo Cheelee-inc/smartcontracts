@@ -12,9 +12,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event SetSaleAndTreasury(address sale, address treasury);
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
-    event GlobalBlacklistUpdated(address blacklist);
 
-    ICommonBlacklist public commonBlacklist;
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x4B994AD16E588C7aF227044c2268Cd27324e254D);
     string public NAME;
     string public SYMBOL;
     string private baseURI;
@@ -22,7 +21,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
-    uint256[50] __gap;
+    uint256[49] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -31,8 +30,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
 
     function initialize(
         string memory _name,
-        string memory _symbol,
-        ICommonBlacklist _commonBlacklist
+        string memory _symbol
     )
     external
     initializer
@@ -43,7 +41,6 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
 
         NAME = _name;
         SYMBOL = _symbol;
-        commonBlacklist = _commonBlacklist;
 
         transferOwnership(GNOSIS);
     }

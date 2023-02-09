@@ -8,7 +8,7 @@ import "./interfaces/ICommonBlacklist.sol";
 contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlUpgradeable {
 
     bytes32 public constant BLACKLIST_OPERATOR_ROLE = keccak256("BLACKLIST_OPERATOR_ROLE");
-    address public constant GNOSIS = 0xe69C24fA49FC2fF52305E4300D627a9094b648f5;
+    address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
 
     // user
     // is_blacklisted
@@ -48,6 +48,8 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     event SetTokenLimit(address token, uint256 dayLimit, uint256 monthLimit);
     event AddToExclusionList(address token);
     event RemoveFromExclusionList(address token);
+
+    uint256[50] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

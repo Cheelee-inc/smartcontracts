@@ -56,6 +56,14 @@
     "tdeploy:cheel": "npx hardhat run --network truffle scripts/4_deploy_cheel.ts",
     "tdeploy:glasses": "npx hardhat run --network truffle scripts/5_deploy_nft_glasses.ts",
     "tdeploy:cases": "npx hardhat run --network truffle scripts/6_deploy_nft_cases.ts",
+    "tprepare-upgrade:lee": "npx hardhat run --network truffle scripts/7_prepare_upgrade_lee.ts",
+    "tprepare-upgrade:cheel": "npx hardhat run --network truffle scripts/8_prepare_upgrade_cheel.ts",
+    "tprepare-upgrade:glasses": "npx hardhat run --network truffle scripts/9_prepare_upgrade_nft_glasses.ts",
+    "tprepare-upgrade:cases": "npx hardhat run --network truffle scripts/10_prepare_upgrade_nft_cases.ts",
+    "tupgrade-contract:lee": "npx hardhat run --network truffle scripts/11_upgrade_lee.ts",
+    "tupgrade-contract:cheel": "npx hardhat run --network truffle scripts/12_upgrade_cheel.ts",
+    "tupgrade-contract:glasses": "npx hardhat run --network truffle scripts/13_upgrade_nft_glasses.ts",
+    "tupgrade-contract:cases": "npx hardhat run --network truffle scripts/14_upgrade_nft_cases.ts",
     "test": "hardhat test",
     "verify": "hardhat verify --constructor-args config/ContractArguments.ts"
   }

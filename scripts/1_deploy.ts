@@ -40,7 +40,7 @@ async function main() {
 
   // We get the contract to deploy
   const LEEContract = await ethers.getContractFactory(LEEConfig.contractName);
-  const leeProxy = await upgrades.deployProxy(LEEContract, [commonBlacklistProxy.address], { initializer: 'initialize' }) as LEEContractType;
+  const leeProxy = await upgrades.deployProxy(LEEContract, [], { initializer: 'initialize' }) as LEEContractType;
 
   await leeProxy.deployed();
 
@@ -55,7 +55,7 @@ async function main() {
 
   // We get the contract to deploy
   const CHEELContract = await ethers.getContractFactory(CHEELConfig.contractName);
-  const cheelProxy = await upgrades.deployProxy(CHEELContract, [commonBlacklistProxy.address], { initializer: 'initialize' }) as CHEELContractType;
+  const cheelProxy = await upgrades.deployProxy(CHEELContract, [], { initializer: 'initialize' }) as CHEELContractType;
 
   await cheelProxy.deployed();
 
@@ -70,7 +70,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTGlassesContract = await ethers.getContractFactory(NFTGlassesConfig.contractName);
-  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol, commonBlacklistProxy.address], { initializer: 'initialize' }) as NFTContractType;
+  const nftGlassesProxy = await upgrades.deployProxy(NFTGlassesContract, [NFTGlassesConfig.nftName, NFTGlassesConfig.nftSymbol], { initializer: 'initialize' }) as NFTContractType;
 
   await nftGlassesProxy.deployed();
 
@@ -85,7 +85,7 @@ async function main() {
 
   // We get the contract to deploy
   const NFTCasesContract = await ethers.getContractFactory(NFTCasesConfig.contractName);
-  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol, commonBlacklistProxy.address], { initializer: 'initialize' }) as NFTContractType;
+  const nftCasesProxy = await upgrades.deployProxy(NFTCasesContract, [NFTCasesConfig.nftName, NFTCasesConfig.nftSymbol], { initializer: 'initialize' }) as NFTContractType;
 
   await nftCasesProxy.deployed();
 
