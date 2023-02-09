@@ -40,8 +40,14 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     // has limit
     mapping(address => bool) public tokens_with_limits;
 
+    // contract
+    // has exception
+    mapping(address => bool) public contracts_exclusion_list;
+
     // Events
     event SetTokenLimit(address token, uint256 dayLimit, uint256 monthLimit);
+    event AddToExclusionList(address token);
+    event RemoveFromExclusionList(address token);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -179,6 +185,36 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
+     * @notice Adding Contracts to exclusion list
+     * @param _contract: address of contract
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function addContractToExclusionList(
+        address _contract
+    ) external onlyBlacklistOperator {
+        contracts_exclusion_list[_contract] = true;
+
+        emit AddToExclusionList(_contract);
+    }
+
+    /**
+     * @notice Removing Contracts from exclusion list
+     * @param _contract: address of contract
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function removeContractFromExclusionList(
+        address _contract
+    ) external onlyBlacklistOperator {
+        contracts_exclusion_list[_contract] = false;
+
+        emit RemoveFromExclusionList(_contract);
+    }
+
+    /**
      * @notice Getting information if user blacklisted
      * @param _user: user address
      *
@@ -216,7 +252,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     ) external view returns(bool) {
         uint256 currentDay = getCurrentDay();
 
-        if (!tokens_with_limits[_token]) {
+        if (!tokens_with_limits[_token] || contracts_exclusion_list[_user]) {
             return true;
         }
 
@@ -237,7 +273,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     ) external view returns(bool) {
         uint256 currentMonth = getCurrentMonth();
 
-        if (!tokens_with_limits[_token]) {
+        if (!tokens_with_limits[_token] || contracts_exclusion_list[_user]) {
             return true;
         }
 

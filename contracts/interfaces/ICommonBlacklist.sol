@@ -85,6 +85,28 @@ interface ICommonBlacklist {
     ) external;
 
     /**
+     * @notice Adding Contracts to exclusion list
+     * @param _contract: address of contract
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function addContractToExclusionList(
+        address _contract
+    ) external;
+
+    /**
+     * @notice Removing Contracts from exclusion list
+     * @param _contract: address of contract
+     *
+     * @dev Callable by blacklist operator
+     *
+     */
+    function removeContractFromExclusionList(
+        address _contract
+    ) external;
+
+    /**
      * @notice Getting information if user blacklisted
      * @param _user: user address
      *

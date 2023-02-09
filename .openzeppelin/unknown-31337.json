@@ -2,7 +2,7 @@
   "manifestVersion": "3.2",
   "admin": {
     "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "txHash": "0xdd2f96fac064c231485037baa30991b728a3b681cdfa51a05ef4a103b33a3c1f"
+    "txHash": "0xab246f7acc43fc276952b5f6a5aaa5f34c3a95cca1a41a1ea6bfb61a7063c28b"
   },
   "proxies": [
     {
@@ -257,27 +257,27 @@
     },
     {
       "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
-      "txHash": "0x6615c9ffa841c2800802e7d191c888d21da3ef21f42260919a9f51eca70d7015",
+      "txHash": "0x1688e3a9bf82828646d0d74f683484240d4a6e3bc54468a0dd0dfaff7398408e",
       "kind": "transparent"
     },
     {
       "address": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E",
-      "txHash": "0x199f48e164bf469c512be5074501512f7b3617852aa5fc9b81a0c53fe727d126",
+      "txHash": "0x3557372af2a2ec03ccc9fe4e16eefa93ea54d78369b4114531c96f3394b87d40",
       "kind": "transparent"
     },
     {
       "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
-      "txHash": "0x14236608b36f2a24be6008b80cafc86be3aa1773de4489460722875a2b63a9d6",
+      "txHash": "0x3419d261321eef059fa36cd692cafc749698cd781023ae4d886c543cad97d50a",
       "kind": "transparent"
     },
     {
       "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-      "txHash": "0xb41dbc32326c79dc648ceb906277010b200277dc69eeea787e4c2add976ea7d6",
+      "txHash": "0x495a6d5aabdf1fd90906aaf9e06ad57d466b39a266e20c4e6e1b9deb96a800d3",
       "kind": "transparent"
     },
     {
       "address": "0x998abeb3E57409262aE5b751f60747921B33613E",
-      "txHash": "0x4a5a30fed31d2a8d74a2a9275076cdc7eea40d10e26e941a09d91421a1d3bb81",
+      "txHash": "0x3d3bbba249ac352b10b4f0bcaafef18f8de1275a0311fe7488e06b8d49d6a27a",
       "kind": "transparent"
     },
     {
@@ -287,7 +287,7 @@
     },
     {
       "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
-      "txHash": "0x40f8349cccdc7eb1d5c7a90915edb7d2fe0f8f0f89c7c4765a7ac6a0e350de2e",
+      "txHash": "0x9e56db3719a96a0be8fe3cb77ade5fef34afc049b6fd6776deb0efa6447957e5",
       "kind": "transparent"
     },
     {
@@ -307,7 +307,7 @@
     },
     {
       "address": "0x04C89607413713Ec9775E14b954286519d836FEf",
-      "txHash": "0xf60dcd69c57ddbd902843761ebba4d327b02de24661c13f2a6960024a083176b",
+      "txHash": "0x0e6c255d65d2573f69c48d81f6384c28a504b909f5089ae030ad07d55c748e30",
       "kind": "transparent"
     },
     {
@@ -317,7 +317,7 @@
     },
     {
       "address": "0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD",
-      "txHash": "0xee8e2b1a2e5cb5c98f199517f0db28354023ceb10658e052fa35c9aae7ff8234",
+      "txHash": "0x39271735c77b1cd3094e562476f048d4ba721bc9b62e1930f813a1bccf74f15a",
       "kind": "transparent"
     },
     {
@@ -327,42 +327,42 @@
     },
     {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-      "txHash": "0xdaf1287d973266348862ead0d43a1d9297a510d09fbc3bc724adebeb3e3abbcb",
+      "txHash": "0xf958149aaf1874384300edecedf0972c13f735f30382748cd8f39800f2a3d13c",
       "kind": "transparent"
     },
     {
       "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0xeedd75ab1015d836cf8d2500aff5ced1f61784f038858d484920682145ab5d1c",
+      "txHash": "0x4dc4d4bc19d87b99079442b7e5d0108e4f96d33ed0c174cdb879abdaddde8817",
       "kind": "transparent"
     },
     {
       "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
-      "txHash": "0xf8993dd95c1317c1325c6a0016e745bbe8569a07492cb3f59df3815a9ede8702",
+      "txHash": "0x1b418db38a36c2eaf674c6421dfed92cd9fa7d93e9c5ac051f21b0899c70df39",
       "kind": "transparent"
     },
     {
       "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
-      "txHash": "0xe3c33324e9601e01cc80bf7d27cfe849e06c7c78a9c0070bff73a8d83f8bb915",
+      "txHash": "0x8f37cab3ebd9327c66c680fe0359ed935ae5caa1ecf58b8f7b4579ef21984bc7",
       "kind": "transparent"
     },
     {
       "address": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
-      "txHash": "0x24a94ab060ea67b6d6ad1e255e960c0ecf814bc24142b05b05a772b9338839f5",
+      "txHash": "0x71105134e1dabbee2cacd0fb6b7648c30195e004ff212236e004b4ef4ad579be",
       "kind": "transparent"
     },
     {
       "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-      "txHash": "0xa37ae53bfed92ae58faf7c3ac13db3020346c9cec35b035d5c2820f2d6637c8b",
+      "txHash": "0xd7a249a2f2f9c37370b8a263bd7df01c0baeb83958bc4f2d87ad20ddbde1657b",
       "kind": "transparent"
     },
     {
       "address": "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1",
-      "txHash": "0xa5d306123d8209d526b9983b166ea82345c8d4dc2837bf7837574bf1ff40edfd",
+      "txHash": "0xb61da595dc181875651bf2783ba56b0081720c4995c513003f571efb2c6f8e63",
       "kind": "transparent"
     },
     {
       "address": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
-      "txHash": "0xb4b14de66f74e0cac20f7750aa8279ffe314e2c1b63c4bd27f1cab997a4235c0",
+      "txHash": "0xc770c45dbeca4a06e4fe4b07dcd5db4861957ec5f28836d2f4f0667c7ef16a02",
       "kind": "transparent"
     },
     {
@@ -402,7 +402,7 @@
     },
     {
       "address": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
-      "txHash": "0xc196dc8117f461c44f87659cd55b771c01348070cd9e82eea292a9d5ce033fc0",
+      "txHash": "0x333720e8ea9c5d1f1c0f88c28871588b3348d9c924b01e2f9f890af14842b873",
       "kind": "transparent"
     },
     {
@@ -417,7 +417,7 @@
     },
     {
       "address": "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
-      "txHash": "0x44666380079137d8a26ea3aedee4c509d4a4cff8815c54dad0616fc215d51801",
+      "txHash": "0x3cfea87df63ddafecaf4875158042a8dba4352f359a1d5168923dfefb5ef136a",
       "kind": "transparent"
     },
     {
@@ -432,7 +432,7 @@
     },
     {
       "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
-      "txHash": "0xf3299f858b3f291f9f581e840b29a0dbbde406128bf2ccf908dfaeee0f121394",
+      "txHash": "0x4eb8b2d5786429ac19ded835f8aa8076b757e99e0f5845f9f75f501c2015fc45",
       "kind": "transparent"
     },
     {
@@ -447,7 +447,7 @@
     },
     {
       "address": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
-      "txHash": "0x6690bb547b5cfdf0a452b390a5d3547792c61cd14f4a9e8f8f5d8283e9baddf3",
+      "txHash": "0xff5b58c5926d62136f464f6c33df219924fbc4e292f7f4d1485ba202ff3532d0",
       "kind": "transparent"
     },
     {
@@ -462,7 +462,7 @@
     },
     {
       "address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
-      "txHash": "0x3170d08a562da64fb33ccde08266bfd286849a34f6350b4ae96944e888a4948b",
+      "txHash": "0xb9bf7aa918a94e209227abeaa5fa749094c680348eb507ebb0e8fa0a73618626",
       "kind": "transparent"
     },
     {
@@ -477,7 +477,7 @@
     },
     {
       "address": "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
-      "txHash": "0x08b17c859439c72de4d9fddc93c0ff1bb4313e8ea064267c37b47e7d095b9b8a",
+      "txHash": "0xa1ecb2aaa0d347473bff6e030c951c0c2f26d93e3881682646aee67cb91e1e70",
       "kind": "transparent"
     },
     {
@@ -2202,7 +2202,7 @@
     },
     "49433040330d5997c610db43e4a44074a07cb67e2d0578ff8132be3a5bd86a3e": {
       "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0xd300b5b2364a8042e3da1e4e46ba6b2e44cfc6beebec7cb5f2e924487893cd23",
+      "txHash": "0x25b74492a225c49052ed4bbd4015831dc8c0c24859b38e59555382e14c947205",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -2307,7 +2307,7 @@
             "label": "_nonces",
             "offset": 0,
             "slot": "153",
-            "type": "t_mapping(t_address,t_struct(Counter)3691_storage)",
+            "type": "t_mapping(t_address,t_struct(Counter)4104_storage)",
             "contract": "ERC20PermitUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol:28"
           },
@@ -2340,7 +2340,7 @@
             "label": "_checkpoints",
             "offset": 0,
             "slot": "205",
-            "type": "t_mapping(t_address,t_array(t_struct(Checkpoint)1081_storage)dyn_storage)",
+            "type": "t_mapping(t_address,t_array(t_struct(Checkpoint)1494_storage)dyn_storage)",
             "contract": "ERC20VotesUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol:43"
           },
@@ -2348,7 +2348,7 @@
             "label": "_totalSupplyCheckpoints",
             "offset": 0,
             "slot": "206",
-            "type": "t_array(t_struct(Checkpoint)1081_storage)dyn_storage",
+            "type": "t_array(t_struct(Checkpoint)1494_storage)dyn_storage",
             "contract": "ERC20VotesUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol:44"
           },
@@ -2388,7 +2388,7 @@
             "label": "commonBlacklist",
             "offset": 0,
             "slot": "354",
-            "type": "t_contract(ICommonBlacklist)9846",
+            "type": "t_contract(ICommonBlacklist)10847",
             "contract": "CHEEL",
             "src": "contracts/CHEEL.sol:15"
           }
@@ -2398,7 +2398,7 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Checkpoint)1081_storage)dyn_storage": {
+          "t_array(t_struct(Checkpoint)1494_storage)dyn_storage": {
             "label": "struct ERC20VotesUpgradeable.Checkpoint[]",
             "numberOfBytes": "32"
           },
@@ -2426,7 +2426,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(ICommonBlacklist)9846": {
+          "t_contract(ICommonBlacklist)10847": {
             "label": "contract ICommonBlacklist",
             "numberOfBytes": "20"
           },
@@ -2434,7 +2434,7 @@
             "label": "mapping(address => address)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_array(t_struct(Checkpoint)1081_storage)dyn_storage)": {
+          "t_mapping(t_address,t_array(t_struct(Checkpoint)1494_storage)dyn_storage)": {
             "label": "mapping(address => struct ERC20VotesUpgradeable.Checkpoint[])",
             "numberOfBytes": "32"
           },
@@ -2442,7 +2442,7 @@
             "label": "mapping(address => mapping(address => uint256))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(Counter)3691_storage)": {
+          "t_mapping(t_address,t_struct(Counter)4104_storage)": {
             "label": "mapping(address => struct CountersUpgradeable.Counter)",
             "numberOfBytes": "32"
           },
@@ -2454,7 +2454,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Checkpoint)1081_storage": {
+          "t_struct(Checkpoint)1494_storage": {
             "label": "struct ERC20VotesUpgradeable.Checkpoint",
             "members": [
               {
@@ -2472,7 +2472,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(Counter)3691_storage": {
+          "t_struct(Counter)4104_storage": {
             "label": "struct CountersUpgradeable.Counter",
             "members": [
               {
@@ -2505,7 +2505,7 @@
     },
     "02457db948ba479729397f3968dc983b25d26732ee7f9bb5af30ee710ff5478b": {
       "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-      "txHash": "0xe6674a009a1df920620e527f8c2201b77d95a046cd90c2d42a6aced390c6318d",
+      "txHash": "0x4704a9ea4962125d7688ee836db4c79de9a14ec1c7543962d7b53dd866e18c79",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -2610,7 +2610,7 @@
             "label": "_nonces",
             "offset": 0,
             "slot": "153",
-            "type": "t_mapping(t_address,t_struct(Counter)3691_storage)",
+            "type": "t_mapping(t_address,t_struct(Counter)4104_storage)",
             "contract": "ERC20PermitUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol:28"
           },
@@ -2659,7 +2659,7 @@
             "label": "commonBlacklist",
             "offset": 0,
             "slot": "304",
-            "type": "t_contract(ICommonBlacklist)9846",
+            "type": "t_contract(ICommonBlacklist)10847",
             "contract": "LEE",
             "src": "contracts/LEE.sol:14"
           }
@@ -2689,7 +2689,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(ICommonBlacklist)9846": {
+          "t_contract(ICommonBlacklist)10847": {
             "label": "contract ICommonBlacklist",
             "numberOfBytes": "20"
           },
@@ -2697,7 +2697,7 @@
             "label": "mapping(address => mapping(address => uint256))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(Counter)3691_storage)": {
+          "t_mapping(t_address,t_struct(Counter)4104_storage)": {
             "label": "mapping(address => struct CountersUpgradeable.Counter)",
             "numberOfBytes": "32"
           },
@@ -2709,7 +2709,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Counter)3691_storage": {
+          "t_struct(Counter)4104_storage": {
             "label": "struct CountersUpgradeable.Counter",
             "members": [
               {
@@ -2734,7 +2734,7 @@
     },
     "f2bc9fd0c98e0daac6584f28a3c11fb8b39934ad97bd0fac8c199e549b6c89c1": {
       "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-      "txHash": "0xff1d8a8a3078fdebc1132eaf28c78b336a6ac9a2a40491c49d8cd4b805a3772e",
+      "txHash": "0xd54a23e7a75859e3a20cec282c8a31d7a9f0bff0af54e2ad613c5019e1662390",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -2887,7 +2887,7 @@
             "label": "commonBlacklist",
             "offset": 0,
             "slot": "251",
-            "type": "t_contract(ICommonBlacklist)9846",
+            "type": "t_contract(ICommonBlacklist)10847",
             "contract": "NFT",
             "src": "contracts/NFT.sol:17"
           },
@@ -2969,7 +2969,7 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_contract(ICommonBlacklist)9846": {
+          "t_contract(ICommonBlacklist)10847": {
             "label": "contract ICommonBlacklist",
             "numberOfBytes": "20"
           },
@@ -3220,9 +3220,9 @@
         }
       }
     },
-    "c0a7f9cbdbf32b60794bc7110aab85b80ae975949319834f4420eb04519421cc": {
+    "3ff64a427fbb68fe5690e219b9b038617b181eba7d95c65504551b86866c10ed": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "txHash": "0xa6eef480de0e35d0492a577ad458222cb8458b468091a6a39408a6aa013b5bc5",
+      "txHash": "0xaf7bee8a320c6261cd891d70bb488b3fb64a747e1b5297a17b70b3c84b3ecf56",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -3311,7 +3311,7 @@
             "label": "token_limits",
             "offset": 0,
             "slot": "203",
-            "type": "t_mapping(t_address,t_struct(TokenLimit)1787_storage)",
+            "type": "t_mapping(t_address,t_struct(TokenLimit)1845_storage)",
             "contract": "CommonBlacklist",
             "src": "contracts/CommonBlacklist.sol:25"
           },
@@ -3338,6 +3338,14 @@
             "type": "t_mapping(t_address,t_bool)",
             "contract": "CommonBlacklist",
             "src": "contracts/CommonBlacklist.sol:41"
+          },
+          {
+            "label": "contracts_exclusion_list",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:45"
           }
         ],
         "types": {
@@ -3377,7 +3385,7 @@
             "label": "mapping(address => mapping(uint256 => uint256))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(TokenLimit)1787_storage)": {
+          "t_mapping(t_address,t_struct(TokenLimit)1845_storage)": {
             "label": "mapping(address => struct ICommonBlacklist.TokenLimit)",
             "numberOfBytes": "32"
           },
@@ -3407,7 +3415,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(TokenLimit)1787_storage": {
+          "t_struct(TokenLimit)1845_storage": {
             "label": "struct ICommonBlacklist.TokenLimit",
             "members": [
               {
