@@ -108,22 +108,30 @@ interface ICommonBlacklist {
 
     /**
      * @notice Getting information if user blacklisted
-     * @param _user: user address
+     * @param _sender: sender address
+     * @param _from: from address
+     * @param _to: to address
      *
      */
     function userIsBlacklisted(
-        address _user
+        address _sender,
+        address _from,
+        address _to
     ) external view returns(bool);
 
     /**
      * @notice Getting information if user in internal blacklist
      * @param _token: address of token contract
-     * @param _user: user address
+     * @param _sender: sender address
+     * @param _from: from address
+     * @param _to: to address
      *
      */
     function userIsInternalBlacklisted(
         address _token,
-        address _user
+        address _sender,
+        address _from,
+        address _to
     ) external view returns(bool);
 
     /**

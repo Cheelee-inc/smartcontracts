@@ -66,6 +66,8 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         __AccessControl_init();
         __Ownable_init();
 
+        contracts_exclusion_list[address(0)] = true;
+
         transferOwnership(GNOSIS);
         _setupRole(DEFAULT_ADMIN_ROLE, GNOSIS);
     }
@@ -81,6 +83,8 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address[] memory _users
     ) external onlyBlacklistOperator {
         for (uint i; i < _users.length; i++) {
+            require(_users[i] != address(0), "Cannot be zero address");
+
             blacklist[_users[i]] = true;
         }
     }
@@ -113,6 +117,8 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address[] memory _users
     ) external onlyBlacklistOperator {
         for (uint i; i < _users.length; i++) {
+            require(_users[i] != address(0), "Cannot be zero address");
+
             internal_blacklist[_token][_users[i]] = true;
         }
     }
@@ -218,26 +224,72 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
 
     /**
      * @notice Getting information if user blacklisted
-     * @param _user: user address
+     * @param _sender: sender address
+     * @param _from: from address
+     * @param _to: to address
      *
      */
     function userIsBlacklisted(
-        address _user
+        address _sender,
+        address _from,
+        address _to
     ) external view returns(bool) {
-        return blacklist[_user];
+        return blacklist[_sender] || blacklist[_from] || blacklist[_to];
     }
 
     /**
      * @notice Getting information if user in internal blacklist
      * @param _token: address of token contract
-     * @param _user: user address
+     * @param _sender: sender address
+     * @param _from: from address
+     * @param _to: to address
      *
      */
     function userIsInternalBlacklisted(
         address _token,
-        address _user
+        address _sender,
+        address _from,
+        address _to
     ) external view returns(bool) {
-        return internal_blacklist[_token][_user];
+        return internal_blacklist[_token][_sender] || internal_blacklist[_token][_from] || internal_blacklist[_token][_to];
+    }
+
+    /**
+     * @notice Getting information about the presence of users from the list in the blacklist
+     * @param _token: address of token contract
+     * @param _users: list of user address
+     *
+     */
+    function usersFromListIsBlacklisted(
+        address _token,
+        address[] memory _users
+    ) external onlyBlacklistOperator view returns(address[] memory) {
+        uint256 length = 0;
+
+        for (uint i; i < _users.length; i++) {
+            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internal_blacklist[_token][_users[i]] || blacklist[_users[i]];
+            if (hasMatch) {
+                length += 1;
+            }
+        }
+
+        address[] memory list = new address[](length);
+
+        if (length == 0) {
+            return list;
+        }
+
+        uint256 listCounter = 0;
+
+        for (uint i; i < _users.length; i++) {
+            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internal_blacklist[_token][_users[i]] || blacklist[_users[i]];
+            if (hasMatch) {
+                list[listCounter] = _users[i];
+                listCounter++;
+            }
+        }
+
+        return list;
     }
 
     /**

@@ -12,7 +12,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 10**9 * 10**18;
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
     uint256[49] __gap;
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x4B994AD16E588C7aF227044c2268Cd27324e254D);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -82,12 +82,8 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
 
-        require(!commonBlacklist.userIsBlacklisted(from), "CHEEL: Spender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "CHEEL: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "CHEEL: Sender in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), from), "CHEEL: Spender in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "CHEEL: Recipient in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender()), "CHEEL: Sender in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "CHEEL: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "CHEEL: Blocked by internal blacklist");
         require(commonBlacklist.dayLimitIsReached(address(this), from, amount), "CHEEL: Spender has reached the day limit");
         require(commonBlacklist.monthLimitIsReached(address(this), from, amount), "CHEEL: Spender has reached the month limit");
     }
@@ -111,10 +107,8 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
 
-        require(!commonBlacklist.userIsBlacklisted(owner), "CHEEL: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(spender), "CHEEL: Spender in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner), "CHEEL: Owner in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), spender), "CHEEL: Spender in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "CHEEL: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "CHEEL: Blocked by internal blacklist");
 
         super._approve(owner, spender, amount);
     }

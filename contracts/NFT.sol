@@ -13,7 +13,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x4B994AD16E588C7aF227044c2268Cd27324e254D);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x70e0bA845a1A0F2DA3359C97E0285013525FFC49);
     string public NAME;
     string public SYMBOL;
     string private baseURI;
@@ -171,12 +171,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address to,
         uint256 tokenId
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(from), "NFT: Sender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "NFT: Sender in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), from), "NFT: Sender in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "NFT: Recipient in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender()), "NFT: Sender in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "NFT: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "NFT: Blocked by internal blacklist");
         require(commonBlacklist.dayLimitIsReached(address(this), from, 1), "NFT: Spender has reached the day limit");
         require(commonBlacklist.monthLimitIsReached(address(this), from, 1), "NFT: Spender has reached the month limit");
     }
@@ -187,8 +183,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
      * Emits an {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(to), "NFT: Recipient in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "NFT: Recipient in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(address(0), address(0), to), "NFT: Recipient in global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), address(0), address(0), to), "NFT: Recipient in internal blacklist");
 
         super._approve(to, tokenId);
     }
@@ -203,10 +199,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address operator,
         bool approved
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(owner), "NFT: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(operator), "NFT: Operator in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner), "NFT: Owner in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), operator), "NFT: Operator in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(owner, operator, address(0)), "NFT: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, operator, address(0)), "NFT: Blocked by internal blacklist");
 
         super._setApprovalForAll(owner, operator, approved);
     }

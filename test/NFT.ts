@@ -1,6 +1,7 @@
 import {assert, expect} from "chai";
 import {
   expectRevert,
+  constants,
   // @ts-ignore
 } from "@openzeppelin/test-helpers";
 import { parseEther } from "ethers/lib/utils";
@@ -352,9 +353,9 @@ contract(NFTGlassesConfig.contractName, () => {
         [varybadguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), true);
-      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
 
       await expectRevert(
         nftSaleGlasses.connect(varybadguy).purchase(
@@ -365,7 +366,7 @@ contract(NFTGlassesConfig.contractName, () => {
             value: price
           }
         ),
-        "NFT: Recipient in global blacklist"
+        "NFT: Blocked by global blacklist"
       );
 
       await commonBlacklist.connect(moderator).removeUsersFromBlacklist(
@@ -402,8 +403,8 @@ contract(NFTGlassesConfig.contractName, () => {
         [badguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, badguy.address), true);
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, deployer.address), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
 
       await expectRevert(
         nftSaleGlasses.connect(badguy).purchase(
@@ -414,7 +415,7 @@ contract(NFTGlassesConfig.contractName, () => {
             value: price
           }
         ),
-        "NFT: Recipient in internal blacklist"
+        "NFT: Blocked by internal blacklist"
       );
 
       await commonBlacklist.connect(moderator).removeUsersFromInternalBlacklist(
@@ -422,7 +423,7 @@ contract(NFTGlassesConfig.contractName, () => {
         [badguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, badguy.address), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(nftGlasses.address, badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
 
       await nftSaleGlasses.connect(badguy).purchase(
         5,
@@ -568,7 +569,7 @@ contract(NFTGlassesConfig.contractName, () => {
           timestamp,
           signature2
         ),
-        "NFT: Recipient in internal blacklist"
+        "NFT: Blocked by internal blacklist"
       );
 
       await expectRevert(
@@ -577,7 +578,7 @@ contract(NFTGlassesConfig.contractName, () => {
           timestamp,
           signature3
         ),
-        "NFT: Recipient in global blacklist"
+        "NFT: Blocked by global blacklist"
       );
     });
 
@@ -708,7 +709,7 @@ contract(NFTGlassesConfig.contractName, () => {
           1,
           signature2
         ),
-        "NFT: Recipient in internal blacklist"
+        "NFT: Blocked by internal blacklist"
       );
 
       await expectRevert(
@@ -720,7 +721,7 @@ contract(NFTGlassesConfig.contractName, () => {
           1,
           signature3
         ),
-        "NFT: Recipient in global blacklist"
+        "NFT: Blocked by global blacklist"
       );
     });
 
@@ -742,7 +743,7 @@ contract(NFTGlassesConfig.contractName, () => {
           treasury.address,
           4
         ),
-        "NFT: Sender in global blacklist"
+        "NFT: Blocked by global blacklist"
       );
 
       await expectRevert(
@@ -751,7 +752,7 @@ contract(NFTGlassesConfig.contractName, () => {
           treasury.address,
           5
         ),
-        "NFT: Sender in internal blacklist"
+        "NFT: Blocked by internal blacklist"
       );
     });
 
@@ -938,6 +939,54 @@ contract(NFTGlassesConfig.contractName, () => {
           signature3
         ),
         "Too many transfers"
+      );
+    });
+  });
+
+  describe("Getting information about the presence of users from the list in the blacklist", async () => {
+    it("Only internal blacklisted user", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        nftGlasses.address,
+        [deployer.address, receiver.address, badguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [badguy.address].toString()
+      );
+    });
+
+    it("Internal and global blacklisted user", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        nftGlasses.address,
+        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [badguy.address, varybadguy.address].toString()
+      );
+    });
+
+    it("internal user is global blacklisted", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        constants.ZERO_ADDRESS,
+        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [varybadguy.address].toString()
+      );
+    });
+
+    it("Forbidden for colling from other users", async function () {
+      await expectRevert(
+        commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
+          constants.ZERO_ADDRESS,
+          [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        ),
+        "Not a blacklist operator"
       );
     });
   });
@@ -1278,7 +1327,7 @@ contract(NFTGlassesConfig.contractName, () => {
           varybadguy.address,
           parseEther("1000")
         ),
-        "CHEEL: Recipient in global blacklist"
+        "CHEEL: Blocked by global blacklist"
       );
 
       await expectRevert(
@@ -1290,7 +1339,7 @@ contract(NFTGlassesConfig.contractName, () => {
           1,
           signature
         ),
-        "CHEEL: Recipient in global blacklist"
+        "CHEEL: Blocked by global blacklist"
       );
     });
 

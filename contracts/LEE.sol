@@ -11,7 +11,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
     uint256[49] __gap;
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x4B994AD16E588C7aF227044c2268Cd27324e254D);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -79,12 +79,8 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(from), "LEE: Spender in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(to), "LEE: Recipient in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(_msgSender()), "LEE: Sender in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), from), "LEE: Spender in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), to), "LEE: Recipient in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender()), "LEE: Sender in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
         require(commonBlacklist.dayLimitIsReached(address(this), from, amount), "LEE: Spender has reached the day limit");
         require(commonBlacklist.monthLimitIsReached(address(this), from, amount), "LEE: Spender has reached the month limit");
     }
@@ -107,10 +103,8 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(owner), "LEE: Owner in global blacklist");
-        require(!commonBlacklist.userIsBlacklisted(spender), "LEE: Spender in global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner), "LEE: Owner in internal blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), spender), "LEE: Spender in internal blacklist");
+        require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "LEE: Blocked by global blacklist");
+        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "LEE: Blocked by internal blacklist");
 
         super._approve(owner, spender, amount);
     }

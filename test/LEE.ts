@@ -1,6 +1,7 @@
 import {assert, expect} from "chai";
 import {
   expectRevert,
+  constants
   // @ts-ignore
 } from "@openzeppelin/test-helpers";
 import { parseEther } from "ethers/lib/utils";
@@ -170,9 +171,9 @@ contract(LEEConfig.contractName, () => {
         [varybadguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), true);
-      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("Blocking transactions for users in common blacklist", async function () {
@@ -181,7 +182,7 @@ contract(LEEConfig.contractName, () => {
           deployer.address,
           parseEther("1000000")
         ),
-        "LEE: Spender in global blacklist"
+        "LEE: Blocked by global blacklist"
       );
 
       await expectRevert(
@@ -209,7 +210,7 @@ contract(LEEConfig.contractName, () => {
         [varybadguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("UnBlocking transactions for users in common blacklist and blocking again", async function () {
@@ -255,10 +256,10 @@ contract(LEEConfig.contractName, () => {
         [badguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address), true);
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, deployer.address), false);
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, varybadguy.address), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
     });
 
     it("Blocking transactions for users in internal blacklist", async function () {
@@ -267,7 +268,7 @@ contract(LEEConfig.contractName, () => {
           deployer.address,
           parseEther("1000000")
         ),
-        "LEE: Spender in internal blacklist"
+        "LEE: Blocked by internal blacklist"
       );
 
       await expectRevert(
@@ -275,7 +276,7 @@ contract(LEEConfig.contractName, () => {
           badguy.address,
           parseEther("1000000")
         ),
-        "LEE: Recipient in internal blacklist"
+        "LEE: Blocked by internal blacklist"
       );
 
       await expectRevert(
@@ -315,7 +316,7 @@ contract(LEEConfig.contractName, () => {
         [badguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address), false);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("UnBlocking transactions for users in internal blacklist and blocking again", async function () {
@@ -352,6 +353,54 @@ contract(LEEConfig.contractName, () => {
       await commonBlacklist.connect(moderator).addUsersToInternalBlacklist(
         lee.address,
         [badguy.address]
+      );
+    });
+  });
+
+  describe("Getting information about the presence of users from the list in the blacklist", async () => {
+    it("Only internal blacklisted user", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        lee.address,
+        [deployer.address, receiver.address, badguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [badguy.address].toString()
+      );
+    });
+
+    it("Internal and global blacklisted user", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        lee.address,
+        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [badguy.address, varybadguy.address].toString()
+      );
+    });
+
+    it("internal user is global blacklisted", async function () {
+      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+        constants.ZERO_ADDRESS,
+        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+      );
+
+      assert.equal(
+        result.toString(),
+        [varybadguy.address].toString()
+      );
+    });
+
+    it("Forbidden for colling from other users", async function () {
+      await expectRevert(
+        commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
+          constants.ZERO_ADDRESS,
+          [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        ),
+        "Not a blacklist operator"
       );
     });
   });
