@@ -135,6 +135,17 @@ interface ICommonBlacklist {
     ) external view returns(bool);
 
     /**
+     * @notice Getting information about the presence of users from the list in the blacklist
+     * @param _token: address of token contract
+     * @param _users: list of user address
+     *
+     */
+    function usersFromListIsBlacklisted(
+        address _token,
+        address[] memory _users
+    ) external view returns(address[] memory);
+
+    /**
      * @notice Checking the user for the limits used per day
      * @param _token: address of token contract
      * @param _user: user address
