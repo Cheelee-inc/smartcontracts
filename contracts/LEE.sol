@@ -11,7 +11,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
     uint256[49] __gap;
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x6EE6F05425DCF27DDFab9603c4Fb93ea9B3d4cD5);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
