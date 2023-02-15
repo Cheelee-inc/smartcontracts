@@ -7,9 +7,9 @@ async function main() {
 
   // We get the contract to deploy
   const NewNFTGlassesContract = await ethers.getContractFactory(NFTGlassesConfig.contractName);
-  const newNFTGlassesContract = await upgrades.upgradeProxy(NFTGlassesConfig.proxyContractAddress, NewNFTGlassesContract) as NFTContractType;
+  await upgrades.upgradeProxy(NFTGlassesConfig.proxyContractAddress, NewNFTGlassesContract) as NFTContractType;
 
-  console.log('NFT Glasses Contract is upgraded:', newNFTGlassesContract);
+  console.log('NFT Glasses Contract is upgraded');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

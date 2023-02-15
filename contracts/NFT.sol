@@ -13,7 +13,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x6EE6F05425DCF27DDFab9603c4Fb93ea9B3d4cD5);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d);
     string public NAME;
     string public SYMBOL;
     string private baseURI;
@@ -21,7 +21,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
-    uint256[49] __gap;
+    uint256[50] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

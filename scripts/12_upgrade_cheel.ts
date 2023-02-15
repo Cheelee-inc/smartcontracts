@@ -7,9 +7,9 @@ async function main() {
 
   // We get the contract to deploy
   const NewCHEELContract = await ethers.getContractFactory(CHEELConfig.contractName);
-  const newCHEELContract = await upgrades.upgradeProxy(CHEELConfig.proxyContractAddress, NewCHEELContract) as CHEELContractType;
+  await upgrades.upgradeProxy(CHEELConfig.proxyContractAddress, NewCHEELContract) as CHEELContractType;
 
-  console.log('CHEEL Contract is upgraded:', newCHEELContract);
+  console.log('CHEEL Contract is upgraded');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

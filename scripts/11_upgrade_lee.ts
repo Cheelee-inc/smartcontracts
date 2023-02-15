@@ -7,9 +7,9 @@ async function main() {
 
   // We get the contract to deploy
   const NewLEEContract = await ethers.getContractFactory(LEEConfig.contractName);
-  const newLEEContract = await upgrades.upgradeProxy(LEEConfig.proxyContractAddress, NewLEEContract) as LEEContractType;
+  await upgrades.upgradeProxy(LEEConfig.proxyContractAddress, NewLEEContract) as LEEContractType;
 
-  console.log('LEE Contract is upgraded:', newLEEContract);
+  console.log('LEE Contract is upgraded');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
