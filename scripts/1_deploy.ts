@@ -1,12 +1,12 @@
 import { ethers, upgrades } from "hardhat";
 import {
   CHEELContractType,
-  CommonBlacklistContractType,
+  // CommonBlacklistContractType,
   LEEContractType,
   NFTContractType
 } from "../lib/ContractProvider";
 import {
-  CommonBlacklistConfig,
+  // CommonBlacklistConfig,
   LEEConfig,
   CHEELConfig,
   NFTCasesConfig,
@@ -21,20 +21,20 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  console.log('Deploying blacklist contract...');
-
-  // We get the contract to deploy
-  const CommonBlacklistContract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
-  const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [], { initializer: 'initialize' }) as CommonBlacklistContractType;
-
-  await commonBlacklistProxy.deployed();
-
-  const commonBlacklistContract = await upgrades.erc1967.getImplementationAddress(commonBlacklistProxy.address);
-  const commonBlacklistAdmin = await upgrades.erc1967.getAdminAddress(commonBlacklistProxy.address);
-
-  console.log('Contract blacklist deployed to:', commonBlacklistContract);
-  console.log('Proxy blacklist contract deployed to:', commonBlacklistProxy.address);
-  console.log('Admin blacklist contract deployed to:', commonBlacklistAdmin);
+  // console.log('Deploying blacklist contract...');
+  //
+  // // We get the contract to deploy
+  // const CommonBlacklistContract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
+  // const commonBlacklistProxy = await upgrades.deployProxy(CommonBlacklistContract, [], { initializer: 'initialize' }) as CommonBlacklistContractType;
+  //
+  // await commonBlacklistProxy.deployed();
+  //
+  // const commonBlacklistContract = await upgrades.erc1967.getImplementationAddress(commonBlacklistProxy.address);
+  // const commonBlacklistAdmin = await upgrades.erc1967.getAdminAddress(commonBlacklistProxy.address);
+  //
+  // console.log('Contract blacklist deployed to:', commonBlacklistContract);
+  // console.log('Proxy blacklist contract deployed to:', commonBlacklistProxy.address);
+  // console.log('Admin blacklist contract deployed to:', commonBlacklistAdmin);
 
   console.log('Deploying LEE contract...');
 

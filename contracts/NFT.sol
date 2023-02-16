@@ -13,7 +13,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d);
+    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x7C1E145346Cb97BeeD131ce541d0497Bada9f1DF);
     string public NAME;
     string public SYMBOL;
     string private baseURI;

@@ -3,6 +3,7 @@ import {
   LEE as LEEType,
   CHEEL as CHEELType,
   NFT as NFTType,
+  Treasury as TreasuryType,
 } from '../typechain/index';
 
 import { ethers } from 'hardhat';
@@ -26,3 +27,4 @@ export type CommonBlacklistContractType = CommonBlacklistType;
 export type LEEContractType = LEEType;
 export type CHEELContractType = CHEELType;
 export type NFTContractType = NFTType;
+export type TreasuryContractType = TreasuryType;
