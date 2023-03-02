@@ -9,7 +9,7 @@ export const CommonBlacklistConfig: CommonBlacklistInterface = {
   mainnet: Networks.bscMainnet,
   contractName: 'CommonBlacklist',
   multiSigAddress: '0x126481E4E79cBc8b4199911342861F7535e76EE7',
-  contractAddress: '0xCB367893413E4c961C8220b2e3Ce9174A32959C5',
+  contractAddress: '0xe95C8Bb4Da1561B3aC9c5719716A11055c2655c3',
   proxyContractAddress: '0x7C1E145346Cb97BeeD131ce541d0497Bada9f1DF',
   adminContractAddress: '0x1cf4dF9dA9062Fd7c441a9B77c6bcF45596492bB',
 };

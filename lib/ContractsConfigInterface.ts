@@ -57,7 +57,7 @@ export interface NFTSaleConfigInterface {
   contractName: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
   adminContractAddress: string|null;
 }
 
@@ -67,7 +67,7 @@ export interface TreasuryConfigInterface {
   contractName: string;
   multiSigAddress: string;
   contractAddress: string|null;
-  proxyContractAddress: string|null;
+  proxyContractAddress: string;
   adminContractAddress: string|null;
 }
 

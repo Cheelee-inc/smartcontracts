@@ -945,7 +945,7 @@ contract(NFTGlassesConfig.contractName, () => {
 
   describe("Getting information about the presence of users from the list in the blacklist", async () => {
     it("Only internal blacklisted user", async function () {
-      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+      result = await commonBlacklist.connect(receiver).usersFromListIsBlacklisted(
         nftGlasses.address,
         [deployer.address, receiver.address, badguy.address]
       );
@@ -957,7 +957,7 @@ contract(NFTGlassesConfig.contractName, () => {
     });
 
     it("Internal and global blacklisted user", async function () {
-      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+      result = await commonBlacklist.connect(varybadguy).usersFromListIsBlacklisted(
         nftGlasses.address,
         [deployer.address, receiver.address, badguy.address, varybadguy.address]
       );
@@ -969,7 +969,7 @@ contract(NFTGlassesConfig.contractName, () => {
     });
 
     it("internal user is global blacklisted", async function () {
-      result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
+      result = await commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
         constants.ZERO_ADDRESS,
         [deployer.address, receiver.address, badguy.address, varybadguy.address]
       );
@@ -977,16 +977,6 @@ contract(NFTGlassesConfig.contractName, () => {
       assert.equal(
         result.toString(),
         [varybadguy.address].toString()
-      );
-    });
-
-    it("Forbidden for colling from other users", async function () {
-      await expectRevert(
-        commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
-          constants.ZERO_ADDRESS,
-          [deployer.address, receiver.address, badguy.address, varybadguy.address]
-        ),
-        "Not a blacklist operator"
       );
     });
   });

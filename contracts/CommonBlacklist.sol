@@ -263,7 +263,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function usersFromListIsBlacklisted(
         address _token,
         address[] memory _users
-    ) external onlyBlacklistOperator view returns(address[] memory) {
+    ) external view returns(address[] memory) {
         uint256 length = 0;
 
         for (uint i; i < _users.length; i++) {
