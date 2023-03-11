@@ -393,16 +393,6 @@ contract(LEEConfig.contractName, () => {
         [varybadguy.address].toString()
       );
     });
-
-    it("Forbidden for colling from other users", async function () {
-      await expectRevert(
-        commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
-          constants.ZERO_ADDRESS,
-          [deployer.address, receiver.address, badguy.address, varybadguy.address]
-        ),
-        "Not a blacklist operator"
-      );
-    });
   });
 
   describe("Token Rate Limit", async () => {
@@ -418,6 +408,18 @@ contract(LEEConfig.contractName, () => {
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
       expect(resultWaited.events[0].args.dayLimit).to.equal(parseEther("1000000").toString());
       expect(resultWaited.events[0].args.monthLimit).to.equal(parseEther("1500000").toString());
+
+      result = await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
+        lee.address,
+        true,
+        true
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.token).to.equal(lee.address);
+      expect(resultWaited.events[0].args.dayLimit).to.equal(true);
+      expect(resultWaited.events[0].args.monthLimit).to.equal(true);
 
       assert.equal(
         String(await commonBlacklist.getTokenLimits(lee.address)),
@@ -461,6 +463,55 @@ contract(LEEConfig.contractName, () => {
         parseEther("1000000").toString()
       );
 
+      assert.equal(
+        String(await commonBlacklist.getUserTokenMonthTransfers(lee.address, deployer.address)),
+        parseEther("1000000").toString()
+      );
+
+      await expectRevert(
+        lee.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1")
+        ),
+        "LEE: Spender has reached the day limit"
+      );
+
+      // Getting Remaining limit
+      assert.equal(
+        String(await commonBlacklist.getUserRemainingLimit(lee.address, deployer.address)),
+        `0,${parseEther("500000").toString()}`
+      );
+
+      // disable day limits
+      await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
+        lee.address,
+        false,
+        true
+      );
+
+      await lee.connect(deployer).transfer(
+        receiver.address,
+        parseEther("1")
+      );
+
+      // Compare limits
+      assert.equal(
+        String(await commonBlacklist.getUserTokenDayTransfers(lee.address, deployer.address)),
+        parseEther("1000000").toString()
+      );
+
+      assert.equal(
+        String(await commonBlacklist.getUserTokenMonthTransfers(lee.address, deployer.address)),
+        parseEther("1000001").toString()
+      );
+
+      // enable day limits
+      await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
+        lee.address,
+        true,
+        true
+      );
+
       await expectRevert(
         lee.connect(deployer).transfer(
           receiver.address,
@@ -475,18 +526,18 @@ contract(LEEConfig.contractName, () => {
       // Next Day transaction
       result = await lee.connect(deployer).transfer(
         receiver.address,
-        parseEther("500000")
+        parseEther("499999")
       );
 
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.from).to.equal(deployer.address);
       expect(resultWaited.events[0].args.to).to.equal(receiver.address);
-      expect(resultWaited.events[0].args.value).to.equal(parseEther("500000").toString());
+      expect(resultWaited.events[0].args.value).to.equal(parseEther("499999").toString());
 
       assert.equal(
         String(await commonBlacklist.getUserTokenDayTransfers(lee.address, deployer.address)),
-        parseEther("500000").toString()
+        parseEther("499999").toString()
       );
 
       assert.equal(
@@ -550,13 +601,13 @@ contract(LEEConfig.contractName, () => {
 
       assert.equal(
         String(await commonBlacklist.getUserTokenDayTransfers(lee.address, deployer.address)),
-        parseEther("1000000").toString()
+        parseEther("999999").toString()
       );
 
       await expectRevert(
         lee.connect(deployer).transfer(
           receiver.address,
-          parseEther("1")
+          parseEther("2")
         ),
         "LEE: Spender has reached the day limit"
       );

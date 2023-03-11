@@ -995,6 +995,18 @@ contract(NFTGlassesConfig.contractName, () => {
       expect(resultWaited.events[0].args.dayLimit).to.equal("2");
       expect(resultWaited.events[0].args.monthLimit).to.equal("3");
 
+      result = await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
+        nftGlasses.address,
+        true,
+        true
+      );
+
+      resultWaited = await result.wait();
+
+      expect(resultWaited.events[0].args.token).to.equal(nftGlasses.address);
+      expect(resultWaited.events[0].args.dayLimit).to.equal(true);
+      expect(resultWaited.events[0].args.monthLimit).to.equal(true);
+
       assert.equal(
         String(await commonBlacklist.getTokenLimits(nftGlasses.address)),
         `2,3`,

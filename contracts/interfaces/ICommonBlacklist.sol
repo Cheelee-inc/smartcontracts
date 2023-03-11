@@ -152,7 +152,7 @@ interface ICommonBlacklist {
      * @param _amount: amount of tokens
      *
      */
-    function dayLimitIsReached(
+    function dayLimitAllows(
         address _token,
         address _user,
         uint256 _amount
@@ -165,7 +165,7 @@ interface ICommonBlacklist {
      * @param _amount: amount of tokens
      *
      */
-    function monthLimitIsReached(
+    function monthLimitAllows(
         address _token,
         address _user,
         uint256 _amount
@@ -201,4 +201,15 @@ interface ICommonBlacklist {
         address _token,
         address _user
     ) external view returns(uint256);
+
+    /**
+     * @notice Getting remaining limit for user
+     * @param _token: address of token contract
+     * @param _user: user address
+     *
+     */
+    function getUserRemainingLimit(
+        address _token,
+        address _user
+    ) external view returns(uint256 dayRemaining, uint256 monthRemaining);
 }

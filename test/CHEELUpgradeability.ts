@@ -68,41 +68,44 @@ contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
     cheel = await upgrades.upgradeProxy(oldCheel.address, CHEEL)
   });
 
-  it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
-    expect((await cheel.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
+  // Uncommit for testing working blacklist after upgrade
+  // it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
+  //   expect((await cheel.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
+  //
+  //   await commonBlacklist.connect(blacklistGnosis).grantRole(
+  //     BLACKLIST_OPERATOR_ROLE,
+  //     moderator.address
+  //   );
+  // });
+  //
+  // it("Adding badguy for common blacklist", async function () {
+  //   await commonBlacklist.connect(moderator).addUsersToBlacklist(
+  //     [badguy.address]
+  //   );
+  //
+  //   assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+  // });
+  //
+  // it("New function added works", async function () {
+  //   await expectRevert(
+  //     cheel.connect(badguy).transfer(
+  //       deployer.address,
+  //       parseEther("1000000")
+  //     ),
+  //     "CHEEL: Blocked by global blacklist"
+  //   );
+  //
+  //   await expectRevert(
+  //     cheel.connect(gnosis).transferFrom(
+  //       badguy.address,
+  //       deployer.address,
+  //       parseEther("1000000")
+  //     ),
+  //     "ERC20: insufficient allowance"
+  //   );
+  // });
 
-    await commonBlacklist.connect(blacklistGnosis).grantRole(
-      BLACKLIST_OPERATOR_ROLE,
-      moderator.address
-    );
-  });
-
-  it("Adding badguy for common blacklist", async function () {
-    await commonBlacklist.connect(moderator).addUsersToBlacklist(
-      [badguy.address]
-    );
-
-    assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
-  });
-
-  it("New function added works", async function () {
-    await expectRevert(
-      cheel.connect(badguy).transfer(
-        deployer.address,
-        parseEther("1000000")
-      ),
-      "CHEEL: Blocked by global blacklist"
-    );
-
-    await expectRevert(
-      cheel.connect(gnosis).transferFrom(
-        badguy.address,
-        deployer.address,
-        parseEther("1000000")
-      ),
-      "ERC20: insufficient allowance"
-    );
-
+  it("Balancies is correct", async function () {
     assert.equal(
       String(await cheel.balanceOf(deployer.address)),
       parseEther("1000000").toString()

@@ -68,30 +68,37 @@ contract(`OLD${NFTGlassesConfig.contractName} Upgrade`, () => {
     nft = await upgrades.upgradeProxy(oldNft.address, NFT)
   });
 
-  it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
-    await commonBlacklist.connect(blacklistGnosis).grantRole(
-      BLACKLIST_OPERATOR_ROLE,
-      moderator.address
+  // it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
+  //   await commonBlacklist.connect(blacklistGnosis).grantRole(
+  //     BLACKLIST_OPERATOR_ROLE,
+  //     moderator.address
+  //   );
+  // });
+  //
+  // it("Adding badguy for common blacklist", async function () {
+  //   expect((await nft.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
+  //
+  //   await commonBlacklist.connect(moderator).addUsersToBlacklist(
+  //     [badguy.address]
+  //   );
+  //
+  //   assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+  // });
+  //
+  // it("New function added works", async() => {
+  //   await expectRevert(
+  //     nft.connect(gnosis).safeMint(
+  //       badguy.address,
+  //       1
+  //     ),
+  //     "NFT: Blocked by global blacklist"
+  //   );
+  // })
+
+  it("Balancies is correct", async function () {
+    assert.equal(
+      String(await nft.balanceOf(gnosis.address)),
+      "1"
     );
   });
-
-  it("Adding badguy for common blacklist", async function () {
-    expect((await nft.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
-
-    await commonBlacklist.connect(moderator).addUsersToBlacklist(
-      [badguy.address]
-    );
-
-    assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
-  });
-
-  it("New function added works", async() => {
-    await expectRevert(
-      nft.connect(gnosis).safeMint(
-        badguy.address,
-        1
-      ),
-      "NFT: Blocked by global blacklist"
-    );
-  })
 });

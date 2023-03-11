@@ -173,8 +173,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     ) internal virtual override {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "NFT: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "NFT: Blocked by internal blacklist");
-        require(commonBlacklist.dayLimitIsReached(address(this), from, 1), "NFT: Spender has reached the day limit");
-        require(commonBlacklist.monthLimitIsReached(address(this), from, 1), "NFT: Spender has reached the month limit");
+        require(commonBlacklist.dayLimitAllows(address(this), from, 1), "NFT: Spender has reached the day limit");
+        require(commonBlacklist.monthLimitAllows(address(this), from, 1), "NFT: Spender has reached the month limit");
     }
 
     /**
