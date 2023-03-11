@@ -84,8 +84,16 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
 
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "CHEEL: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "CHEEL: Blocked by internal blacklist");
-        require(commonBlacklist.dayLimitAllows(address(this), from, amount), "CHEEL: Spender has reached the day limit");
-        require(commonBlacklist.monthLimitAllows(address(this), from, amount), "CHEEL: Spender has reached the month limit");
+
+        (bool dayInComeLimitAllowed,
+        bool monthInComeLimitAllowed,
+        bool dayOutComeLimitAllowed,
+        bool monthOutComeLimitAllowed) = commonBlacklist.limitAllows(address(this), from, to, amount);
+
+        require(dayOutComeLimitAllowed, "CHEEL: Spender has reached the day limit");
+        require(monthOutComeLimitAllowed, "CHEEL: Spender has reached the month limit");
+        require(dayInComeLimitAllowed, "CHEEL: Recipient has reached the day limit");
+        require(monthInComeLimitAllowed, "CHEEL: Recipient has reached the month limit");
     }
 
     /**
@@ -132,6 +140,6 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        commonBlacklist.saveUserTransfers(from, amount);
+        commonBlacklist.saveUserTransfers(from, to, amount);
     }
 }

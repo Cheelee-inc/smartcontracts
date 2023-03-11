@@ -21,36 +21,26 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
 
 
     // token
-    // limits struct { day, month }
+    // limits struct { inComeDay, inComeMonth, outComeDay, outComeMonth }
     mapping(address => TokenLimit) public token_limits;
 
     // token
     // user
-    // day
-    // amount
-    mapping(address => mapping (address => mapping (uint256 => uint256))) public token_day_transfers;
+    // date
+    // transfers struct { inCome, outCome }
+    mapping(address => mapping (address => mapping (uint256 => TokenTransfers))) public token_transfers;
 
     // token
-    // user
-    // month
-    // amount
-    mapping(address => mapping (address => mapping (uint256 => uint256))) public token_month_transfers;
-
-    // token
-    // has day limit
-    mapping(address => bool) public tokens_with_day_limits;
-
-    // token
-    // has month limit
-    mapping(address => bool) public tokens_with_month_limits;
+    // has limit struct { hasInComeDayLimit, hasInComeMonthLimit, hasOutComeDayLimit, hasOutComeMonthLimit }
+    mapping(address => TokenLimitDisabling) public tokens_with_limits;
 
     // contract
     // has exception
     mapping(address => bool) public contracts_exclusion_list;
 
     // Events
-    event SetTokenLimit(address token, uint256 dayLimit, uint256 monthLimit);
-    event SetTokenLimitStatus(address token, bool dayLimit, bool monthLimit);
+    event SetTokenLimit(address token, uint256 inComeDayLimit, uint256 inComeMonthLimit, uint256 outComeDayLimit, uint256 outComeMonthLimit);
+    event SetTokenLimitStatus(address token, bool hasInComeDayLimit, bool hasInComeMonthLimit, bool hasOutComeDayLimit, bool hasOutComeMonthLimit);
     event AddToExclusionList(address token);
     event RemoveFromExclusionList(address token);
 
@@ -220,55 +210,70 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
      */
     function getCurrentDay() public view returns(uint256) {
         (,, uint256 day) = _timestampToDate(block.timestamp);
-        return day;
+        return getCurrentMonth() * 100 + day;
     }
 
     /**
      * @notice Function returns current month
      */
     function getCurrentMonth() public view returns(uint256) {
-        (, uint256 month,) = _timestampToDate(block.timestamp);
-        return month;
+        (uint256 year, uint256 month,) = _timestampToDate(block.timestamp);
+
+        return year * 100 + month;
     }
 
     /**
      * @notice Setting token limits
-     * @param _dayLimit: day limit for token transfer
-     * @param _monthLimit: month limit for token transfer
+     * @param _token: address of token contract
+     * @param _inComeDayLimit: day limit for income token transfer
+     * @param _inComeMonthLimit: month limit for income token transfer
+     * @param _outComeDayLimit: day limit for outcome token transfer
+     * @param _outComeMonthLimit: month limit for outcome token transfer
      *
      * @dev Callable by blacklist operator
      *
      */
     function settingTokenLimits(
         address _token,
-        uint256 _dayLimit,
-        uint256 _monthLimit
+        uint256 _inComeDayLimit,
+        uint256 _inComeMonthLimit,
+        uint256 _outComeDayLimit,
+        uint256 _outComeMonthLimit
     ) external onlyBlacklistOperator {
-        token_limits[_token] = TokenLimit(_dayLimit, _monthLimit);
+        token_limits[_token] = TokenLimit(_inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
 
-        emit SetTokenLimit(_token, _dayLimit, _monthLimit);
+        emit SetTokenLimit(_token, _inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
     }
 
     /**
-     * @notice Save user transfers
-     * @param _user: user address
+     * @notice Save income user transfers
+     * @param _from: from address
+     * @param _to: to address
      * @param _amount: amount of tokens
      *
      */
     function saveUserTransfers(
-        address _user,
+        address _from,
+        address _to,
         uint256 _amount
     ) external {
-        if (tokens_with_day_limits[msg.sender]) {
-            uint256 currentDay = getCurrentDay();
+        uint256 currentMonth = getCurrentMonth();
+        uint256 currentDay = getCurrentDay();
 
-            token_day_transfers[msg.sender][_user][currentDay] += _amount;
+        if (tokens_with_limits[msg.sender].hasInComeDayLimit) {
+            token_transfers[msg.sender][_to][currentDay].inCome += _amount;
         }
 
-        if (tokens_with_month_limits[msg.sender]) {
-            uint256 currentMonth = getCurrentMonth();
+        if (tokens_with_limits[msg.sender].hasInComeMonthLimit) {
+            token_transfers[msg.sender][_to][currentMonth].inCome += _amount;
+        }
 
-            token_month_transfers[msg.sender][_user][currentMonth] += _amount;
+        if (tokens_with_limits[msg.sender].hasOutComeDayLimit) {
+            token_transfers[msg.sender][_from][currentDay].outCome += _amount;
+        }
+
+        if (tokens_with_limits[msg.sender].hasOutComeMonthLimit) {
+            token_transfers[msg.sender][_from][currentMonth].outCome += _amount;
         }
     }
 
@@ -303,45 +308,39 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
-     * @notice Checking the user for the limits used per day
+     * @notice Checking the user for the limits allows
      * @param _token: address of token contract
-     * @param _user: user address
+     * @param _from: spender user address
+     * @param _to: recipient user address
      * @param _amount: amount of tokens
      *
      */
-    function dayLimitAllows(
+    function limitAllows(
         address _token,
-        address _user,
+        address _from,
+        address _to,
         uint256 _amount
-    ) external view returns(bool) {
+    ) external view returns(
+        bool dayInComeLimitAllow,
+        bool monthInComeLimitAllow,
+        bool dayOutComeLimitAllow,
+        bool monthOutComeLimitAllow
+    ) {
+        uint256 currentMonth = getCurrentMonth();
         uint256 currentDay = getCurrentDay();
 
-        if (!tokens_with_day_limits[_token] || contracts_exclusion_list[_user]) {
-            return true;
-        }
+        dayInComeLimitAllow = !tokens_with_limits[_token].hasInComeDayLimit || contracts_exclusion_list[_to] ? true :
+            token_transfers[_token][_to][currentDay].inCome + _amount <= token_limits[_token].inComeDay;
 
-        return token_day_transfers[_token][_user][currentDay] + _amount <= token_limits[_token].day;
-    }
+        monthInComeLimitAllow = !tokens_with_limits[_token].hasInComeMonthLimit || contracts_exclusion_list[_to] ? true :
+            token_transfers[_token][_to][currentMonth].inCome + _amount <= token_limits[_token].inComeMonth;
 
-    /**
-     * @notice Checking the user for the limits used per month
-     * @param _token: address of token contract
-     * @param _user: user address
-     * @param _amount: amount of tokens
-     *
-     */
-    function monthLimitAllows(
-        address _token,
-        address _user,
-        uint256 _amount
-    ) external view returns(bool) {
-        uint256 currentMonth = getCurrentMonth();
+        dayOutComeLimitAllow = !tokens_with_limits[_token].hasOutComeDayLimit || contracts_exclusion_list[_from] ? true :
+            token_transfers[_token][_from][currentDay].outCome + _amount <= token_limits[_token].outComeDay;
 
-        if (!tokens_with_month_limits[_token] || contracts_exclusion_list[_user]) {
-            return true;
-        }
+        monthOutComeLimitAllow = !tokens_with_limits[_token].hasOutComeMonthLimit || contracts_exclusion_list[_from] ? true :
+            token_transfers[_token][_from][currentMonth].outCome + _amount <= token_limits[_token].outComeMonth;
 
-        return token_month_transfers[_token][_user][currentMonth] + _amount <= token_limits[_token].month;
     }
 
     /**
@@ -356,51 +355,61 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     }
 
     /**
-     * @notice Getting user token day transfers
+     * @notice Getting user token transfers
      * @param _token: address of token contract
      * @param _user: user address
      *
      */
-    function getUserTokenDayTransfers(
+    function getUserTokenTransfers(
         address _token,
         address _user
-    ) public view returns(uint256) {
-        uint256 currentDay = getCurrentDay();
-        return token_day_transfers[_token][_user][currentDay];
-    }
-
-    /**
-     * @notice Getting user token month transfers
-     * @param _token: address of token contract
-     * @param _user: user address
-     *
-     */
-    function getUserTokenMonthTransfers(
-        address _token,
-        address _user
-    ) public view returns(uint256) {
+    ) public view returns(
+        uint256 dayInComeTransfers,
+        uint256 monthInComeTransfers,
+        uint256 dayOutComeTransfers,
+        uint256 monthOutComeTransfers
+    ) {
         uint256 currentMonth = getCurrentMonth();
-        return token_month_transfers[_token][_user][currentMonth];
+        uint256 currentDay = getCurrentDay();
+
+        dayInComeTransfers = uint256(token_transfers[_token][_user][currentDay].inCome);
+        monthInComeTransfers = uint256(token_transfers[_token][_user][currentMonth].inCome);
+        dayOutComeTransfers = uint256(token_transfers[_token][_user][currentDay].outCome);
+        monthOutComeTransfers = uint256(token_transfers[_token][_user][currentMonth].outCome);
     }
 
     /**
      * @notice Disable/Enable token limits
      * @param _token: address of token contract
-     * @param _dayLimit: for disabling day limits
-     * @param _monthLimit: for disabling month limits
+     * @param _hasInComeDayLimit: for disabling income day limits
+     * @param _hasInComeMonthLimit: for disabling income month limits
+     * @param _hasOutComeDayLimit: for disabling outcome day limits
+     * @param _hasOutComeMonthLimit: for disabling outcome month limits
      *
      * @dev Callable by blacklist operator
      *
      */
     function changeDisablingTokenLimits(
         address _token,
-        bool _dayLimit,
-        bool _monthLimit
+        bool _hasInComeDayLimit,
+        bool _hasInComeMonthLimit,
+        bool _hasOutComeDayLimit,
+        bool _hasOutComeMonthLimit
     ) external onlyBlacklistOperator {
-        tokens_with_day_limits[_token] = _dayLimit;
-        tokens_with_month_limits[_token] = _monthLimit;
+        tokens_with_limits[_token] = TokenLimitDisabling(
+            _hasInComeDayLimit,
+            _hasInComeMonthLimit,
+            _hasOutComeDayLimit,
+            _hasOutComeMonthLimit
+        );
 
-        emit SetTokenLimitStatus(_token, _dayLimit, _monthLimit);
+        emit SetTokenLimitStatus(
+            _token,
+            _hasInComeDayLimit,
+            _hasInComeMonthLimit,
+            _hasOutComeDayLimit,
+            _hasOutComeMonthLimit
+        );
     }
 
     /**
@@ -412,12 +421,21 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function getUserRemainingLimit(
         address _token,
         address _user
-    ) external view returns(uint256 dayRemaining, uint256 monthRemaining) {
-        uint256 currentMonthTransfers = getUserTokenMonthTransfers(_token, _user);
-        uint256 currentDayTransfers = getUserTokenDayTransfers(_token, _user);
+    ) external view returns(
+        uint256 dayInComeRemaining,
+        uint256 monthInComeRemaining,
+        uint256 dayOutComeRemaining,
+        uint256 monthOutComeRemaining
+    ) {
+        (uint256 dayInComeTransfers,
+        uint256 monthInComeTransfers,
+        uint256 dayOutComeTransfers,
+        uint256 monthOutComeTransfers) = getUserTokenTransfers(_token, _user);
 
-        monthRemaining = uint256(token_limits[_token].month - currentMonthTransfers);
-        dayRemaining = uint256(token_limits[_token].day - currentDayTransfers);
+        dayInComeRemaining = uint256(token_limits[_token].inComeDay - dayInComeTransfers);
+        monthInComeRemaining = uint256(token_limits[_token].inComeMonth - monthInComeTransfers);
+        dayOutComeRemaining = uint256(token_limits[_token].outComeDay - dayOutComeTransfers);
+        monthOutComeRemaining = uint256(token_limits[_token].outComeMonth - monthOutComeTransfers);
     }
 
     /**

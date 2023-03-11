@@ -81,8 +81,16 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     ) internal virtual override {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
-        require(commonBlacklist.dayLimitAllows(address(this), from, amount), "LEE: Spender has reached the day limit");
-        require(commonBlacklist.monthLimitAllows(address(this), from, amount), "LEE: Spender has reached the month limit");
+
+        (bool dayInComeLimitAllowed,
+        bool monthInComeLimitAllowed,
+        bool dayOutComeLimitAllowed,
+        bool monthOutComeLimitAllowed) = commonBlacklist.limitAllows(address(this), from, to, amount);
+
+        require(dayOutComeLimitAllowed, "LEE: Spender has reached the day limit");
+        require(monthOutComeLimitAllowed, "LEE: Spender has reached the month limit");
+        require(dayInComeLimitAllowed, "LEE: Recipient has reached the day limit");
+        require(monthInComeLimitAllowed, "LEE: Recipient has reached the month limit");
     }
 
     /**
@@ -128,6 +136,6 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        commonBlacklist.saveUserTransfers(from, amount);
+        commonBlacklist.saveUserTransfers(from, to, amount);
     }
 }

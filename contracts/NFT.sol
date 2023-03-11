@@ -173,8 +173,6 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     ) internal virtual override {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "NFT: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "NFT: Blocked by internal blacklist");
-        require(commonBlacklist.dayLimitAllows(address(this), from, 1), "NFT: Spender has reached the day limit");
-        require(commonBlacklist.monthLimitAllows(address(this), from, 1), "NFT: Spender has reached the month limit");
     }
 
     /**
@@ -203,24 +201,5 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, operator, address(0)), "NFT: Blocked by internal blacklist");
 
         super._setApprovalForAll(owner, operator, approved);
-    }
-
-    /**
-     * @dev Hook that is called after any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        commonBlacklist.saveUserTransfers(from, 1);
     }
 }
