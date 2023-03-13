@@ -277,57 +277,42 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
 
     /**
      * @notice Checking the user for the limits allows
-     * @param _token: address of token contract
      * @param _from: spender user address
      * @param _to: recipient user address
      * @param _amount: amount of tokens
      *
      */
     function limitAllows(
-        address _token,
         address _from,
         address _to,
         uint256 _amount
-    ) external returns(
-        bool dayInComeLimitAllow,
-        bool monthInComeLimitAllow,
-        bool dayOutComeLimitAllow,
-        bool monthOutComeLimitAllow
-    ) {
+    ) external {
         uint256 currentMonth = getCurrentMonth();
         uint256 currentDay = getCurrentDay();
+        address _token = msg.sender;
 
-        dayInComeLimitAllow = !tokens_with_limits[_token].hasInComeDayLimit || contracts_exclusion_list[_to] ? true :
-            token_transfers[_token][_to][currentDay].inCome + _amount <= token_limits[_token].inComeDay;
+        if (tokens_with_limits[_token].hasOutComeDayLimit && !contracts_exclusion_list[_from]) {
+            require(token_transfers[_token][_from][currentDay].outCome + _amount <= token_limits[_token].outComeDay, "Spender has reached the day limit");
 
-        monthInComeLimitAllow = !tokens_with_limits[_token].hasInComeMonthLimit || contracts_exclusion_list[_to] ? true :
-            token_transfers[_token][_to][currentMonth].inCome + _amount <= token_limits[_token].inComeMonth;
-
-        dayOutComeLimitAllow = !tokens_with_limits[_token].hasOutComeDayLimit || contracts_exclusion_list[_from] ? true :
-            token_transfers[_token][_from][currentDay].outCome + _amount <= token_limits[_token].outComeDay;
-
-        monthOutComeLimitAllow = !tokens_with_limits[_token].hasOutComeMonthLimit || contracts_exclusion_list[_from] ? true :
-            token_transfers[_token][_from][currentMonth].outCome + _amount <= token_limits[_token].outComeMonth;
-
-        require(dayOutComeLimitAllow, "Spender has reached the day limit");
-        require(monthOutComeLimitAllow, "Spender has reached the month limit");
-        require(dayInComeLimitAllow, "Recipient has reached the day limit");
-        require(monthInComeLimitAllow, "Recipient has reached the month limit");
-
-        if (tokens_with_limits[msg.sender].hasInComeDayLimit) {
-            token_transfers[msg.sender][_to][currentDay].inCome += _amount;
+            token_transfers[_token][_from][currentDay].outCome += _amount;
         }
 
-        if (tokens_with_limits[msg.sender].hasInComeMonthLimit) {
-            token_transfers[msg.sender][_to][currentMonth].inCome += _amount;
+        if (tokens_with_limits[_token].hasOutComeMonthLimit) {
+            require(token_transfers[_token][_from][currentMonth].outCome + _amount <= token_limits[_token].outComeMonth, "Spender has reached the month limit");
+
+            token_transfers[_token][_from][currentMonth].outCome += _amount;
         }
 
-        if (tokens_with_limits[msg.sender].hasOutComeDayLimit) {
-            token_transfers[msg.sender][_from][currentDay].outCome += _amount;
+        if (tokens_with_limits[_token].hasInComeDayLimit && !contracts_exclusion_list[_to]) {
+            require(token_transfers[_token][_to][currentDay].inCome + _amount <= token_limits[_token].inComeDay, "Recipient has reached the day limit");
+
+            token_transfers[_token][_to][currentDay].inCome += _amount;
         }
 
-        if (tokens_with_limits[msg.sender].hasOutComeMonthLimit) {
-            token_transfers[msg.sender][_from][currentMonth].outCome += _amount;
+        if (tokens_with_limits[_token].hasInComeMonthLimit && !contracts_exclusion_list[_to]) {
+            require(token_transfers[_token][_to][currentMonth].inCome + _amount <= token_limits[_token].inComeMonth, "Recipient has reached the month limit");
+
+            token_transfers[_token][_to][currentMonth].inCome += _amount;
         }
     }
 

@@ -82,7 +82,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
 
-        commonBlacklist.limitAllows(address(this), from, to, amount);
+        commonBlacklist.limitAllows(from, to, amount);
     }
 
     /**

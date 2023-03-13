@@ -171,23 +171,16 @@ interface ICommonBlacklist {
 
     /**
      * @notice Checking the user for the limits allows
-     * @param _token: address of token contract
      * @param _from: spender user address
      * @param _to: recipient user address
      * @param _amount: amount of tokens
      *
      */
     function limitAllows(
-        address _token,
         address _from,
         address _to,
         uint256 _amount
-    ) external returns(
-        bool dayInComeLimitAllow,
-        bool monthInComeLimitAllow,
-        bool dayOutComeLimitAllow,
-        bool monthOutComeLimitAllow
-    );
+    ) external;
 
     /**
      * @notice Getting token limits

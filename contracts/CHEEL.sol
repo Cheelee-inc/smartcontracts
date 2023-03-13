@@ -85,7 +85,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "CHEEL: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "CHEEL: Blocked by internal blacklist");
 
-        commonBlacklist.limitAllows(address(this), from, to, amount);
+        commonBlacklist.limitAllows(from, to, amount);
     }
 
     /**
