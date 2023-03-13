@@ -233,7 +233,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
      * @dev Callable by blacklist operator
      *
      */
-    function settingTokenLimits(
+    function setTokenLimits(
         address _token,
         uint256 _inComeDayLimit,
         uint256 _inComeMonthLimit,
@@ -243,38 +243,6 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         token_limits[_token] = TokenLimit(_inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
 
         emit SetTokenLimit(_token, _inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
-    }
-
-    /**
-     * @notice Save income user transfers
-     * @param _from: from address
-     * @param _to: to address
-     * @param _amount: amount of tokens
-     *
-     */
-    function saveUserTransfers(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external {
-        uint256 currentMonth = getCurrentMonth();
-        uint256 currentDay = getCurrentDay();
-
-        if (tokens_with_limits[msg.sender].hasInComeDayLimit) {
-            token_transfers[msg.sender][_to][currentDay].inCome += _amount;
-        }
-
-        if (tokens_with_limits[msg.sender].hasInComeMonthLimit) {
-            token_transfers[msg.sender][_to][currentMonth].inCome += _amount;
-        }
-
-        if (tokens_with_limits[msg.sender].hasOutComeDayLimit) {
-            token_transfers[msg.sender][_from][currentDay].outCome += _amount;
-        }
-
-        if (tokens_with_limits[msg.sender].hasOutComeMonthLimit) {
-            token_transfers[msg.sender][_from][currentMonth].outCome += _amount;
-        }
     }
 
     /**
@@ -320,7 +288,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _from,
         address _to,
         uint256 _amount
-    ) external view returns(
+    ) external returns(
         bool dayInComeLimitAllow,
         bool monthInComeLimitAllow,
         bool dayOutComeLimitAllow,
@@ -341,6 +309,26 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         monthOutComeLimitAllow = !tokens_with_limits[_token].hasOutComeMonthLimit || contracts_exclusion_list[_from] ? true :
             token_transfers[_token][_from][currentMonth].outCome + _amount <= token_limits[_token].outComeMonth;
 
+        require(dayOutComeLimitAllow, "Spender has reached the day limit");
+        require(monthOutComeLimitAllow, "Spender has reached the month limit");
+        require(dayInComeLimitAllow, "Recipient has reached the day limit");
+        require(monthInComeLimitAllow, "Recipient has reached the month limit");
+
+        if (tokens_with_limits[msg.sender].hasInComeDayLimit) {
+            token_transfers[msg.sender][_to][currentDay].inCome += _amount;
+        }
+
+        if (tokens_with_limits[msg.sender].hasInComeMonthLimit) {
+            token_transfers[msg.sender][_to][currentMonth].inCome += _amount;
+        }
+
+        if (tokens_with_limits[msg.sender].hasOutComeDayLimit) {
+            token_transfers[msg.sender][_from][currentDay].outCome += _amount;
+        }
+
+        if (tokens_with_limits[msg.sender].hasOutComeMonthLimit) {
+            token_transfers[msg.sender][_from][currentMonth].outCome += _amount;
+        }
     }
 
     /**

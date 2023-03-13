@@ -5,6 +5,7 @@ import {
 import {
   CommonBlacklistConfig,
 } from "../config/ContractsConfig";
+import {verify} from "./19_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -28,6 +29,10 @@ async function main() {
   console.log('Contract blacklist deployed to:', commonBlacklistContract);
   console.log('Proxy blacklist contract deployed to:', commonBlacklistProxy.address);
   console.log('Admin blacklist contract deployed to:', commonBlacklistAdmin);
+
+  console.log('Verification for Blacklist contract...');
+  await verify(commonBlacklistContract, []);
+  console.log('Blacklist contract is verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

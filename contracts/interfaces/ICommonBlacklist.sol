@@ -139,25 +139,12 @@ interface ICommonBlacklist {
      * @dev Callable by blacklist operator
      *
      */
-    function settingTokenLimits(
+    function setTokenLimits(
         address _token,
         uint256 _inComeDayLimit,
         uint256 _inComeMonthLimit,
         uint256 _outComeDayLimit,
         uint256 _outComeMonthLimit
-    ) external;
-
-    /**
-     * @notice Save income user transfers
-     * @param _from: from address
-     * @param _to: to address
-     * @param _amount: amount of tokens
-     *
-     */
-    function saveUserTransfers(
-        address _from,
-        address _to,
-        uint256 _amount
     ) external;
 
     /**
@@ -195,7 +182,7 @@ interface ICommonBlacklist {
         address _from,
         address _to,
         uint256 _amount
-    ) external view returns(
+    ) external returns(
         bool dayInComeLimitAllow,
         bool monthInComeLimitAllow,
         bool dayOutComeLimitAllow,

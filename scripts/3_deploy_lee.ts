@@ -1,6 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import { LEEContractType } from '../lib/ContractProvider';
 import { LEEConfig } from "../config/ContractsConfig";
+import {verify} from "./19_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -24,6 +25,10 @@ async function main() {
   console.log('Contract LEE deployed to:', leeContract);
   console.log('Proxy LEE contract deployed to:', leeProxy.address);
   console.log('Admin LEE contract deployed to:', leeAdmin);
+
+  console.log('Verification for LEE contract...');
+  await verify(leeContract, []);
+  console.log('LEE contract is verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

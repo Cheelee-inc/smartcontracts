@@ -1,6 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import { NFTContractType } from '../lib/ContractProvider';
 import { NFTGlassesConfig } from "../config/ContractsConfig";
+import {verify} from "./19_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -24,6 +25,10 @@ async function main() {
   console.log('Contract NFT Glasses deployed to:', nftGlassesContract);
   console.log('Proxy NFT Glasses contract deployed to:', nftGlassesProxy.address);
   console.log('Admin NFT Glasses deployed to:', nftGlassesAdmin);
+
+  console.log('Verification for NFT Glasses contract...');
+  await verify(nftGlassesContract, []);
+  console.log('NFT Glasses contract is verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

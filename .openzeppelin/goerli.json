@@ -34,6 +34,11 @@
       "address": "0x703FEaa4eCadc96673a06C31c4053Fd014272999",
       "txHash": "0x89f800f1a04413ba063a87c1c76be2dc215d220fa3e0ff5db23f44a114f8aabf",
       "kind": "transparent"
+    },
+    {
+      "address": "0x7355Fef999eEB90B4633Aa71376Be38Cf738AeDa",
+      "txHash": "0x115c94ad6343ea5d845cfd1b8e93cd9cc544945fcf0037c87d4b0861af732426",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -1479,6 +1484,294 @@
               },
               {
                 "label": "month",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "e50e001729abbf8aa7773f1a977787c9012985d1ad63e771632e2a4055fb6314": {
+      "address": "0x43D6e1e891d4324Ee5A2bB12cE7c9f7075A7903B",
+      "txHash": "0xfdc2208e5aa4203a8f75a384c3ed36a1cb797e4637951b0d38735658fb902ed0",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "label": "blacklist",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:15"
+          },
+          {
+            "label": "internal_blacklist",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:20"
+          },
+          {
+            "label": "token_limits",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_mapping(t_address,t_struct(TokenLimit)12354_storage)",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:25"
+          },
+          {
+            "label": "token_transfers",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_mapping(t_uint256,t_struct(TokenTransfers)12359_storage)))",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:31"
+          },
+          {
+            "label": "tokens_with_limits",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_mapping(t_address,t_struct(TokenLimitDisabling)12368_storage)",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:35"
+          },
+          {
+            "label": "contracts_exclusion_list",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:39"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "CommonBlacklist",
+            "src": "contracts/CommonBlacklist.sol:47"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_mapping(t_uint256,t_struct(TokenTransfers)12359_storage)))": {
+            "label": "mapping(address => mapping(address => mapping(uint256 => struct ICommonBlacklist.TokenTransfers)))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(TokenTransfers)12359_storage))": {
+            "label": "mapping(address => mapping(uint256 => struct ICommonBlacklist.TokenTransfers))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(TokenLimit)12354_storage)": {
+            "label": "mapping(address => struct ICommonBlacklist.TokenLimit)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(TokenLimitDisabling)12368_storage)": {
+            "label": "mapping(address => struct ICommonBlacklist.TokenLimitDisabling)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(TokenTransfers)12359_storage)": {
+            "label": "mapping(uint256 => struct ICommonBlacklist.TokenTransfers)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)34_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(TokenLimit)12354_storage": {
+            "label": "struct ICommonBlacklist.TokenLimit",
+            "members": [
+              {
+                "label": "inComeDay",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "inComeMonth",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "outComeDay",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "outComeMonth",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(TokenLimitDisabling)12368_storage": {
+            "label": "struct ICommonBlacklist.TokenLimitDisabling",
+            "members": [
+              {
+                "label": "hasInComeDayLimit",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "hasInComeMonthLimit",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "hasOutComeDayLimit",
+                "type": "t_bool",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "hasOutComeMonthLimit",
+                "type": "t_bool",
+                "offset": 3,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TokenTransfers)12359_storage": {
+            "label": "struct ICommonBlacklist.TokenTransfers",
+            "members": [
+              {
+                "label": "inCome",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "outCome",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "1"

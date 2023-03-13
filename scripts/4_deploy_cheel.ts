@@ -1,6 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import { CHEELContractType } from '../lib/ContractProvider';
 import { CHEELConfig } from "../config/ContractsConfig";
+import {verify} from "./19_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -24,6 +25,10 @@ async function main() {
   console.log('Contract CHEEL deployed to:', cheelContract);
   console.log('Proxy CHEEL contract deployed to:', cheelProxy.address);
   console.log('Admin CHEEL contract deployed to:', cheelAdmin);
+
+  console.log('Verification for CHEEL contract...');
+  await verify(cheelContract, []);
+  console.log('CHEEL contract is verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

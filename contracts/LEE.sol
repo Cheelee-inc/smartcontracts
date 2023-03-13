@@ -82,15 +82,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
 
-        (bool dayInComeLimitAllowed,
-        bool monthInComeLimitAllowed,
-        bool dayOutComeLimitAllowed,
-        bool monthOutComeLimitAllowed) = commonBlacklist.limitAllows(address(this), from, to, amount);
-
-        require(dayOutComeLimitAllowed, "LEE: Spender has reached the day limit");
-        require(monthOutComeLimitAllowed, "LEE: Spender has reached the month limit");
-        require(dayInComeLimitAllowed, "LEE: Recipient has reached the day limit");
-        require(monthInComeLimitAllowed, "LEE: Recipient has reached the month limit");
+        commonBlacklist.limitAllows(address(this), from, to, amount);
     }
 
     /**
@@ -115,27 +107,5 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "LEE: Blocked by internal blacklist");
 
         super._approve(owner, spender, amount);
-    }
-
-    /**
-     * @dev Hook that is called after any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * has been transferred to `to`.
-     * - when `from` is zero, `amount` tokens have been minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens have been burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        commonBlacklist.saveUserTransfers(from, to, amount);
     }
 }

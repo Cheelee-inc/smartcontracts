@@ -397,7 +397,7 @@ contract(LEEConfig.contractName, () => {
 
   describe("Token Rate Limit", async () => {
     it("Adding Token limit", async function () {
-      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+      result = await commonBlacklist.connect(moderator).setTokenLimits(
         lee.address,
         parseEther("1000000"),
         parseEther("1500000"),
@@ -476,7 +476,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Getting Remaining limit
@@ -499,7 +499,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "LEE: Recipient has reached the day limit"
+        "Recipient has reached the day limit"
       );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
@@ -541,7 +541,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next day
@@ -575,7 +575,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "LEE: Spender has reached the month limit"
+        "Spender has reached the month limit"
       );
 
       assert.equal(
@@ -592,7 +592,7 @@ contract(LEEConfig.contractName, () => {
     });
 
     it("Increase limits", async function () {
-      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+      result = await commonBlacklist.connect(moderator).setTokenLimits(
         lee.address,
         parseEther("1000000"),
         parseEther("3000000"),
@@ -631,10 +631,10 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
-      await commonBlacklist.connect(moderator).settingTokenLimits(
+      await commonBlacklist.connect(moderator).setTokenLimits(
         lee.address,
         parseEther("500000"),
         parseEther("3000000"),
@@ -658,10 +658,10 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "LEE: Recipient has reached the day limit"
+        "Recipient has reached the day limit"
       );
 
-      await commonBlacklist.connect(moderator).settingTokenLimits(
+      await commonBlacklist.connect(moderator).setTokenLimits(
         lee.address,
         parseEther("1000000"),
         parseEther("3000000"),
@@ -691,7 +691,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next day
@@ -702,7 +702,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1500000")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next Day transaction
@@ -722,7 +722,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1500000")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       assert.equal(
@@ -735,7 +735,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "LEE: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // disable day limits
@@ -763,7 +763,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "LEE: Spender has reached the month limit"
+        "Spender has reached the month limit"
       );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
@@ -779,7 +779,7 @@ contract(LEEConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "LEE: Recipient has reached the month limit"
+        "Recipient has reached the month limit"
       );
 
       assert.equal(

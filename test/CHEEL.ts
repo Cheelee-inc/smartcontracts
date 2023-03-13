@@ -413,7 +413,7 @@ contract(CHEELConfig.contractName, () => {
 
   describe("Token Rate Limit", async () => {
     it("Adding Token limit", async function () {
-      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+      result = await commonBlacklist.connect(moderator).setTokenLimits(
         cheel.address,
         parseEther("1000000"),
         parseEther("1500000"),
@@ -492,7 +492,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Getting Current Day
@@ -532,7 +532,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "CHEEL: Recipient has reached the day limit"
+        "Recipient has reached the day limit"
       );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
@@ -574,7 +574,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next day
@@ -608,7 +608,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1")
         ),
-        "CHEEL: Spender has reached the month limit"
+        "Spender has reached the month limit"
       );
 
       assert.equal(
@@ -625,7 +625,7 @@ contract(CHEELConfig.contractName, () => {
     });
 
     it("Increase limits", async function () {
-      result = await commonBlacklist.connect(moderator).settingTokenLimits(
+      result = await commonBlacklist.connect(moderator).setTokenLimits(
         cheel.address,
         parseEther("1000000"),
         parseEther("3000000"),
@@ -664,10 +664,10 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
-      await commonBlacklist.connect(moderator).settingTokenLimits(
+      await commonBlacklist.connect(moderator).setTokenLimits(
         cheel.address,
         parseEther("500000"),
         parseEther("3000000"),
@@ -691,10 +691,10 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "CHEEL: Recipient has reached the day limit"
+        "Recipient has reached the day limit"
       );
 
-      await commonBlacklist.connect(moderator).settingTokenLimits(
+      await commonBlacklist.connect(moderator).setTokenLimits(
         cheel.address,
         parseEther("1000000"),
         parseEther("3000000"),
@@ -724,7 +724,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("2")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next day
@@ -735,7 +735,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1500000")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // Next Day transaction
@@ -755,7 +755,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1500000")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       assert.equal(
@@ -768,7 +768,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "CHEEL: Spender has reached the day limit"
+        "Spender has reached the day limit"
       );
 
       // disable day limits
@@ -796,7 +796,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "CHEEL: Spender has reached the month limit"
+        "Spender has reached the month limit"
       );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
@@ -812,7 +812,7 @@ contract(CHEELConfig.contractName, () => {
           receiver.address,
           parseEther("1000000")
         ),
-        "CHEEL: Recipient has reached the month limit"
+        "Recipient has reached the month limit"
       );
 
       assert.equal(

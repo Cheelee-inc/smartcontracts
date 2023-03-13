@@ -1,6 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import {TreasuryContractType} from '../lib/ContractProvider';
 import {CHEELConfig, LEEConfig, NFTCasesConfig, NFTGlassesConfig, TreasuryConfig} from "../config/ContractsConfig";
+import {verify} from "./19_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -31,6 +32,10 @@ async function main() {
   console.log('Contract Treasury deployed to:', treasuryContract);
   console.log('Proxy Treasury contract deployed to:', treasuryProxy.address);
   console.log('Admin Treasury deployed to:', treasuryAdmin);
+
+  console.log('Verification for Treasury contract...');
+  await verify(treasuryContract, []);
+  console.log('Treasury contract is verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
