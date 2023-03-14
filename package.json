@@ -41,6 +41,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "4.7.3",
     "@openzeppelin/contracts-upgradeable": "4.7.3",
+    "@rumblefishdev/hardhat-kms-signer": "^1.1.2",
+    "aws-sdk": "^2.1327.0",
     "hardhat-prettier": "^0.0.1"
   },
   "scripts": {
