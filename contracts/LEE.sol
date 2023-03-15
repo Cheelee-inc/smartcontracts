@@ -10,8 +10,9 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
 
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x7C1E145346Cb97BeeD131ce541d0497Bada9f1DF);
-    uint256[50] __gap;
+    ICommonBlacklist public commonBlacklist;
+    bool commonBlacklistIsSetted;
+    uint256[49] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -61,6 +62,20 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     }
 
     /**
+     * @notice Setting blacklist
+     * @param _blacklist: new blacklist address
+     *
+     * @dev Callable by owner
+     *
+     */
+    function setBlacklist(
+        ICommonBlacklist _blacklist
+    ) external onlyOwner {
+        commonBlacklist = _blacklist;
+        commonBlacklistIsSetted = true;
+    }
+
+    /**
      * @dev Hook that is called before any transfer of tokens. This includes
      * minting and burning.
      *
@@ -79,10 +94,12 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
+        if (commonBlacklistIsSetted) {
+            require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
+            require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
 
-        commonBlacklist.limitAllows(from, to, amount);
+            commonBlacklist.limitAllows(from, to, amount);
+        }
     }
 
     /**
@@ -103,9 +120,10 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) internal virtual override {
-        require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "LEE: Blocked by global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "LEE: Blocked by internal blacklist");
-
+        if (commonBlacklistIsSetted) {
+            require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "LEE: Blocked by global blacklist");
+            require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "LEE: Blocked by internal blacklist");
+        }
         super._approve(owner, spender, amount);
     }
 }

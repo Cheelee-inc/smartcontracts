@@ -50,6 +50,10 @@ contract(LEEConfig.contractName, () => {
   });
 
   describe("Normal cases:", async () => {
+    it("Setting blacklist", async function () {
+      await lee.connect(gnosis).setBlacklist(commonBlacklist.address);
+    });
+
     it("Check initial data", async function () {
       expect(await lee.name()).to.equal(LEEConfig.tokenName);
       expect(await lee.symbol()).to.equal(LEEConfig.tokenSymbol);

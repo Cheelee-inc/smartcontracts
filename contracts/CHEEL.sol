@@ -11,8 +11,9 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
 
     uint256 public constant MAX_AMOUNT = 10**9 * 10**18;
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
-    ICommonBlacklist public constant commonBlacklist = ICommonBlacklist(0x7C1E145346Cb97BeeD131ce541d0497Bada9f1DF);
-    uint256[50] __gap;
+    ICommonBlacklist public commonBlacklist;
+    bool commonBlacklistIsSetted;
+    uint256[49] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -63,6 +64,20 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     }
 
     /**
+     * @notice Setting blacklist
+     * @param _blacklist: new blacklist address
+     *
+     * @dev Callable by owner
+     *
+     */
+    function setBlacklist(
+        ICommonBlacklist _blacklist
+    ) external onlyOwner {
+        commonBlacklist = _blacklist;
+        commonBlacklistIsSetted = true;
+    }
+
+    /**
      * @dev Hook that is called before any transfer of tokens. This includes
      * minting and burning.
      *
@@ -81,11 +96,12 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
+        if (commonBlacklistIsSetted) {
+            require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "CHEEL: Blocked by global blacklist");
+            require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "CHEEL: Blocked by internal blacklist");
 
-        require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "CHEEL: Blocked by global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "CHEEL: Blocked by internal blacklist");
-
-        commonBlacklist.limitAllows(from, to, amount);
+            commonBlacklist.limitAllows(from, to, amount);
+        }
     }
 
     /**
@@ -106,10 +122,10 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) internal virtual override {
-
-        require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "CHEEL: Blocked by global blacklist");
-        require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "CHEEL: Blocked by internal blacklist");
-
+        if (commonBlacklistIsSetted) {
+            require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "CHEEL: Blocked by global blacklist");
+            require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "CHEEL: Blocked by internal blacklist");
+        }
         super._approve(owner, spender, amount);
     }
 }

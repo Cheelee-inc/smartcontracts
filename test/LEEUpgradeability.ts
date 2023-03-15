@@ -68,53 +68,56 @@ contract(`OLD${LEEConfig.contractName} Upgrade`, () => {
     lee = await upgrades.upgradeProxy(oldLee.address, LEE)
   });
 
-  // Uncommit for testing working blacklist after upgrade
-  // it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
-  //   await commonBlacklist.connect(blacklistGnosis).grantRole(
-  //     BLACKLIST_OPERATOR_ROLE,
-  //     moderator.address
-  //   );
-  // });
-  //
-  // it("Adding badguy for common blacklist", async function () {
-  //   expect((await lee.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
-  //
-  //   await commonBlacklist.connect(moderator).addUsersToBlacklist(
-  //     [badguy.address]
-  //   );
-  //
-  //   assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
-  // });
-  //
-  //
-  // it("New function added works", async function () {
-  //   await expectRevert(
-  //     lee.connect(badguy).transfer(
-  //       deployer.address,
-  //       parseEther("1000000")
-  //     ),
-  //     "LEE: Blocked by global blacklist"
-  //   );
-  //
-  //   await expectRevert(
-  //     lee.connect(gnosis).transferFrom(
-  //       badguy.address,
-  //       deployer.address,
-  //       parseEther("1000000")
-  //     ),
-  //     "ERC20: insufficient allowance"
-  //   );
-  //
-  //   assert.equal(
-  //     String(await lee.balanceOf(deployer.address)),
-  //     parseEther("1000000").toString()
-  //   );
-  //
-  //   assert.equal(
-  //     String(await lee.balanceOf(badguy.address)),
-  //     parseEther("1000000").toString()
-  //   );
-  // });
+  it("Setting blacklist", async function () {
+    await lee.connect(gnosis).setBlacklist(commonBlacklist.address);
+  });
+
+  it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
+    await commonBlacklist.connect(blacklistGnosis).grantRole(
+      BLACKLIST_OPERATOR_ROLE,
+      moderator.address
+    );
+  });
+
+  it("Adding badguy for common blacklist", async function () {
+    expect((await lee.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
+
+    await commonBlacklist.connect(moderator).addUsersToBlacklist(
+      [badguy.address]
+    );
+
+    assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+  });
+
+
+  it("New function added works", async function () {
+    await expectRevert(
+      lee.connect(badguy).transfer(
+        deployer.address,
+        parseEther("1000000")
+      ),
+      "LEE: Blocked by global blacklist"
+    );
+
+    await expectRevert(
+      lee.connect(gnosis).transferFrom(
+        badguy.address,
+        deployer.address,
+        parseEther("1000000")
+      ),
+      "ERC20: insufficient allowance"
+    );
+
+    assert.equal(
+      String(await lee.balanceOf(deployer.address)),
+      parseEther("1000000").toString()
+    );
+
+    assert.equal(
+      String(await lee.balanceOf(badguy.address)),
+      parseEther("1000000").toString()
+    );
+  });
 
   it("Balancies is correct", async function () {
     assert.equal(

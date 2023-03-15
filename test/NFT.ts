@@ -152,6 +152,13 @@ contract(NFTGlassesConfig.contractName, () => {
   });
 
   describe("Normal cases:", async () => {
+    it("Setting blacklist", async function () {
+      await nftGlasses.connect(nftGlassesGnosis).setBlacklist(commonBlacklist.address);
+      await nftCases.connect(nftCasesGnosis).setBlacklist(commonBlacklist.address);
+      await cheel.connect(cheelGnosis).setBlacklist(commonBlacklist.address);
+      await lee.connect(leeGnosis).setBlacklist(commonBlacklist.address);
+    });
+
     it("Setting nft BASE URI", async function () {
       await nftGlasses.connect(nftGlassesGnosis).setUri(
         testBaseURI

@@ -50,6 +50,10 @@ contract(CHEELConfig.contractName, () => {
   });
 
   describe("Normal cases:", async () => {
+    it("Setting blacklist", async function () {
+      await cheel.connect(gnosis).setBlacklist(commonBlacklist.address);
+    });
+
     it("Check initial data", async function () {
       expect(await cheel.name()).to.equal(CHEELConfig.tokenName);
       expect(await cheel.symbol()).to.equal(CHEELConfig.tokenSymbol);
