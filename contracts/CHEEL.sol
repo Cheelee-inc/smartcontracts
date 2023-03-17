@@ -13,7 +13,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
     ICommonBlacklist public commonBlacklist;
     bool public commonBlacklistIsSetted;
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
