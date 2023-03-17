@@ -7,6 +7,7 @@ contract StakingV2 is Staking {
     bool public flag;
 
     function withdraw(uint256 _option) external override {
-        flag = true;
+        if (_option > 0)
+            flag = true;
     }
 }

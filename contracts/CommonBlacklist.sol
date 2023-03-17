@@ -17,26 +17,26 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     // token
     // user
     // is_blacklisted
-    mapping(address => mapping (address => bool)) public internal_blacklist;
+    mapping(address => mapping (address => bool)) public internalBlacklist;
 
 
     // token
     // limits struct { inComeDay, inComeMonth, outComeDay, outComeMonth }
-    mapping(address => TokenLimit) public token_limits;
+    mapping(address => TokenLimit) public tokenLimits;
 
     // token
     // user
     // date
     // transfers struct { inCome, outCome }
-    mapping(address => mapping (address => mapping (uint256 => TokenTransfers))) public token_transfers;
+    mapping(address => mapping (address => mapping (uint256 => TokenTransfers))) public tokenTransfers;
 
     // token
     // has limit struct { hasInComeDayLimit, hasInComeMonthLimit, hasOutComeDayLimit, hasOutComeMonthLimit }
-    mapping(address => TokenLimitDisabling) public tokens_with_limits;
+    mapping(address => TokenLimitDisabling) public tokensWithLimits;
 
     // contract
     // has exception
-    mapping(address => bool) public contracts_exclusion_list;
+    mapping(address => bool) public contractsExclusionList;
 
     // Events
     event SetTokenLimit(address token, uint256 inComeDayLimit, uint256 inComeMonthLimit, uint256 outComeDayLimit, uint256 outComeMonthLimit);
@@ -44,7 +44,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     event AddToExclusionList(address token);
     event RemoveFromExclusionList(address token);
 
-    uint256[50] __gap;
+    uint256[50] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -61,7 +61,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         __AccessControl_init();
         __Ownable_init();
 
-        contracts_exclusion_list[address(0)] = true;
+        contractsExclusionList[address(0)] = true;
 
         transferOwnership(GNOSIS);
         _setupRole(DEFAULT_ADMIN_ROLE, GNOSIS);
@@ -114,7 +114,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         for (uint i; i < _users.length; i++) {
             require(_users[i] != address(0), "Cannot be zero address");
 
-            internal_blacklist[_token][_users[i]] = true;
+            internalBlacklist[_token][_users[i]] = true;
         }
     }
 
@@ -131,7 +131,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address[] memory _users
     ) external onlyBlacklistOperator {
         for (uint i; i < _users.length; i++) {
-            internal_blacklist[_token][_users[i]] = false;
+            internalBlacklist[_token][_users[i]] = false;
         }
     }
 
@@ -164,7 +164,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _from,
         address _to
     ) external view returns(bool) {
-        return internal_blacklist[_token][_sender] || internal_blacklist[_token][_from] || internal_blacklist[_token][_to];
+        return internalBlacklist[_token][_sender] || internalBlacklist[_token][_from] || internalBlacklist[_token][_to];
     }
 
     /**
@@ -180,7 +180,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 length = 0;
 
         for (uint i; i < _users.length; i++) {
-            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internal_blacklist[_token][_users[i]] || blacklist[_users[i]];
+            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internalBlacklist[_token][_users[i]] || blacklist[_users[i]];
             if (hasMatch) {
                 length += 1;
             }
@@ -195,7 +195,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 listCounter = 0;
 
         for (uint i; i < _users.length; i++) {
-            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internal_blacklist[_token][_users[i]] || blacklist[_users[i]];
+            bool hasMatch = _token == address(0) ? blacklist[_users[i]] : internalBlacklist[_token][_users[i]] || blacklist[_users[i]];
             if (hasMatch) {
                 list[listCounter] = _users[i];
                 listCounter++;
@@ -240,7 +240,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 _outComeDayLimit,
         uint256 _outComeMonthLimit
     ) external onlyBlacklistOperator {
-        token_limits[_token] = TokenLimit(_inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
+        tokenLimits[_token] = TokenLimit(_inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
 
         emit SetTokenLimit(_token, _inComeDayLimit, _inComeMonthLimit, _outComeDayLimit, _outComeMonthLimit);
     }
@@ -255,7 +255,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function addContractToExclusionList(
         address _contract
     ) external onlyBlacklistOperator {
-        contracts_exclusion_list[_contract] = true;
+        contractsExclusionList[_contract] = true;
 
         emit AddToExclusionList(_contract);
     }
@@ -270,7 +270,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function removeContractFromExclusionList(
         address _contract
     ) external onlyBlacklistOperator {
-        contracts_exclusion_list[_contract] = false;
+        contractsExclusionList[_contract] = false;
 
         emit RemoveFromExclusionList(_contract);
     }
@@ -291,28 +291,28 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 currentDay = getCurrentDay();
         address _token = msg.sender;
 
-        if (tokens_with_limits[_token].hasOutComeDayLimit && !contracts_exclusion_list[_from]) {
-            require(token_transfers[_token][_from][currentDay].outCome + _amount <= token_limits[_token].outComeDay, "Spender has reached the day limit");
+        if (tokensWithLimits[_token].hasOutComeDayLimit && !contractsExclusionList[_from]) {
+            require(tokenTransfers[_token][_from][currentDay].outCome + _amount <= tokenLimits[_token].outComeDay, "Spender has reached the day limit");
 
-            token_transfers[_token][_from][currentDay].outCome += _amount;
+            tokenTransfers[_token][_from][currentDay].outCome += _amount;
         }
 
-        if (tokens_with_limits[_token].hasOutComeMonthLimit) {
-            require(token_transfers[_token][_from][currentMonth].outCome + _amount <= token_limits[_token].outComeMonth, "Spender has reached the month limit");
+        if (tokensWithLimits[_token].hasOutComeMonthLimit) {
+            require(tokenTransfers[_token][_from][currentMonth].outCome + _amount <= tokenLimits[_token].outComeMonth, "Spender has reached the month limit");
 
-            token_transfers[_token][_from][currentMonth].outCome += _amount;
+            tokenTransfers[_token][_from][currentMonth].outCome += _amount;
         }
 
-        if (tokens_with_limits[_token].hasInComeDayLimit && !contracts_exclusion_list[_to]) {
-            require(token_transfers[_token][_to][currentDay].inCome + _amount <= token_limits[_token].inComeDay, "Recipient has reached the day limit");
+        if (tokensWithLimits[_token].hasInComeDayLimit && !contractsExclusionList[_to]) {
+            require(tokenTransfers[_token][_to][currentDay].inCome + _amount <= tokenLimits[_token].inComeDay, "Recipient has reached the day limit");
 
-            token_transfers[_token][_to][currentDay].inCome += _amount;
+            tokenTransfers[_token][_to][currentDay].inCome += _amount;
         }
 
-        if (tokens_with_limits[_token].hasInComeMonthLimit && !contracts_exclusion_list[_to]) {
-            require(token_transfers[_token][_to][currentMonth].inCome + _amount <= token_limits[_token].inComeMonth, "Recipient has reached the month limit");
+        if (tokensWithLimits[_token].hasInComeMonthLimit && !contractsExclusionList[_to]) {
+            require(tokenTransfers[_token][_to][currentMonth].inCome + _amount <= tokenLimits[_token].inComeMonth, "Recipient has reached the month limit");
 
-            token_transfers[_token][_to][currentMonth].inCome += _amount;
+            tokenTransfers[_token][_to][currentMonth].inCome += _amount;
         }
     }
 
@@ -324,7 +324,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function getTokenLimits(
         address _token
     ) external view returns(TokenLimit memory) {
-        return token_limits[_token];
+        return tokenLimits[_token];
     }
 
     /**
@@ -345,10 +345,10 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 currentMonth = getCurrentMonth();
         uint256 currentDay = getCurrentDay();
 
-        dayInComeTransfers = uint256(token_transfers[_token][_user][currentDay].inCome);
-        monthInComeTransfers = uint256(token_transfers[_token][_user][currentMonth].inCome);
-        dayOutComeTransfers = uint256(token_transfers[_token][_user][currentDay].outCome);
-        monthOutComeTransfers = uint256(token_transfers[_token][_user][currentMonth].outCome);
+        dayInComeTransfers = uint256(tokenTransfers[_token][_user][currentDay].inCome);
+        monthInComeTransfers = uint256(tokenTransfers[_token][_user][currentMonth].inCome);
+        dayOutComeTransfers = uint256(tokenTransfers[_token][_user][currentDay].outCome);
+        monthOutComeTransfers = uint256(tokenTransfers[_token][_user][currentMonth].outCome);
     }
 
     /**
@@ -369,7 +369,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         bool _hasOutComeDayLimit,
         bool _hasOutComeMonthLimit
     ) external onlyBlacklistOperator {
-        tokens_with_limits[_token] = TokenLimitDisabling(
+        tokensWithLimits[_token] = TokenLimitDisabling(
             _hasInComeDayLimit,
             _hasInComeMonthLimit,
             _hasOutComeDayLimit,
@@ -405,10 +405,10 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 dayOutComeTransfers,
         uint256 monthOutComeTransfers) = getUserTokenTransfers(_token, _user);
 
-        dayInComeRemaining = uint256(token_limits[_token].inComeDay - dayInComeTransfers);
-        monthInComeRemaining = uint256(token_limits[_token].inComeMonth - monthInComeTransfers);
-        dayOutComeRemaining = uint256(token_limits[_token].outComeDay - dayOutComeTransfers);
-        monthOutComeRemaining = uint256(token_limits[_token].outComeMonth - monthOutComeTransfers);
+        dayInComeRemaining = uint256(tokenLimits[_token].inComeDay - dayInComeTransfers);
+        monthInComeRemaining = uint256(tokenLimits[_token].inComeMonth - monthInComeTransfers);
+        dayOutComeRemaining = uint256(tokenLimits[_token].outComeDay - dayOutComeTransfers);
+        monthOutComeRemaining = uint256(tokenLimits[_token].outComeMonth - monthOutComeTransfers);
     }
 
     /**
@@ -419,17 +419,25 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function _timestampToDate(
         uint256 _timestamp
     ) internal pure returns (uint256 year, uint256 month, uint256 day) {
-        unchecked {
-            uint256 SECONDS_PER_DAY = 24 * 60 * 60;
-            int256 _days = int256(_timestamp / SECONDS_PER_DAY);
+        uint256 SECONDS_PER_DAY;
+        uint256 _days;
+        uint256 L;
+        uint256 N;
+        uint256 _year;
+        uint256 _month;
+        uint256 _day;
 
-            int256 L = _days + 68569 + 2440588;
-            int256 N = (4 * L) / 146097;
+        unchecked {
+            SECONDS_PER_DAY = 24 * 60 * 60;
+            _days = _timestamp / SECONDS_PER_DAY;
+
+            L = _days + 68569 + 2440588;
+            N = (4 * L) / 146097;
             L = L - (146097 * N + 3) / 4;
-            int256 _year = (4000 * (L + 1)) / 1461001;
+            _year = (4000 * (L + 1)) / 1461001;
             L = L - (1461 * _year) / 4 + 31;
-            int256 _month = (80 * L) / 2447;
-            int256 _day = L - (2447 * _month) / 80;
+            _month = (80 * L) / 2447;
+            _day = L - (2447 * _month) / 80;
             L = _month / 11;
             _month = _month + 2 - 12 * L;
             _year = 100 * (N - 49) + _year + L;

@@ -19,7 +19,7 @@ contract OLDNFT is ERC721EnumerableUpgradeable, ICustomNFT, OwnableUpgradeable {
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
-    uint256[50] __gap;
+    uint256[50] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

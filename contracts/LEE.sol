@@ -3,16 +3,16 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
-import './interfaces/ICommonBlacklist.sol';
-import './interfaces/ILEE.sol';
+import "./interfaces/ICommonBlacklist.sol";
+import "./interfaces/ILEE.sol";
 
 contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
 
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
     ICommonBlacklist public commonBlacklist;
-    bool commonBlacklistIsSetted;
-    uint256[49] __gap;
+    bool public commonBlacklistIsSetted;
+    uint256[50] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
