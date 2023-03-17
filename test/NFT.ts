@@ -1141,6 +1141,13 @@ contract(NFTGlassesConfig.contractName, () => {
       );
     });
 
+    it("tokens Owned By User", async function () {
+      assert.equal(
+        String(await nftGlasses.tokensOwnedByUser(deployer.address)),
+        "1,8"
+      );
+    });
+
     it("USDT withdraw", async function () {
       result = await treasury.connect(treasuryGnosis).withdrawToken(
         usdt.address,

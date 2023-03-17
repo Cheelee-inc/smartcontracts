@@ -59,13 +59,31 @@ contract(`OLD${NFTGlassesConfig.contractName} Upgrade`, () => {
 
     expect(resultWaited.events[0].args.to).to.equal(gnosis.address);
     expect(resultWaited.events[0].args.tokenId).to.equal("0");
-  })
+  });
+
+  it("tokens Owned By User", async function () {
+    assert.equal(
+      String(await oldNft.tokensOwnedByUser(gnosis.address)),
+      "0"
+    );
+  });
 
   it('Upgrade old NFT', async function () {
     let NFT = await ethers.getContractFactory("NFT");
 
     nft = await upgrades.upgradeProxy(oldNft.address, NFT)
   });
+
+  it("Mint NFT 2", async() => {
+    result = await nft.connect(gnosis).safeMint(
+      gnosis.address,
+      1
+    );
+    resultWaited = await result.wait();
+
+    expect(resultWaited.events[0].args.to).to.equal(gnosis.address);
+    expect(resultWaited.events[0].args.tokenId).to.equal("1");
+  })
 
   it("Setting blacklist", async function () {
     await nft.connect(gnosis).setBlacklist(commonBlacklist.address);
@@ -92,7 +110,7 @@ contract(`OLD${NFTGlassesConfig.contractName} Upgrade`, () => {
     await expectRevert(
       nft.connect(gnosis).safeMint(
         badguy.address,
-        1
+        2
       ),
       "NFT: Blocked by global blacklist"
     );
@@ -101,7 +119,14 @@ contract(`OLD${NFTGlassesConfig.contractName} Upgrade`, () => {
   it("Balancies is correct", async function () {
     assert.equal(
       String(await nft.balanceOf(gnosis.address)),
-      "1"
+      "2"
+    );
+  });
+
+  it("tokens Owned By User", async function () {
+    assert.equal(
+      String(await oldNft.tokensOwnedByUser(gnosis.address)),
+      "0,1"
     );
   });
 });
