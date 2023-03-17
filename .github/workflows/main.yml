@@ -11,7 +11,6 @@ jobs:
       - name: Gas
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 15
           max_attempts: 3
           command: |
            yarn install
@@ -20,14 +19,12 @@ jobs:
       - name: Coverage 
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 15
           max_attempts: 3
           command: |
             npx hardhat coverage && npx istanbul check-coverage --statements 88
       - name: Solhint
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 15
           max_attempts: 3
           command: |
             npx solhint 'contracts/**/*.sol' -w 0
