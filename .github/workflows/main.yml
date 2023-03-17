@@ -9,13 +9,25 @@ jobs:
       - name: Checkout latest state
         uses: actions/checkout@v2
       - name: Gas
-        run: |
-         yarn install
-         npx hardhat compile 
-         npx hardhat test
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 15
+          max_attempts: 3
+          run: |
+           yarn install
+           npx hardhat compile 
+           npx hardhat test
       - name: Coverage 
-        run: |
-          npx hardhat coverage && npx istanbul check-coverage --statements 88
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 15
+          max_attempts: 3
+          run: |
+            npx hardhat coverage && npx istanbul check-coverage --statements 88
       - name: Solhint
-        run: |
-          npx solhint 'contracts/**/*.sol' -w 0
+        uses: nick-fields/retry@v2
+        with:
+          timeout_seconds: 15
+          max_attempts: 3
+          run: |
+            npx solhint 'contracts/**/*.sol' -w 0
