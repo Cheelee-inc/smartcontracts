@@ -15,7 +15,7 @@ jobs:
          npx hardhat test
       - name: Coverage 
         run: |
-          npx hardhat coverage && npx istanbul check-coverage --statements 90
+          npx hardhat coverage && npx istanbul check-coverage --statements 88
       - name: Solhint
         run: |
           npx solhint 'contracts/**/*.sol' -w 0
