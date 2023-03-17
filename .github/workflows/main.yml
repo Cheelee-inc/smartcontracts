@@ -12,6 +12,7 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
+          timeout_minutes: 15
           command: |
            yarn install
            npx hardhat compile 
@@ -20,11 +21,13 @@ jobs:
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
+          timeout_minutes: 15
           command: |
             npx hardhat coverage && npx istanbul check-coverage --statements 88
       - name: Solhint
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3
+          timeout_minutes: 15
           command: |
             npx solhint 'contracts/**/*.sol' -w 0
