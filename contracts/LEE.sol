@@ -98,6 +98,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
 
             commonBlacklist.limitAllows(from, to, amount);
         }
+        super._beforeTokenTransfer(from, to, amount);
     }
 
     /**

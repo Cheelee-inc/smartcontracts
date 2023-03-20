@@ -100,6 +100,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
 
             commonBlacklist.limitAllows(from, to, amount);
         }
+        super._beforeTokenTransfer(from, to, amount);
     }
 
     /**
