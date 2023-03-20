@@ -11,7 +11,6 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
     uint256 public constant MAX_AMOUNT = 7 * 10**9 * 10**18;
     address public constant GNOSIS = 0xE6e74cA74e2209A5f2272f531627f44d34AFc299;
     ICommonBlacklist public commonBlacklist;
-    bool commonBlacklistIsSetted;
     uint256[49] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -72,7 +71,6 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         ICommonBlacklist _blacklist
     ) external onlyOwner {
         commonBlacklist = _blacklist;
-        commonBlacklistIsSetted = true;
     }
 
     /**
@@ -94,7 +92,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address to,
         uint256 amount
     ) internal virtual override {
-        if (commonBlacklistIsSetted) {
+        if (address(commonBlacklist) != address(0)) {
             require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "LEE: Blocked by global blacklist");
             require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "LEE: Blocked by internal blacklist");
 
@@ -120,7 +118,7 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) internal virtual override {
-        if (commonBlacklistIsSetted) {
+        if (address(commonBlacklist) != address(0)) {
             require(!commonBlacklist.userIsBlacklisted(owner, spender, address(0)), "LEE: Blocked by global blacklist");
             require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "LEE: Blocked by internal blacklist");
         }

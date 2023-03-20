@@ -21,7 +21,6 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
     ICommonBlacklist public commonBlacklist;
-    bool commonBlacklistIsSetted;
     uint256[49] __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -156,7 +155,6 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         ICommonBlacklist _blacklist
     ) external onlyOwner {
         commonBlacklist = _blacklist;
-        commonBlacklistIsSetted = true;
     }
 
     /**
@@ -186,7 +184,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address to,
         uint256 tokenId
     ) internal virtual override {
-        if (commonBlacklistIsSetted) {
+        if (address(commonBlacklist) != address(0)) {
             require(!commonBlacklist.userIsBlacklisted(_msgSender(), from, to), "NFT: Blocked by global blacklist");
             require(!commonBlacklist.userIsInternalBlacklisted(address(this), _msgSender(), from, to), "NFT: Blocked by internal blacklist");
         }
@@ -199,7 +197,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
      * Emits an {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual override {
-        if (commonBlacklistIsSetted) {
+        if (address(commonBlacklist) != address(0)) {
             require(!commonBlacklist.userIsBlacklisted(address(0), address(0), to), "NFT: Recipient in global blacklist");
             require(!commonBlacklist.userIsInternalBlacklisted(address(this), address(0), address(0), to), "NFT: Recipient in internal blacklist");
         }
@@ -216,7 +214,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         address operator,
         bool approved
     ) internal virtual override {
-        if (commonBlacklistIsSetted) {
+        if (address(commonBlacklist) != address(0)) {
             require(!commonBlacklist.userIsBlacklisted(owner, operator, address(0)), "NFT: Blocked by global blacklist");
             require(!commonBlacklist.userIsInternalBlacklisted(address(this), owner, operator, address(0)), "NFT: Blocked by internal blacklist");
         }
