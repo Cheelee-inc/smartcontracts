@@ -419,28 +419,28 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     function _timestampToDate(
         uint256 _timestamp
     ) internal pure returns (uint256 year, uint256 month, uint256 day) {
-        uint256 SECONDS_PER_DAY;
+        uint256 _secondsPerDay;
         uint256 _days;
-        uint256 L;
-        uint256 N;
+        uint256 _l;
+        uint256 _n;
         uint256 _year;
         uint256 _month;
         uint256 _day;
 
         unchecked {
-            SECONDS_PER_DAY = 24 * 60 * 60;
-            _days = _timestamp / SECONDS_PER_DAY;
+            _secondsPerDay = 24 * 60 * 60;
+            _days = _timestamp / _secondsPerDay;
 
-            L = _days + 68569 + 2440588;
-            N = (4 * L) / 146097;
-            L = L - (146097 * N + 3) / 4;
-            _year = (4000 * (L + 1)) / 1461001;
-            L = L - (1461 * _year) / 4 + 31;
-            _month = (80 * L) / 2447;
-            _day = L - (2447 * _month) / 80;
-            L = _month / 11;
-            _month = _month + 2 - 12 * L;
-            _year = 100 * (N - 49) + _year + L;
+            _l = _days + 68569 + 2440588;
+            _n = (4 * _l) / 146097;
+            _l = _l - (146097 * _n + 3) / 4;
+            _year = (4000 * (_l + 1)) / 1461001;
+            _l = _l - (1461 * _year) / 4 + 31;
+            _month = (80 * _l) / 2447;
+            _day = _l - (2447 * _month) / 80;
+            _l = _month / 11;
+            _month = _month + 2 - 12 * _l;
+            _year = 100 * (_n - 49) + _year + _l;
 
             year = uint256(_year);
             month = uint256(_month);

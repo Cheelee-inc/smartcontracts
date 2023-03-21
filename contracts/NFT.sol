@@ -13,7 +13,9 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
+    // solhint-disable-next-line var-name-mixedcase
     string public NAME;
+    // solhint-disable-next-line var-name-mixedcase
     string public SYMBOL;
     string private baseURI;
 
