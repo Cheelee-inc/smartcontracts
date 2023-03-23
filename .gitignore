@@ -11,3 +11,4 @@ backup_openzeppelin
 #Hardhat files
 cache
 artifacts
+.openzeppelin**
