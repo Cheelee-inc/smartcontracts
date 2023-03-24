@@ -12,14 +12,16 @@ contract OLDNFT is ERC721EnumerableUpgradeable, ICustomNFT, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
+    // solhint-disable-next-line var-name-mixedcase    
     string public NAME;
+    // solhint-disable-next-line var-name-mixedcase
     string public SYMBOL;
     string private baseURI;
 
     address public nftSale;
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
-    uint256[50] __gap;
+    uint256[50] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

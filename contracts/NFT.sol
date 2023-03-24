@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import './interfaces/ICommonBlacklist.sol';
+import "./interfaces/ICommonBlacklist.sol";
 import "./interfaces/ICustomNFT.sol";
 
 contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
@@ -13,7 +13,9 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     event ReceiveNFT(address indexed receiver, uint256 indexed tokenId);
     event SetURI(string uri);
 
+    // solhint-disable-next-line var-name-mixedcase
     string public NAME;
+    // solhint-disable-next-line var-name-mixedcase
     string public SYMBOL;
     string private baseURI;
 
@@ -21,7 +23,8 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
     ICommonBlacklist public commonBlacklist;
-    uint256[49] __gap;
+    bool public commonBlacklistIsSetted;
+    uint256[49] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

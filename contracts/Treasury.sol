@@ -62,7 +62,7 @@ contract Treasury is
     address public constant GNOSIS = 0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70;
     IERC20Upgradeable[] public tokens;
     ICustomNFT[] public nfts;
-    uint256[50] __gap;
+    uint256[50] private __gap;
 
     function initialize(
         ICustomNFT _chests,

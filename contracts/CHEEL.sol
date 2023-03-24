@@ -4,15 +4,16 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import './interfaces/ICommonBlacklist.sol';
-import './interfaces/ICHEEL.sol';
+import "./interfaces/ICommonBlacklist.sol";
+import "./interfaces/ICHEEL.sol";
 
 contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
 
     uint256 public constant MAX_AMOUNT = 10**9 * 10**18;
     address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
     ICommonBlacklist public commonBlacklist;
-    uint256[49] __gap;
+    bool public commonBlacklistIsSetted;
+    uint256[49] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
