@@ -23,7 +23,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
     address public treasury;
     address public constant GNOSIS = 0xC40b7fBb7160B98323159BA800e122C9DeD0668D;
     ICommonBlacklist public commonBlacklist;
-    bool public commonBlacklistIsSetted;
+
     uint256[49] private __gap;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
