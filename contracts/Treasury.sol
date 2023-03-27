@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 
-import "./interfaces/CustomNFT.sol";
+import "./interfaces/ICustomNFT.sol";
 
 /// @title Treasury
 /// @title Smart contract used to transfer tokens from inner to outter wallet
@@ -61,17 +61,12 @@ contract Treasury is
     address public signer;
     address public constant GNOSIS = 0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70;
     IERC20Upgradeable[] public tokens;
-    CustomNFT[] public nfts;
-    uint256[50] __gap;
+    ICustomNFT[] public nfts;
+    uint256[50] private __gap;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-    
     function initialize(
-        CustomNFT _chests,
-        CustomNFT _glasses,
+        ICustomNFT _chests,
+        ICustomNFT _glasses,
         address _signer,
         IERC20Upgradeable _lee,
         IERC20Upgradeable _cheel,
@@ -247,7 +242,7 @@ contract Treasury is
     }
 
     /// @notice Add support for new NFT
-    function addNFT(CustomNFT _addr, uint256 _limit) external onlyOwner {
+    function addNFT(ICustomNFT _addr, uint256 _limit) external onlyOwner {
         require(address(_addr) != address(0), "Zero address not acceptable");
         nfts.push(_addr);
         maxNftTransfersPerDay.push(_limit);
@@ -264,7 +259,7 @@ contract Treasury is
 
     /// @notice Disable nft by index
     function disableNFT(uint256 _index) external onlyOwner {
-        nfts[_index] = CustomNFT(address(0));
+        nfts[_index] = ICustomNFT(address(0));
 
         emit DisableNFT(_index);
     }

@@ -25,4 +25,3 @@ export interface RedeemSignature {
       verifyingContract: contractAddress,
     };
   }
-  

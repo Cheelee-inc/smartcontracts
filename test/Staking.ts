@@ -1,21 +1,23 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, Signer, Contract } from "ethers";
 import { ethers } from "hardhat";
-import { CHEEL, Staking } from "../typechain";
-import { deployCHEEL, deployStaking } from "../utils/deployContracts"
+import {deployCHEEL, deployCommonBlacklist, deployStaking} from "../utils/deployContracts"
 import { increaseTime, increaseTimeDays, currentTimestamp } from "../utils/helpers"
 
 
-describe("Test", function () {
-  let cheel: CHEEL
-  let staking: Staking
+describe("Staking", function () {
+  let commonBlacklist: Contract;
+  let cheel: Contract
+  let staking: Contract
   let owner: Signer
   let user: Signer
 
   beforeEach(async ()=>{
     [owner, user] = await ethers.getSigners()
-    cheel = await deployCHEEL();
+
+    commonBlacklist = await deployCommonBlacklist();
+    cheel = await deployCHEEL(commonBlacklist.address);
     staking = await deployStaking(cheel.address);
   })
 
@@ -56,7 +58,7 @@ describe("Test", function () {
     let amountIncorrect  =    "15000000000000000000"
     let amount2Incorrect =   "100000000000000000000"
     let amount3Incorrect =   "450000000000000000000"
-    let amountSum = "5650000000000000000000"  
+    let amountSum = "5650000000000000000000"
     await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amountSum)
     await cheel.connect(user).approve(staking.address, amountSum);
 
@@ -67,9 +69,9 @@ describe("Test", function () {
     await staking.connect(user).deposit(amount, 0)
     await staking.connect(user).deposit(amount2, 1)
     await staking.connect(user).deposit(amount3, 2)
-    
+
     await increaseTime(5 * 60 * 60 / 2)
-    
+
     let earned, earned2, earned3
     earned = BigNumber.from((await staking.earned(await user.getAddress(), 0))._earned).toString()
     earned2 = BigNumber.from((await staking.earned(await user.getAddress(), 1))._earned).toString()
@@ -109,7 +111,7 @@ describe("Test", function () {
     expect((await staking.earned(await user.getAddress(), 0))[0]).not.to.be.equal(0);
     await staking.connect(user).collect(0)
     expect((await staking.earned(await user.getAddress(), 0))[0]).to.be.equal(0);
-    
+
     await increaseTimeDays(44) //not friday
 
     expect((await staking.earned(await user.getAddress(), 0))[0]).not.to.be.equal(0);
@@ -148,11 +150,11 @@ describe("Test", function () {
     await staking.connect(await getGnosisWithEther(staking)).addOption(0, 110, 0, maxValue)
     await staking.connect(await getGnosisWithEther(staking)).setOptionState(4, true)
     await expect(staking.connect(user).deposit(amount, 4)).to.be.revertedWith("Deposit for this option paused")
-    
+
     let it = await staking.getRegisteredUsersSample(0,1,3)
     it = it[0].balance
     expect(it).to.be.equal(amount);
-    
+
     it = await staking.getRegisteredUsersSample(0,1,4)
     it = it[0].balance
     expect(it).to.be.equal("0");

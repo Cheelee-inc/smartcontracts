@@ -1,15 +1,23 @@
 import { ethers, upgrades } from "hardhat";
+import {CHEELConfig, CommonBlacklistConfig} from "../config/ContractsConfig";
+
+export async function deployCommonBlacklist() {
+    const Contract = await ethers.getContractFactory(CommonBlacklistConfig.contractName);
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
+    await contract.deployed()
+    return contract
+}
 
 export async function deployLEE() {
     const Contract = await ethers.getContractFactory("LEE");
-    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }
 
 export async function deployCHEEL() {
-    const Contract = await ethers.getContractFactory("CHEEL");
-    const contract = await upgrades.deployProxy(Contract, [], {initializer: "initialize"})
+    const Contract = await ethers.getContractFactory(CHEELConfig.contractName);
+    const contract = await upgrades.deployProxy(Contract, [], { initializer: "initialize" })
     await contract.deployed()
     return contract
 }

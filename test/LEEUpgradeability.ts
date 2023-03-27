@@ -5,15 +5,15 @@ import {
   // @ts-ignore
 } from "@openzeppelin/test-helpers";
 import {contract, ethers, upgrades} from "hardhat";
-import {CHEELConfig, CommonBlacklistConfig} from "../config/ContractsConfig";
+import {LEEConfig, CommonBlacklistConfig} from "../config/ContractsConfig";
 import {parseEther} from "ethers/lib/utils";
 import {Contract} from "ethers";
 import {deployCommonBlacklist} from "../utils/deployContracts";
 import {assert, expect} from "chai";
 
-contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
-  let oldCheel: Contract;
-  let cheel: Contract;
+contract(`OLD${LEEConfig.contractName} Upgrade`, () => {
+  let oldLee: Contract;
+  let lee: Contract;
   let commonBlacklist: Contract;
   let gnosis: SignerWithAddress;
   let blacklistGnosis: SignerWithAddress;
@@ -25,20 +25,20 @@ contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
   let BLACKLIST_OPERATOR_ROLE: string;
 
   before(async () => {
-    // Deploy OLDCHEEL
-    const OLDCHEEL = await ethers.getContractFactory("OLDCHEEL");
-    oldCheel = await upgrades.deployProxy(OLDCHEEL, [], { initializer: "initialize" });
-    await oldCheel.deployed();
+    // Deploy OLDLEE
+    const OLDLEE = await ethers.getContractFactory("OLDLEE");
+    oldLee = await upgrades.deployProxy(OLDLEE, [], { initializer: "initialize" });
+    await oldLee.deployed();
 
     // Deploy Common Blacklist
     commonBlacklist = await deployCommonBlacklist();
 
     // Creating GNOSIS
     [etherHolder, deployer, receiver, badguy, moderator] = await ethers.getSigners();
-    gnosis = await ethers.getImpersonatedSigner(CHEELConfig.multiSigAddress)
+    gnosis = await ethers.getImpersonatedSigner(LEEConfig.multiSigAddress)
     blacklistGnosis = await ethers.getImpersonatedSigner(CommonBlacklistConfig.multiSigAddress)
     await etherHolder.sendTransaction({
-      to: CHEELConfig.multiSigAddress,
+      to: LEEConfig.multiSigAddress,
       value: ethers.utils.parseEther("1")
     })
     await etherHolder.sendTransaction({
@@ -51,30 +51,28 @@ contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
 
   it("Mint tokens", async function () {
 
-    await oldCheel.connect(gnosis).mint(
+    await oldLee.connect(gnosis).mint(
       deployer.address,
       parseEther("1000000")
     );
 
-    await oldCheel.connect(gnosis).mint(
+    await oldLee.connect(gnosis).mint(
       badguy.address,
       parseEther("1000000")
     );
   });
 
   it('Upgrade to new CHEEL version', async function () {
-    const CHEEL = await ethers.getContractFactory(CHEELConfig.contractName);
+    const LEE = await ethers.getContractFactory(LEEConfig.contractName);
 
-    cheel = await upgrades.upgradeProxy(oldCheel.address, CHEEL)
+    lee = await upgrades.upgradeProxy(oldLee.address, LEE)
   });
 
   it("Setting blacklist", async function () {
-    await cheel.connect(gnosis).setBlacklist(commonBlacklist.address);
+    await lee.connect(gnosis).setBlacklist(commonBlacklist.address);
   });
 
   it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
-    expect((await cheel.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
-
     await commonBlacklist.connect(blacklistGnosis).grantRole(
       BLACKLIST_OPERATOR_ROLE,
       moderator.address
@@ -82,6 +80,8 @@ contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
   });
 
   it("Adding badguy for common blacklist", async function () {
+    expect((await lee.commonBlacklist()).toUpperCase()).to.equal(commonBlacklist.address.toUpperCase());
+
     await commonBlacklist.connect(moderator).addUsersToBlacklist(
       [badguy.address]
     );
@@ -89,33 +89,44 @@ contract(`OLD${CHEELConfig.contractName} Upgrade`, () => {
     assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
   });
 
+
   it("New function added works", async function () {
     await expectRevert(
-      cheel.connect(badguy).transfer(
+      lee.connect(badguy).transfer(
         deployer.address,
         parseEther("1000000")
       ),
-      "CHEEL: Blocked by global blacklist"
+      "LEE: Blocked by global blacklist"
     );
 
     await expectRevert(
-      cheel.connect(gnosis).transferFrom(
+      lee.connect(gnosis).transferFrom(
         badguy.address,
         deployer.address,
         parseEther("1000000")
       ),
       "ERC20: insufficient allowance"
     );
-  });
 
-  it("Balancies is correct", async function () {
     assert.equal(
-      String(await cheel.balanceOf(deployer.address)),
+      String(await lee.balanceOf(deployer.address)),
       parseEther("1000000").toString()
     );
 
     assert.equal(
-      String(await cheel.balanceOf(badguy.address)),
+      String(await lee.balanceOf(badguy.address)),
+      parseEther("1000000").toString()
+    );
+  });
+
+  it("Balancies is correct", async function () {
+    assert.equal(
+      String(await lee.balanceOf(deployer.address)),
+      parseEther("1000000").toString()
+    );
+
+    assert.equal(
+      String(await lee.balanceOf(badguy.address)),
       parseEther("1000000").toString()
     );
   });
