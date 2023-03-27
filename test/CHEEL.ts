@@ -894,7 +894,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("9000000").toString()
+        parseEther("8000000").toString()
       );
     });
   });
