@@ -174,6 +174,18 @@ contract(CHEELConfig.contractName, () => {
   });
 
   describe("Global Blacklist", async () => {
+
+
+    it("Adding varybadguy for common blacklist", async function () {
+      await commonBlacklist.connect(blacklistGnosis).addUsersToBlacklist(
+        [varybadguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+    });
+
     it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
       result = await commonBlacklist.connect(blacklistGnosis).grantRole(
         BLACKLIST_OPERATOR_ROLE,
@@ -184,16 +196,6 @@ contract(CHEELConfig.contractName, () => {
       expect(resultWaited.events[0].args.role).to.equal(BLACKLIST_OPERATOR_ROLE);
       expect(resultWaited.events[0].args.account).to.equal(moderator.address);
       assert.equal(await commonBlacklist.hasRole(BLACKLIST_OPERATOR_ROLE, moderator.address), true);
-    });
-
-    it("Adding varybadguy for common blacklist", async function () {
-      await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
-      );
-
-      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
-      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("Blocking transactions for users in common blacklist", async function () {
@@ -762,10 +764,10 @@ contract(CHEELConfig.contractName, () => {
         "Spender has reached the day limit"
       );
 
-      // assert.equal(
-      //   String(await commonBlacklist.getUserTokenTransfers(cheel.address, deployer.address)),
-      //     `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
-      // );
+      assert.equal(
+        String(await commonBlacklist.getUserTokenTransfers(cheel.address, deployer.address)),
+          `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
+      );
 
       await expectRevert(
         cheel.connect(deployer).transfer(
@@ -785,23 +787,23 @@ contract(CHEELConfig.contractName, () => {
       );
 
       // Getting Remaining limit
-      // assert.equal(
-      //   String(await commonBlacklist.getUserRemainingLimit(cheel.address, deployer.address)),
-      //   `${parseEther("1000000").toString()},${parseEther("3000000").toString()},0,0`
-      // );
+      assert.equal(
+        String(await commonBlacklist.getUserRemainingLimit(cheel.address, deployer.address)),
+        `${parseEther("1000000").toString()},${parseEther("3000000").toString()},0,0`
+      );
 
-      // assert.equal(
-      //   String(await commonBlacklist.getUserRemainingLimit(cheel.address, receiver.address)),
-      //   `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
-      // );
+      assert.equal(
+        String(await commonBlacklist.getUserRemainingLimit(cheel.address, receiver.address)),
+        `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
+      );
 
-      // await expectRevert(
-      //   cheel.connect(deployer).transfer(
-      //     receiver.address,
-      //     parseEther("1000000")
-      //   ),
-      //   "Spender has reached the month limit"
-      // );
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1000000")
+        ),
+        "Spender has reached the month limit"
+      );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
         cheel.address,
@@ -811,13 +813,13 @@ contract(CHEELConfig.contractName, () => {
         false
       );
 
-      // await expectRevert(
-      //   cheel.connect(deployer).transfer(
-      //     receiver.address,
-      //     parseEther("1000000")
-      //   ),
-      //   "Recipient has reached the month limit"
-      // );
+      await expectRevert(
+        cheel.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1000000")
+        ),
+        "Recipient has reached the month limit"
+      );
 
       assert.equal(
         String(await cheel.balanceOf(deployer.address)),

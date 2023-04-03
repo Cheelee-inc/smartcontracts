@@ -752,23 +752,23 @@ contract(LEEConfig.contractName, () => {
       );
 
       // Getting Remaining limit
-      // assert.equal(
-      //   String(await commonBlacklist.getUserRemainingLimit(lee.address, deployer.address)),
-      //   `${parseEther("1000000").toString()},${parseEther("3000000").toString()},0,0`
-      // );
-      //
-      // assert.equal(
-      //   String(await commonBlacklist.getUserRemainingLimit(lee.address, receiver.address)),
-      //   `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
-      // );
-      //
-      // await expectRevert(
-      //   lee.connect(deployer).transfer(
-      //     receiver.address,
-      //     parseEther("1000000")
-      //   ),
-      //   "Spender has reached the month limit"
-      // );
+      assert.equal(
+        String(await commonBlacklist.getUserRemainingLimit(lee.address, deployer.address)),
+        `${parseEther("1000000").toString()},${parseEther("3000000").toString()},0,0`
+      );
+
+      assert.equal(
+        String(await commonBlacklist.getUserRemainingLimit(lee.address, receiver.address)),
+        `0,0,${parseEther("1000000").toString()},${parseEther("3000000").toString()}`
+      );
+
+      await expectRevert(
+        lee.connect(deployer).transfer(
+          receiver.address,
+          parseEther("1000000")
+        ),
+        "Spender has reached the month limit"
+      );
 
       await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
         lee.address,
