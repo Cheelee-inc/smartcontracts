@@ -2,9 +2,10 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { MultiVesting } from "../typechain";
-import {deployCHEEL, deployCommonBlacklist, deployMultiVesting} from "../utils/deployContracts"
+import {deployCHEEL, deployMultiVesting} from "../utils/deployContracts"
 import { currentTimestamp, increaseTime } from "../utils/helpers"
 import {Contract} from "ethers";
+
 
 describe("MultiVesting", function () {
   let commonBlacklist: Contract;
@@ -182,7 +183,7 @@ describe("MultiVesting", function () {
     await vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 0, 50)
   })
 
-  it("Vesting created for passed timestamp", async () => {
+  it("Vesting created for passed timestamp (duration >= cliff)", async () => {
     let day = 60 * 60 & 24
     let sixtyDays = day * 60
     let currentTime = await currentTimestamp()
@@ -199,5 +200,21 @@ describe("MultiVesting", function () {
 
     expect((await vesting.releasable(await receiver.getAddress(), currentTime))[1]).to.be.equal(1000)
     expect((await vesting.releasable(await receiver2.getAddress(), currentTime))[1]).to.be.equal(1000)
+  })
+
+  it("Vesting created for passed timestamp (duration < cliff)", async () => {
+    let day = 60 * 60 & 24
+    let sixtyDays = day * 60
+    let seventyDays = day * 70
+    let currentTime = await currentTimestamp()
+    let oldTimestamp = currentTime - sixtyDays
+    let getDay = (num: number) => {return oldTimestamp + num * day}
+
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(receiver.address, oldTimestamp, sixtyDays, 1000, seventyDays)
+
+    //should work
+    expect((await vesting.releasable(await receiver.getAddress(), getDay(69)))[0].toNumber()).to.be.equal(0)
+    expect((await vesting.releasable(await receiver.getAddress(), getDay(71)))[0].toNumber()).to.be.equal(1000)
   })
 })
