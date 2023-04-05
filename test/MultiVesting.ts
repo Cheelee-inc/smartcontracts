@@ -181,4 +181,23 @@ describe("MultiVesting", function () {
     console.log("can update vest when cliff less than older and amount = 0");
     await vesting.vest(await receiver4.getAddress(), await currentTimestamp(), 1000, 0, 50)
   })
+
+  it("Vesting created for passed timestamp", async () => {
+    let day = 60 * 60 & 24
+    let sixtyDays = day * 60
+    let currentTime = await currentTimestamp()
+    let oldTimestamp = currentTime - sixtyDays
+
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(receiver.address, oldTimestamp, sixtyDays, 1000, sixtyDays + 10)
+
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(receiver2.address, oldTimestamp, sixtyDays, 1000, sixtyDays - 10)
+
+    expect((await vesting.releasable(await receiver.getAddress(), currentTime - 5))[0].toNumber()).to.be.equal(0)
+    expect((await vesting.releasable(await receiver2.getAddress(), currentTime - 5))[0].toNumber()).to.be.greaterThanOrEqual(950)
+
+    expect((await vesting.releasable(await receiver.getAddress(), currentTime))[1]).to.be.equal(1000)
+    expect((await vesting.releasable(await receiver2.getAddress(), currentTime))[1]).to.be.equal(1000)
+  })
 })
