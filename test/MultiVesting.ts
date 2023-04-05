@@ -18,35 +18,61 @@ describe("MultiVesting", function () {
   let gnosisCheel: SignerWithAddress
   let gnosisMV: SignerWithAddress
 
-  before(async()=>{
+  before(async() => {
     [owner, receiver, receiver2, receiver3, receiver4] = await ethers.getSigners()
 
-    commonBlacklist = await deployCommonBlacklist()
-    cheel = await deployCHEEL(commonBlacklist.address)
+    cheel = await deployCHEEL()
     vesting = await deployMultiVesting(cheel.address, true, true)
 
     gnosisMV = await ethers.getImpersonatedSigner(await vesting.GNOSIS())
-    await owner.sendTransaction({to: gnosisMV.address,value: ethers.utils.parseEther("0.3")})
     gnosisCheel = await ethers.getImpersonatedSigner(await cheel.GNOSIS())
-    await owner.sendTransaction({to: gnosisCheel.address,value: ethers.utils.parseEther("0.3")})
+
+    await owner.sendTransaction({to: gnosisMV.address,value: ethers.utils.parseEther("0.3")})
+    await owner.sendTransaction({to: gnosisCheel.address,value: ethers.utils.parseEther("0.3")})    
+  })
+
+  beforeEach(async()=>{
+    cheel = await deployCHEEL()
+    vesting = await deployMultiVesting(cheel.address, true, true)
 
     await vesting.connect(gnosisMV).setSeller(await owner.getAddress())
+  })
+
+  it("Vest and sumVesting work", async() => {
+    expect(await vesting.sumVesting()).to.be.equal(0)
     await expect(vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)).to.be.revertedWith("Not enough tokens")
-    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    expect(await vesting.sumVesting()).to.be.equal(0)
+    
+    await cheel.connect(gnosisCheel).mint(await vesting.address, 1000)
+ 
+    expect(await vesting.sumVesting()).to.be.equal(0)
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, 1000, 100)
+    expect(await vesting.sumVesting()).to.be.equal(1000)
+
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, 1000, 100)
+    expect(await vesting.sumVesting()).to.be.equal(2000)
   })
 
   it("Cliff works", async() => {
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(await owner.address, await currentTimestamp()-1, 1000, 1000, 100)
+
     await increaseTime(50)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(0)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(52)
+    
     await increaseTime(50)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(102)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(102)
   })
 
   it("Releasable And VestedAmount works works", async() => {
+    await cheel.connect(gnosisCheel).mint(vesting.address, 1000)
+    await vesting.vest(owner.address, await currentTimestamp()-1, 1000, 1000, 100)
 
+    await increaseTime(100)
+    
     expect((await vesting.vestedAmountBeneficiary(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(102)
     expect((await vesting.vestedAmountBeneficiary(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
 
@@ -61,19 +87,20 @@ describe("MultiVesting", function () {
     await increaseTime(899)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(897)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
-
+    
     await increaseTime(1000)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(897)
-    expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
+    expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
 
     await vesting.release(await owner.getAddress())
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(0)
-    expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
+    expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)    
     expect((await vesting.vestedAmountBeneficiary(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(1000)
     expect((await vesting.vestedAmountBeneficiary(await owner.getAddress(), await currentTimestamp()))[1]).to.be.equal(1000)
     expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), await currentTimestamp()))[0]).to.be.equal(0)
     expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), await currentTimestamp()))[1]).to.be.equal(0)
   })
+
 
   it("Blocking works", async()=>{
     let amount = 1000
@@ -81,7 +108,7 @@ describe("MultiVesting", function () {
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
     await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, 1000, 100)
 
-    let fakeToken = await deployCHEEL(commonBlacklist.address)
+    let fakeToken = await deployCHEEL()
 
     await fakeToken.connect(gnosisCheel).mint(vesting.address, 1000)
     expect(await fakeToken.balanceOf(gnosisMV.address)).to.be.equal(0)
@@ -103,6 +130,8 @@ describe("MultiVesting", function () {
   it("change beneficiary works", async() => {
     console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
     await cheel.connect(gnosisCheel).mint(vesting.address, 2000)
+    await vesting.connect(owner).vest(owner.address, await currentTimestamp()-1, 1000, 1000, 100)
+
     console.log(await cheel.balanceOf(vesting.address), await vesting.sumVesting());
     await expect(vesting.connect(receiver2).updateBeneficiary(receiver2.address, receiver4.address)).to.be.revertedWith("Not a beneficiary")
     await vesting.connect(owner).updateBeneficiary(owner.address, receiver4.address)
