@@ -212,4 +212,32 @@ describe("MultiVesting", function () {
     expect((await vesting.releasable(await receiver.getAddress(), getDay(69)))[0].toNumber()).to.be.equal(0)
     expect((await vesting.releasable(await receiver.getAddress(), getDay(71)))[0].toNumber()).to.be.equal(amount)
   })
+
+  it("change amount of recepient", async () => {
+    let currentTime = await currentTimestamp()
+    
+    await cheel.connect(gnosisCheel).mint(vesting.address, amount*3)
+    await vesting.connect(owner).vest(receiver.address, currentTime, getDay(3), amount, getDay(5))
+
+    expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), currentTime))[1].toNumber()).to.be.equal(amount)
+
+    await vesting.connect(gnosisMV).updateBeneficiary(receiver.address, receiver2.address)
+    await increaseTime(110)
+    await vesting.connect(gnosisMV).finishUpdateBeneficiary(receiver.address)
+
+    expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), await currentTimestamp()))[1].toNumber()).to.be.equal(0)
+    expect((await vesting.vestedAmountBeneficiary(await receiver2.getAddress(), await currentTimestamp()))[1].toNumber()).to.be.equal(amount)
+
+    await vesting.connect(owner).vest(receiver.address, currentTime, getDay(3), amount*2, getDay(5) + 2)
+    await vesting.connect(owner).vest(receiver2.address, currentTime, 2, 0, 2)
+
+    expect((await vesting.vestedAmountBeneficiary(await receiver.getAddress(), await currentTimestamp()))[1].toNumber()).to.be.equal(amount*2)
+    expect((await vesting.vestedAmountBeneficiary(await receiver2.getAddress(), await currentTimestamp()))[1].toNumber()).to.be.equal(amount)
+    
+    await increaseTime(10) 
+
+    expect(await cheel.balanceOf(await receiver2.getAddress())).to.be.equal(0)
+    await vesting.release(await receiver2.getAddress())
+    expect(await cheel.balanceOf(await receiver2.getAddress())).to.be.equal(1000)
+  })
 })
