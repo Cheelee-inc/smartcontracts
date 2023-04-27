@@ -11,6 +11,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-prettier"
 import '@openzeppelin/hardhat-upgrades';
+import "@rumblefishdev/hardhat-kms-signer";
 
 dotenv.config();
 
