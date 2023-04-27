@@ -174,6 +174,18 @@ contract(CHEELConfig.contractName, () => {
   });
 
   describe("Global Blacklist", async () => {
+
+
+    it("Adding varybadguy for common blacklist", async function () {
+      await commonBlacklist.connect(blacklistGnosis).addUsersToBlacklist(
+        [varybadguy.address]
+      );
+
+      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+    });
+
     it("Grant BLACKLIST_OPERATOR_ROLE for moderator", async function () {
       result = await commonBlacklist.connect(blacklistGnosis).grantRole(
         BLACKLIST_OPERATOR_ROLE,
@@ -184,16 +196,6 @@ contract(CHEELConfig.contractName, () => {
       expect(resultWaited.events[0].args.role).to.equal(BLACKLIST_OPERATOR_ROLE);
       expect(resultWaited.events[0].args.account).to.equal(moderator.address);
       assert.equal(await commonBlacklist.hasRole(BLACKLIST_OPERATOR_ROLE, moderator.address), true);
-    });
-
-    it("Adding varybadguy for common blacklist", async function () {
-      await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
-      );
-
-      assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
-      assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("Blocking transactions for users in common blacklist", async function () {
