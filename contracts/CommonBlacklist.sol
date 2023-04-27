@@ -65,6 +65,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
 
         transferOwnership(GNOSIS);
         _setupRole(DEFAULT_ADMIN_ROLE, GNOSIS);
+        _setupRole(BLACKLIST_OPERATOR_ROLE, GNOSIS);
     }
 
     /**
