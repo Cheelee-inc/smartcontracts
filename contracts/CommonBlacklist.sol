@@ -39,10 +39,10 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
     mapping(address => bool) public contractsExclusionList;
 
     // Events
-    event SetTokenLimit(address token, uint256 inComeDayLimit, uint256 inComeMonthLimit, uint256 outComeDayLimit, uint256 outComeMonthLimit);
-    event SetTokenLimitStatus(address token, bool hasInComeDayLimit, bool hasInComeMonthLimit, bool hasOutComeDayLimit, bool hasOutComeMonthLimit);
-    event AddToExclusionList(address token);
-    event RemoveFromExclusionList(address token);
+    event SetTokenLimit(address indexed token, uint256 inComeDayLimit, uint256 inComeMonthLimit, uint256 outComeDayLimit, uint256 outComeMonthLimit);
+    event SetTokenLimitStatus(address indexed token, bool hasInComeDayLimit, bool hasInComeMonthLimit, bool hasOutComeDayLimit, bool hasOutComeMonthLimit);
+    event AddToExclusionList(address indexed token);
+    event RemoveFromExclusionList(address indexed token);
 
     uint256[50] private __gap;
 
@@ -210,8 +210,8 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
      * @notice Function returns current day
      */
     function getCurrentDay() public view returns(uint256) {
-        (,, uint256 day) = _timestampToDate(block.timestamp);
-        return getCurrentMonth() * 100 + day;
+        (uint256 year, uint256 month, uint256 day) = _timestampToDate(block.timestamp);
+        return (year * 100 + month) * 100 + day;
     }
 
     /**
