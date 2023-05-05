@@ -44,18 +44,18 @@ const config: HardhatUserConfig = {
   },
   // defaultNetwork: "goerli",
   networks: {
-    // binanceTestnet: {
-    //   url: process.env.ROPSTEN_URL || "",
-    //   accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    // },
-    // rinkeby: {
-    //   url: process.env.RINKEBY_URL || "",
-    //   accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    // },
-    // goerli: {
-    //   url: process.env.GOERLI_URL || "",
-    //   accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-    // },
+    binanceTestnet: {
+      url: process.env.ROPSTEN_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    rinkeby: {
+      url: process.env.RINKEBY_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    goerli: {
+      url: process.env.GOERLI_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     truffle: {
       url: "http://localhost:24012/rpc",
       timeout: 60000,
