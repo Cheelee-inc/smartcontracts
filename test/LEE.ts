@@ -412,10 +412,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.inComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.inComeMonthLimit).to.equal(parseEther("1500000").toString());
-      expect(resultWaited.events[0].args.outComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.outComeMonthLimit).to.equal(parseEther("1500000").toString());
+      expect(resultWaited.events[0].args.dailyIncomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyIncomeLimit).to.equal(parseEther("1500000").toString());
+      expect(resultWaited.events[0].args.dailyOutcomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyOutcomeLimit).to.equal(parseEther("1500000").toString());
 
       result = await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
         lee.address,
@@ -428,10 +428,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.hasInComeDayLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasInComeMonthLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasOutComeDayLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasOutComeMonthLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasDailyIncomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasMonthlyIncomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasDailyOutcomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasMonthlyOutcomeLimit).to.equal(true);
 
       assert.equal(
         String(await commonBlacklist.getTokenLimits(lee.address)),
@@ -607,10 +607,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.inComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.inComeMonthLimit).to.equal(parseEther("3000000").toString());
-      expect(resultWaited.events[0].args.outComeDayLimit).to.equal(parseEther("500000").toString());
-      expect(resultWaited.events[0].args.outComeMonthLimit).to.equal(parseEther("3000000").toString());
+      expect(resultWaited.events[0].args.dailyIncomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyIncomeLimit).to.equal(parseEther("3000000").toString());
+      expect(resultWaited.events[0].args.dailyOutcomeLimit).to.equal(parseEther("500000").toString());
+      expect(resultWaited.events[0].args.monthlyOutcomeLimit).to.equal(parseEther("3000000").toString());
 
       assert.equal(
         String(await commonBlacklist.getTokenLimits(lee.address)),
