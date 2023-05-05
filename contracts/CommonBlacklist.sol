@@ -113,10 +113,12 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _token,
         address[] memory _users
     ) external onlyBlacklistOperator {
+        mapping(address => bool) storage tokenInternalBlacklist = internalBlacklist[_token];
+
         for (uint i; i < _users.length; i++) {
             require(_users[i] != address(0), "Cannot be zero address");
 
-            internalBlacklist[_token][_users[i]] = true;
+            tokenInternalBlacklist[_users[i]] = true;
         }
     }
 
@@ -166,7 +168,9 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         address _from,
         address _to
     ) external view returns(bool) {
-        return internalBlacklist[_token][_sender] || internalBlacklist[_token][_from] || internalBlacklist[_token][_to];
+        mapping(address => bool) storage tokenInternalBlacklist = internalBlacklist[_token];
+
+        return tokenInternalBlacklist[_sender] || tokenInternalBlacklist[_from] || tokenInternalBlacklist[_to];
     }
 
     /**
@@ -212,7 +216,7 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
      */
     function getCurrentDay() public view returns(uint256) {
         (uint256 year, uint256 month, uint256 day) = _timestampToDate(block.timestamp);
-        return year * 10000 + month * 100 + day;
+        return year * 10_000 + month * 100 + day;
     }
 
     /**
@@ -295,30 +299,31 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
 
         require(!contractsExclusionList[_from] || !contractsExclusionList[_to], "Contract excluded");
 
-        TokenLimitDisabling memory _limits = tokensWithLimits[_token];
+        TokenLimitDisabling storage _limits = tokensWithLimits[_token];
+        mapping(address => mapping(uint256 => TokenTransfers)) storage _tokenTransferDay = tokenTransfers[_token];
 
         if (_limits.hasOutComeDayLimit) {
-            require(tokenTransfers[_token][_from][currentDay].outCome + _amount <= tokenLimits[_token].outComeDay, "Spender has reached the day limit");
+            require(_tokenTransferDay[_from][currentDay].outCome + _amount <= tokenLimits[_token].outComeDay, "Spender has reached the day limit");
 
-            tokenTransfers[_token][_from][currentDay].outCome += _amount;
+            _tokenTransferDay[_from][currentDay].outCome += _amount;
         }
 
         if (_limits.hasOutComeMonthLimit) {
-            require(tokenTransfers[_token][_from][currentMonth].outCome + _amount <= tokenLimits[_token].outComeMonth, "Spender has reached the month limit");
+            require(_tokenTransferDay[_from][currentMonth].outCome + _amount <= tokenLimits[_token].outComeMonth, "Spender has reached the month limit");
 
-            tokenTransfers[_token][_from][currentMonth].outCome += _amount;
+            _tokenTransferDay[_from][currentMonth].outCome += _amount;
         }
 
         if (_limits.hasInComeDayLimit) {
-            require(tokenTransfers[_token][_to][currentDay].inCome + _amount <= tokenLimits[_token].inComeDay, "Recipient has reached the day limit");
+            require(_tokenTransferDay[_to][currentDay].inCome + _amount <= tokenLimits[_token].inComeDay, "Recipient has reached the day limit");
 
-            tokenTransfers[_token][_to][currentDay].inCome += _amount;
+            _tokenTransferDay[_to][currentDay].inCome += _amount;
         }
 
         if (_limits.hasInComeMonthLimit) {
-            require(tokenTransfers[_token][_to][currentMonth].inCome + _amount <= tokenLimits[_token].inComeMonth, "Recipient has reached the month limit");
+            require(_tokenTransferDay[_to][currentMonth].inCome + _amount <= tokenLimits[_token].inComeMonth, "Recipient has reached the month limit");
 
-            tokenTransfers[_token][_to][currentMonth].inCome += _amount;
+            _tokenTransferDay[_to][currentMonth].inCome += _amount;
         }
     }
 
