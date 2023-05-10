@@ -8,6 +8,10 @@ jobs:
     steps:
       - name: Checkout latest state
         uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
       - name: Gas
         uses: nick-fields/retry@v2
         with:
@@ -15,8 +19,8 @@ jobs:
           timeout_minutes: 15
           command: |
            yarn install
-           yarn compile 
-           yarn test
+           npx hardhat compile 
+           npx hardhat test
       - name: Coverage
         uses: nick-fields/retry@v2
         with:
