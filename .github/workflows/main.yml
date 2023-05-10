@@ -15,9 +15,9 @@ jobs:
           timeout_minutes: 15
           command: |
            yarn install
-           npx hardhat compile 
-           npx hardhat test
-      - name: Coverage 
+           yarn compile 
+           yarn test
+      - name: Coverage
         uses: nick-fields/retry@v2
         with:
           max_attempts: 3

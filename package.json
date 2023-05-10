@@ -70,8 +70,9 @@
     "tupgrade-contract:cheel": "npx hardhat run --network truffle scripts/16_upgrade_cheel.ts",
     "tupgrade-contract:glasses": "npx hardhat run --network truffle scripts/17_upgrade_nft_glasses.ts",
     "tupgrade-contract:cases": "npx hardhat run --network truffle scripts/18_upgrade_nft_cases.ts",
-    "test": "hardhat test",
     "verify": "hardhat verify --constructor-args config/ContractArguments.ts",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
     "test-gas": "REPORT_GAS=1 hardhat test"
   }
 }
