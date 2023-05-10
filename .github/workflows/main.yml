@@ -8,10 +8,10 @@ jobs:
     steps:
       - name: Checkout latest state
         uses: actions/checkout@v2
-      - name: Install node
-        uses: actions/setup-node@v2
+      - name: Use node
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.x
       - name: Gas
         uses: nick-fields/retry@v2
         with:
