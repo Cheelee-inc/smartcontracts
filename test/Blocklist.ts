@@ -58,7 +58,7 @@ contract("Blacklist", () => {
         expect(await cheel.balanceOf(user.address)).to.be.equal(200)
     })
 
-    it("Underflow2", async() => {
+    it("Underflow", async() => {
         await cheel.connect(cheelGnosis).setBlacklist(commonBlacklist.address);
         await cheel.connect(cheelGnosis).mint(owner.address, 400)
 
