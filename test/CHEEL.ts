@@ -22,6 +22,7 @@ contract(CHEELConfig.contractName, () => {
   let badguy: SignerWithAddress;
   let moderator: SignerWithAddress;
   let varybadguy: SignerWithAddress;
+  let exclusionContract: SignerWithAddress;
   let BLACKLIST_OPERATOR_ROLE: string;
   let result: any;
   let resultWaited: any;
@@ -34,7 +35,7 @@ contract(CHEELConfig.contractName, () => {
     cheel = await deployCHEEL();
 
     // Creating GNOSIS
-    [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();
+    [etherHolder, deployer, receiver, badguy, moderator, varybadguy, exclusionContract] = await ethers.getSigners();
     gnosis = await ethers.getImpersonatedSigner(CHEELConfig.multiSigAddress)
     blacklistGnosis = await ethers.getImpersonatedSigner(CommonBlacklistConfig.multiSigAddress)
     await etherHolder.sendTransaction({
@@ -92,9 +93,14 @@ contract(CHEELConfig.contractName, () => {
         parseEther("3000000")
       );
 
+      await cheel.connect(gnosis).mint(
+        exclusionContract.address,
+        parseEther("3000000")
+      );
+
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("10000000").toString()
+        parseEther("13000000").toString()
       );
 
       assert.equal(
@@ -121,6 +127,11 @@ contract(CHEELConfig.contractName, () => {
         String(await cheel.balanceOf(badguy.address)),
         parseEther("3000000").toString()
       );
+
+      assert.equal(
+        String(await cheel.balanceOf(exclusionContract.address)),
+        parseEther("3000000").toString()
+      );
     });
 
     it("Burn tokens", async function () {
@@ -135,7 +146,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("9000000").toString()
+        parseEther("12000000").toString()
       );
     });
 
@@ -833,6 +844,44 @@ contract(CHEELConfig.contractName, () => {
         parseEther("2000000").toString()
       );
     });
+
+    it("Testing Exclusion list", async function () {
+      await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
+        cheel.address,
+        true,
+        true,
+        true,
+        true
+      );
+
+      await expectRevert(
+        cheel.connect(exclusionContract).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "Spender has reached the day limit"
+      );
+
+      await commonBlacklist.connect(moderator).addContractToExclusionList(exclusionContract.address);
+
+      await expectRevert(
+        cheel.connect(exclusionContract).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "Recipient has reached the day limit"
+      );
+
+      await commonBlacklist.connect(moderator).removeContractFromExclusionList(exclusionContract.address);
+
+      await expectRevert(
+        cheel.connect(exclusionContract).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "Spender has reached the day limit"
+      );
+    });
   });
 
   describe("Restrictions:", async () => {
@@ -857,7 +906,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("9000000").toString()
+        parseEther("12000000").toString()
       );
     });
 
@@ -876,7 +925,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("9000000").toString()
+        parseEther("12000000").toString()
       );
     });
 
@@ -896,7 +945,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.totalSupply()),
-        parseEther("9000000").toString()
+        parseEther("12000000").toString()
       );
     });
   });
