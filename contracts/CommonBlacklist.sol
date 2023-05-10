@@ -312,13 +312,13 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
             _tokenTransferDay[_from][currentMonth].outcome += _amount;
         }
 
-        if (_limits.hasDailyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
+        if (_limits.hasDailyIncomeLimit && !contractsExclusionList[_to]) {
             require(_tokenTransferDay[_to][currentDay].income + _amount <= tokenLimits[_token].dailyIncome, "Recipient has reached the day limit");
 
             _tokenTransferDay[_to][currentDay].income += _amount;
         }
 
-        if (_limits.hasMonthlyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
+        if (_limits.hasMonthlyIncomeLimit && !contractsExclusionList[_to]) {
             require(_tokenTransferDay[_to][currentMonth].income + _amount <= tokenLimits[_token].monthlyIncome, "Recipient has reached the month limit");
 
             _tokenTransferDay[_to][currentMonth].income += _amount;

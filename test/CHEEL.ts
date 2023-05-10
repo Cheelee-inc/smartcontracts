@@ -895,9 +895,12 @@ contract(CHEELConfig.contractName, () => {
       );
 
       // Excluded contract outcome transaction
-      result = await cheel.connect(exclusionContract).transfer(
-        receiver.address,
-        parseEther("1500000")
+      await expectRevert(
+        cheel.connect(exclusionContract).transfer(
+          receiver.address,
+          parseEther("1500000")
+        ),
+        "Recipient has reached the day limit"
       );
 
       // Getting Remaining limit
@@ -940,7 +943,7 @@ contract(CHEELConfig.contractName, () => {
 
       assert.equal(
         String(await cheel.balanceOf(receiver.address)),
-        parseEther("6500000").toString()
+        parseEther("5000000").toString()
       );
 
       assert.equal(
