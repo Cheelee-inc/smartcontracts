@@ -7,28 +7,28 @@ interface ICommonBlacklist {
      * @notice Limits struct
      */
     struct TokenLimit {
-        uint256 inComeDay;
-        uint256 inComeMonth;
-        uint256 outComeDay;
-        uint256 outComeMonth;
+        uint256 dailyIncome;
+        uint256 monthlyIncome;
+        uint256 dailyOutcome;
+        uint256 monthlyOutcome;
     }
 
     /**
      * @notice Limits struct
      */
     struct TokenTransfers {
-        uint256 inCome;
-        uint256 outCome;
+        uint256 income;
+        uint256 outcome;
     }
 
     /**
      * @notice Limits disabling struct
      */
     struct TokenLimitDisabling {
-        bool hasInComeDayLimit;
-        bool hasInComeMonthLimit;
-        bool hasOutComeDayLimit;
-        bool hasOutComeMonthLimit;
+        bool hasDailyIncomeLimit;
+        bool hasMonthlyIncomeLimit;
+        bool hasDailyOutcomeLimit;
+        bool hasMonthlyOutcomeLimit;
     }
 
     /**
@@ -131,20 +131,20 @@ interface ICommonBlacklist {
     /**
      * @notice Setting token limits
      * @param _token: address of token contract
-     * @param _inComeDayLimit: day limit for income token transfer
-     * @param _inComeMonthLimit: month limit for income token transfer
-     * @param _outComeDayLimit: day limit for outcome token transfer
-     * @param _outComeMonthLimit: month limit for outcome token transfer
+     * @param _dailyIncomeLimit: day limit for income token transfer
+     * @param _monthlyIncomeLimit: month limit for income token transfer
+     * @param _dailyOutcomeLimit: day limit for outcome token transfer
+     * @param _monthlyOutcomeLimit: month limit for outcome token transfer
      *
      * @dev Callable by blacklist operator
      *
      */
     function setTokenLimits(
         address _token,
-        uint256 _inComeDayLimit,
-        uint256 _inComeMonthLimit,
-        uint256 _outComeDayLimit,
-        uint256 _outComeMonthLimit
+        uint256 _dailyIncomeLimit,
+        uint256 _monthlyIncomeLimit,
+        uint256 _dailyOutcomeLimit,
+        uint256 _monthlyOutcomeLimit
     ) external;
 
     /**
@@ -201,29 +201,29 @@ interface ICommonBlacklist {
         address _token,
         address _user
     ) external view returns(
-        uint256 dayInComeTransfers,
-        uint256 monthInComeTransfers,
-        uint256 dayOutComeTransfers,
-        uint256 monthOutComeTransfers
+        uint256 dailyIncomeTransfers,
+        uint256 monthlyIncomeTransfers,
+        uint256 dailyOutcomeTransfers,
+        uint256 monthlyOutcomeTransfers
     );
 
     /**
      * @notice Disable/Enable token limits
      * @param _token: address of token contract
-     * @param _hasInComeDayLimit: for disabling income day limits
-     * @param _hasInComeMonthLimit: for disabling income month limits
-     * @param _hasOutComeDayLimit: for disabling outcome day limits
-     * @param _hasOutComeMonthLimit: for disabling outcome month limits
+     * @param _hasDailyIncomeLimit: for disabling income day limits
+     * @param _hasMonthlyIncomeLimit: for disabling income month limits
+     * @param _hasDailyOutcomeLimit: for disabling outcome day limits
+     * @param _hasMonthlyOutcomeLimit: for disabling outcome month limits
      *
      * @dev Callable by blacklist operator
      *
      */
     function changeDisablingTokenLimits(
         address _token,
-        bool _hasInComeDayLimit,
-        bool _hasInComeMonthLimit,
-        bool _hasOutComeDayLimit,
-        bool _hasOutComeMonthLimit
+        bool _hasDailyIncomeLimit,
+        bool _hasMonthlyIncomeLimit,
+        bool _hasDailyOutcomeLimit,
+        bool _hasMonthlyOutcomeLimit
     ) external;
 
     /**
@@ -236,9 +236,9 @@ interface ICommonBlacklist {
         address _token,
         address _user
     ) external view returns(
-        uint256 dayInComeRemaining,
-        uint256 monthInComeRemaining,
-        uint256 dayOutComeRemaining,
-        uint256 monthOutComeRemaining
+        uint256 dailyIncomeRemaining,
+        uint256 monthlyIncomeRemaining,
+        uint256 dailyOutcomeRemaining,
+        uint256 monthlyOutcomeRemaining
     );
 }

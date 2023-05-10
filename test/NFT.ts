@@ -53,7 +53,7 @@ contract(NFTGlassesConfig.contractName, () => {
   let receiver: SignerWithAddress;
   let badguy: SignerWithAddress;
   let moderator: SignerWithAddress;
-  let varybadguy: SignerWithAddress;
+  let verybadguy: SignerWithAddress;
   let tester: SignerWithAddress;
   let BLACKLIST_OPERATOR_ROLE: string;
   let result: any;
@@ -63,7 +63,7 @@ contract(NFTGlassesConfig.contractName, () => {
 
   before(async () => {
     // Create users
-    [etherHolder, deployer, receiver, badguy, moderator, varybadguy, tester] = await ethers.getSigners()
+    [etherHolder, deployer, receiver, badguy, moderator, verybadguy, tester] = await ethers.getSigners()
 
     // Deploy Common Blacklist
     commonBlacklist = await deployCommonBlacklist();
@@ -207,7 +207,7 @@ contract(NFTGlassesConfig.contractName, () => {
       await usdt.transfer(receiver.address, 1000, { from: deployer.address });
       await usdt.transfer(badguy.address, 1000, { from: deployer.address });
       await usdt.transfer(moderator.address, 1000, { from: deployer.address });
-      await usdt.transfer(varybadguy.address, 1000, { from: deployer.address });
+      await usdt.transfer(verybadguy.address, 1000, { from: deployer.address });
       await usdt.transfer(treasury.address, 1000, { from: deployer.address });
     });
   });
@@ -350,22 +350,22 @@ contract(NFTGlassesConfig.contractName, () => {
 
     });
 
-    it("adding varybadguy for Global Blacklist", async function () {
+    it("adding verybadguy for Global Blacklist", async function () {
       const domain = Sale.eip712Domain(nftSaleGlasses.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer.address)
-      const signature = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 4, address_to: varybadguy.address, ttl_timestamp: timestamp})
+      const signature = await signatureSigner._signTypedData(domain, Sale.Pass, {id: 4, address_to: verybadguy.address, ttl_timestamp: timestamp})
 
       await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
 
       assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(verybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
       assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
 
       await expectRevert(
-        nftSaleGlasses.connect(varybadguy).purchase(
+        nftSaleGlasses.connect(verybadguy).purchase(
           4,
           timestamp,
           signature,
@@ -377,10 +377,10 @@ contract(NFTGlassesConfig.contractName, () => {
       );
 
       await commonBlacklist.connect(moderator).removeUsersFromBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
 
-      await nftSaleGlasses.connect(varybadguy).purchase(
+      await nftSaleGlasses.connect(verybadguy).purchase(
         4,
         timestamp,
         signature,
@@ -390,12 +390,12 @@ contract(NFTGlassesConfig.contractName, () => {
       );
 
       assert.equal(
-        String(await nftGlasses.balanceOf(varybadguy.address)),
+        String(await nftGlasses.balanceOf(verybadguy.address)),
         "1"
       );
 
       await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
     });
 
@@ -557,7 +557,7 @@ contract(NFTGlassesConfig.contractName, () => {
       const signatureSigner = await ethers.getImpersonatedSigner(deployer.address)
       const signature = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 8, address_to: deployer.address, ttl_timestamp: timestamp})
       const signature2 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 9, address_to: badguy.address, ttl_timestamp: timestamp})
-      const signature3 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 10, address_to: varybadguy.address, ttl_timestamp: timestamp})
+      const signature3 = await signatureSigner._signTypedData(domain, Redeem.Pass, {id: 10, address_to: verybadguy.address, ttl_timestamp: timestamp})
 
       await nftSaleGlasses.connect(deployer).redeem(
         8,
@@ -580,7 +580,7 @@ contract(NFTGlassesConfig.contractName, () => {
       );
 
       await expectRevert(
-        nftSaleGlasses.connect(varybadguy).redeem(
+        nftSaleGlasses.connect(verybadguy).redeem(
           10,
           timestamp,
           signature3
@@ -687,7 +687,7 @@ contract(NFTGlassesConfig.contractName, () => {
       const signatureSigner = await ethers.getImpersonatedSigner(deployer.address)
       const signature = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 8, id: 11, address_to: deployer.address, ttl: timestamp, option: 1})
       const signature2 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 9, id: 12, address_to: badguy.address, ttl: timestamp, option: 1})
-      const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 10, id: 13, address_to: varybadguy.address, ttl: timestamp, option: 1})
+      const signature3 = await signatureSigner._signTypedData(domain, TrNftSig.Pass, {nonce: 10, id: 13, address_to: verybadguy.address, ttl: timestamp, option: 1})
 
       result = await treasury.connect(deployer).withdrawNFT(
         8,
@@ -720,10 +720,10 @@ contract(NFTGlassesConfig.contractName, () => {
       );
 
       await expectRevert(
-        treasury.connect(varybadguy).withdrawNFT(
+        treasury.connect(verybadguy).withdrawNFT(
           10,
           13,
-          varybadguy.address,
+          verybadguy.address,
           timestamp,
           1,
           signature3
@@ -745,8 +745,8 @@ contract(NFTGlassesConfig.contractName, () => {
       );
 
       await expectRevert(
-        nftGlasses.connect(varybadguy).transferFrom(
-          varybadguy.address,
+        nftGlasses.connect(verybadguy).transferFrom(
+          verybadguy.address,
           treasury.address,
           4
         ),
@@ -964,26 +964,26 @@ contract(NFTGlassesConfig.contractName, () => {
     });
 
     it("Internal and global blacklisted user", async function () {
-      result = await commonBlacklist.connect(varybadguy).usersFromListIsBlacklisted(
+      result = await commonBlacklist.connect(verybadguy).usersFromListIsBlacklisted(
         nftGlasses.address,
-        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        [deployer.address, receiver.address, badguy.address, verybadguy.address]
       );
 
       assert.equal(
         result.toString(),
-        [badguy.address, varybadguy.address].toString()
+        [badguy.address, verybadguy.address].toString()
       );
     });
 
     it("internal user is global blacklisted", async function () {
       result = await commonBlacklist.connect(deployer).usersFromListIsBlacklisted(
         constants.ZERO_ADDRESS,
-        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        [deployer.address, receiver.address, badguy.address, verybadguy.address]
       );
 
       assert.equal(
         result.toString(),
-        [varybadguy.address].toString()
+        [verybadguy.address].toString()
       );
     });
   });
@@ -1059,11 +1059,11 @@ contract(NFTGlassesConfig.contractName, () => {
       const domain = TrTokenSig.eip712Domain(treasury.address, (await ethers.provider.getNetwork()).chainId)
       const timestamp = await currentTimestamp() + 1000
       const signatureSigner = await ethers.getImpersonatedSigner(deployer.address)
-      const signature = await signatureSigner._signTypedData(domain, TrTokenSig.Pass, {nonce: 101, amount: 10000, address_to: varybadguy.address, ttl: timestamp, option: 1})
+      const signature = await signatureSigner._signTypedData(domain, TrTokenSig.Pass, {nonce: 101, amount: 10000, address_to: verybadguy.address, ttl: timestamp, option: 1})
 
       await expectRevert(
         cheel.connect(cheelGnosis).transferFrom(
-          varybadguy.address,
+          verybadguy.address,
           deployer.address,
           parseEther("1000000")
         ),
@@ -1072,17 +1072,17 @@ contract(NFTGlassesConfig.contractName, () => {
 
       await expectRevert(
         cheel.connect(cheelGnosis).mint(
-          varybadguy.address,
+          verybadguy.address,
           parseEther("1000")
         ),
         "CHEEL: Blocked by global blacklist"
       );
 
       await expectRevert(
-        treasury.connect(varybadguy).withdraw(
+        treasury.connect(verybadguy).withdraw(
           101,
           10000,
-          varybadguy.address,
+          verybadguy.address,
           timestamp,
           1,
           signature

@@ -21,7 +21,7 @@ contract(LEEConfig.contractName, () => {
   let receiver: SignerWithAddress;
   let badguy: SignerWithAddress;
   let moderator: SignerWithAddress;
-  let varybadguy: SignerWithAddress;
+  let verybadguy: SignerWithAddress;
   let BLACKLIST_OPERATOR_ROLE: string;
   let result: any;
   let resultWaited: any;
@@ -34,7 +34,7 @@ contract(LEEConfig.contractName, () => {
     lee = await deployLEE();
 
     // Creating GNOSIS
-    [etherHolder, deployer, receiver, badguy, moderator, varybadguy] = await ethers.getSigners();
+    [etherHolder, deployer, receiver, badguy, moderator, verybadguy] = await ethers.getSigners();
     gnosis = await ethers.getImpersonatedSigner(LEEConfig.multiSigAddress);
     blacklistGnosis = await ethers.getImpersonatedSigner(CommonBlacklistConfig.multiSigAddress);
     await etherHolder.sendTransaction({
@@ -88,7 +88,7 @@ contract(LEEConfig.contractName, () => {
       );
 
       await lee.connect(gnosis).mint(
-        varybadguy.address,
+        verybadguy.address,
         parseEther("3000000")
       );
 
@@ -170,19 +170,19 @@ contract(LEEConfig.contractName, () => {
       assert.equal(await commonBlacklist.hasRole(BLACKLIST_OPERATOR_ROLE, moderator.address), true);
     });
 
-    it("Adding varybadguy for common blacklist", async function () {
+    it("Adding verybadguy for common blacklist", async function () {
       await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
 
       assert.equal(await commonBlacklist.userIsBlacklisted(badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsBlacklisted(verybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
       assert.equal(await commonBlacklist.userIsBlacklisted(deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("Blocking transactions for users in common blacklist", async function () {
       await expectRevert(
-        lee.connect(varybadguy).transfer(
+        lee.connect(verybadguy).transfer(
           deployer.address,
           parseEther("1000000")
         ),
@@ -191,7 +191,7 @@ contract(LEEConfig.contractName, () => {
 
       await expectRevert(
         lee.connect(gnosis).transferFrom(
-          varybadguy.address,
+          verybadguy.address,
           deployer.address,
           parseEther("1000000")
         ),
@@ -204,33 +204,33 @@ contract(LEEConfig.contractName, () => {
       );
 
       assert.equal(
-        String(await lee.balanceOf(varybadguy.address)),
+        String(await lee.balanceOf(verybadguy.address)),
         parseEther("3000000").toString()
       );
     });
 
-    it("Removing varybadguy from common blacklist", async function () {
+    it("Removing verybadguy from common blacklist", async function () {
       await commonBlacklist.connect(moderator).removeUsersFromBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
 
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(verybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
     });
 
     it("UnBlocking transactions for users in common blacklist and blocking again", async function () {
-      result = await lee.connect(varybadguy).transfer(
+      result = await lee.connect(verybadguy).transfer(
         deployer.address,
         parseEther("1000000")
       );
       resultWaited = await result.wait();
 
-      expect(resultWaited.events[0].args.from).to.equal(varybadguy.address);
+      expect(resultWaited.events[0].args.from).to.equal(verybadguy.address);
       expect(resultWaited.events[0].args.to).to.equal(deployer.address);
       expect(resultWaited.events[0].args.value).to.equal(parseEther("1000000").toString());
 
       await expectRevert(
         lee.connect(gnosis).transferFrom(
-          varybadguy.address,
+          verybadguy.address,
           deployer.address,
           parseEther("1000000")
         ),
@@ -243,12 +243,12 @@ contract(LEEConfig.contractName, () => {
       );
 
       assert.equal(
-        String(await lee.balanceOf(varybadguy.address)),
+        String(await lee.balanceOf(verybadguy.address)),
         parseEther("2000000").toString()
       );
 
       await commonBlacklist.connect(moderator).addUsersToBlacklist(
-        [varybadguy.address]
+        [verybadguy.address]
       );
     });
   });
@@ -262,8 +262,8 @@ contract(LEEConfig.contractName, () => {
 
       assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, badguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
       assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, deployer.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
-      assert.equal(await commonBlacklist.userIsBlacklisted(varybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
+      assert.equal(await commonBlacklist.userIsInternalBlacklisted(lee.address, verybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), false);
+      assert.equal(await commonBlacklist.userIsBlacklisted(verybadguy.address, constants.ZERO_ADDRESS, constants.ZERO_ADDRESS), true);
     });
 
     it("Blocking transactions for users in internal blacklist", async function () {
@@ -377,24 +377,24 @@ contract(LEEConfig.contractName, () => {
     it("Internal and global blacklisted user", async function () {
       result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
         lee.address,
-        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        [deployer.address, receiver.address, badguy.address, verybadguy.address]
       );
 
       assert.equal(
         result.toString(),
-        [badguy.address, varybadguy.address].toString()
+        [badguy.address, verybadguy.address].toString()
       );
     });
 
     it("internal user is global blacklisted", async function () {
       result = await commonBlacklist.connect(moderator).usersFromListIsBlacklisted(
         constants.ZERO_ADDRESS,
-        [deployer.address, receiver.address, badguy.address, varybadguy.address]
+        [deployer.address, receiver.address, badguy.address, verybadguy.address]
       );
 
       assert.equal(
         result.toString(),
-        [varybadguy.address].toString()
+        [verybadguy.address].toString()
       );
     });
   });
@@ -412,10 +412,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.inComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.inComeMonthLimit).to.equal(parseEther("1500000").toString());
-      expect(resultWaited.events[0].args.outComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.outComeMonthLimit).to.equal(parseEther("1500000").toString());
+      expect(resultWaited.events[0].args.dailyIncomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyIncomeLimit).to.equal(parseEther("1500000").toString());
+      expect(resultWaited.events[0].args.dailyOutcomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyOutcomeLimit).to.equal(parseEther("1500000").toString());
 
       result = await commonBlacklist.connect(moderator).changeDisablingTokenLimits(
         lee.address,
@@ -428,10 +428,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.hasInComeDayLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasInComeMonthLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasOutComeDayLimit).to.equal(true);
-      expect(resultWaited.events[0].args.hasOutComeMonthLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasDailyIncomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasMonthlyIncomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasDailyOutcomeLimit).to.equal(true);
+      expect(resultWaited.events[0].args.hasMonthlyOutcomeLimit).to.equal(true);
 
       assert.equal(
         String(await commonBlacklist.getTokenLimits(lee.address)),
@@ -607,10 +607,10 @@ contract(LEEConfig.contractName, () => {
       resultWaited = await result.wait();
 
       expect(resultWaited.events[0].args.token).to.equal(lee.address);
-      expect(resultWaited.events[0].args.inComeDayLimit).to.equal(parseEther("1000000").toString());
-      expect(resultWaited.events[0].args.inComeMonthLimit).to.equal(parseEther("3000000").toString());
-      expect(resultWaited.events[0].args.outComeDayLimit).to.equal(parseEther("500000").toString());
-      expect(resultWaited.events[0].args.outComeMonthLimit).to.equal(parseEther("3000000").toString());
+      expect(resultWaited.events[0].args.dailyIncomeLimit).to.equal(parseEther("1000000").toString());
+      expect(resultWaited.events[0].args.monthlyIncomeLimit).to.equal(parseEther("3000000").toString());
+      expect(resultWaited.events[0].args.dailyOutcomeLimit).to.equal(parseEther("500000").toString());
+      expect(resultWaited.events[0].args.monthlyOutcomeLimit).to.equal(parseEther("3000000").toString());
 
       assert.equal(
         String(await commonBlacklist.getTokenLimits(lee.address)),
