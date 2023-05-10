@@ -47,14 +47,12 @@ contract("Blacklist", () => {
 
         await cheel.connect(cheelGnosis).setBlacklist(commonBlacklist.address);
 
-        //should be reverted
         await expect(cheel.connect(owner).transfer(user.address, 200)).to.be.revertedWith("Spender has reached the month limit")
 
         await commonBlacklist.connect(blacklistGnosis).addContractToExclusionList(
           owner.address
         )
 
-        //shouldn't be reverted with that exception
         await cheel.connect(owner).transfer(user.address, 200);
 
         expect(await cheel.balanceOf(user.address)).to.be.equal(200)

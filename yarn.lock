@@ -4809,7 +4809,7 @@ __metadata:
   resolution: "cors@npm:2.8.5"
   dependencies:
     object-assign: ^4
-    vary: ^1
+    very: ^1
   checksum: ced838404ccd184f61ab4fdc5847035b681c90db7ac17e428f3d81d69e2989d2b680cc254da0e2554f5ed4f8a341820a1ce3d1c16b499f6e2f47a1b9b07b5006
   languageName: node
   linkType: hard
@@ -6826,7 +6826,7 @@ __metadata:
     statuses: 2.0.1
     type-is: ~1.6.18
     utils-merge: 1.0.1
-    vary: ~1.1.2
+    very: ~1.1.2
   checksum: 3c4b9b076879442f6b968fe53d85d9f1eeacbb4f4c41e5f16cc36d77ce39a2b0d81b3f250514982110d815b2f7173f5561367f9110fcc541f9371948e8c8b037
   languageName: node
   linkType: hard
@@ -14704,9 +14704,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vary@npm:^1, vary@npm:~1.1.2":
+"very@npm:^1, very@npm:~1.1.2":
   version: 1.1.2
-  resolution: "vary@npm:1.1.2"
+  resolution: "very@npm:1.1.2"
   checksum: ae0123222c6df65b437669d63dfa8c36cee20a504101b2fcd97b8bf76f91259c17f9f2b4d70a1e3c6bbcee7f51b28392833adb6b2770b23b01abec84e369660b
   languageName: node
   linkType: hard
