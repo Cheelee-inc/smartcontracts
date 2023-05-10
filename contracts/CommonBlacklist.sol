@@ -297,28 +297,31 @@ contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlU
         uint256 currentDay = getCurrentDay();
         address _token = msg.sender;
 
-        if (tokensWithLimits[_token].hasDailyOutcomeLimit && !contractsExclusionList[_from]) {
-            require(tokenTransfers[_token][_from][currentDay].outcome + _amount <= tokenLimits[_token].dailyOutcome, "Spender has reached the day limit");
+        TokenLimitDisabling storage _limits = tokensWithLimits[_token];
+        mapping(address => mapping(uint256 => TokenTransfers)) storage _tokenTransferDay = tokenTransfers[_token];
 
-            tokenTransfers[_token][_from][currentDay].outcome += _amount;
+        if (_limits.hasDailyOutcomeLimit && !contractsExclusionList[_from]) {
+            require(_tokenTransferDay[_from][currentDay].outcome + _amount <= tokenLimits[_token].dailyOutcome, "Spender has reached the day limit");
+
+            _tokenTransferDay[_from][currentDay].outcome += _amount;
         }
 
-        if (tokensWithLimits[_token].hasMonthlyOutcomeLimit  && !contractsExclusionList[_from]) {
-            require(tokenTransfers[_token][_from][currentMonth].outcome + _amount <= tokenLimits[_token].monthlyOutcome, "Spender has reached the month limit");
+        if (_limits.hasMonthlyOutcomeLimit  && !contractsExclusionList[_from]) {
+            require(_tokenTransferDay[_from][currentMonth].outcome + _amount <= tokenLimits[_token].monthlyOutcome, "Spender has reached the month limit");
 
-            tokenTransfers[_token][_from][currentMonth].outcome += _amount;
+            _tokenTransferDay[_from][currentMonth].outcome += _amount;
         }
 
-        if (tokensWithLimits[_token].hasDailyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
-            require(tokenTransfers[_token][_to][currentDay].income + _amount <= tokenLimits[_token].dailyIncome, "Recipient has reached the day limit");
+        if (_limits.hasDailyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
+            require(_tokenTransferDay[_to][currentDay].income + _amount <= tokenLimits[_token].dailyIncome, "Recipient has reached the day limit");
 
-            tokenTransfers[_token][_to][currentDay].income += _amount;
+            _tokenTransferDay[_to][currentDay].income += _amount;
         }
 
-        if (tokensWithLimits[_token].hasMonthlyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
-            require(tokenTransfers[_token][_to][currentMonth].income + _amount <= tokenLimits[_token].monthlyIncome, "Recipient has reached the month limit");
+        if (_limits.hasMonthlyIncomeLimit && !contractsExclusionList[_to] && !contractsExclusionList[_from]) {
+            require(_tokenTransferDay[_to][currentMonth].income + _amount <= tokenLimits[_token].monthlyIncome, "Recipient has reached the month limit");
 
-            tokenTransfers[_token][_to][currentMonth].income += _amount;
+            _tokenTransferDay[_to][currentMonth].income += _amount;
         }
     }
 
