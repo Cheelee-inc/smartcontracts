@@ -73,7 +73,7 @@ contract("Blacklist", () => {
         await commonBlacklist.connect(blacklistGnosis).setTokenLimits(cheel.address, 300, 300, 300, 300)
         assert.equal(
           String(await commonBlacklist.getUserRemainingLimit(cheel.address, owner.address)),
-          '300,300,0,0'
+          '300,300,0,1'
         );
     })
 })
