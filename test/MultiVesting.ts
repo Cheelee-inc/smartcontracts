@@ -47,14 +47,14 @@ describe("MultiVesting", function () {
     await expect(vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, amount, 100)).to.be.revertedWith("Not enough tokens")
     expect(await vesting.sumVesting()).to.be.equal(0)
     
-    await cheel.connect(gnosisCheel).mint(await vesting.address, amount)
+    await cheel.connect(gnosisCheel).mint(vesting.address, amount)
  
     expect(await vesting.sumVesting()).to.be.equal(0)
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, amount, 100)
     expect(await vesting.sumVesting()).to.be.equal(amount)
 
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
-    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, amount, 100)
+    await vesting.vest(vesting.address, await currentTimestamp()-1, 1000, amount, 100)
     expect(await vesting.sumVesting()).to.be.equal(amount * 2)
   })
 
@@ -108,7 +108,7 @@ describe("MultiVesting", function () {
 
   it("Blocking works", async()=>{
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
-    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, amount, 100)
+    await vesting.vest(vesting.address, await currentTimestamp()-1, 1000, amount, 100)
 
     let fakeToken = await deployCHEEL()
 
