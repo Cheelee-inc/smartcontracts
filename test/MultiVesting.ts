@@ -240,4 +240,11 @@ describe("MultiVesting", function () {
     await vesting.release(await receiver2.getAddress())
     expect(await cheel.balanceOf(await receiver2.getAddress())).to.be.equal(1000)
   })
+
+  
+  it("lock works", async () => {
+    vesting = await deployMultiVesting(cheel.address, true, false)
+
+    await expect(vesting.connect(gnosisMV).emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
+  })
 })
