@@ -44,8 +44,8 @@ const config: HardhatUserConfig = {
   },
   // defaultNetwork: "goerli",
   networks: {
-    binanceTestnet: {
-      url: process.env.ROPSTEN_URL || "",
+    binance: {
+      url: process.env.BINANCE_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     rinkeby: {
