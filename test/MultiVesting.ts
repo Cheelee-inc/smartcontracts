@@ -1,14 +1,13 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract} from "ethers";
 import { ethers } from "hardhat";
 import { MultiVesting } from "../typechain";
-import {deployCHEEL, deployMultiVesting} from "../utils/deployContracts"
+import { deployCHEEL, deployMultiVesting } from "../utils/deployContracts"
 import { currentTimestamp, increaseTime } from "../utils/helpers"
-import {Contract} from "ethers";
 
 
 describe("MultiVesting", function () {
-  let commonBlacklist: Contract;
   let cheel: Contract
   let vesting: MultiVesting
   let owner: SignerWithAddress
@@ -47,20 +46,20 @@ describe("MultiVesting", function () {
     await expect(vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, amount, 100)).to.be.revertedWith("Not enough tokens")
     expect(await vesting.sumVesting()).to.be.equal(0)
     
-    await cheel.connect(gnosisCheel).mint(await vesting.address, amount)
+    await cheel.connect(gnosisCheel).mint(vesting.address, amount)
  
     expect(await vesting.sumVesting()).to.be.equal(0)
     await vesting.vest(await owner.getAddress(), await currentTimestamp()-1, 1000, amount, 100)
     expect(await vesting.sumVesting()).to.be.equal(amount)
 
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
-    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, amount, 100)
+    await vesting.vest(vesting.address, await currentTimestamp()-1, 1000, amount, 100)
     expect(await vesting.sumVesting()).to.be.equal(amount * 2)
   })
 
   it("Cliff works", async() => {
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
-    await vesting.vest(await owner.address, await currentTimestamp()-1, 1000, amount, 100)
+    await vesting.vest(owner.address, await currentTimestamp()-1, 1000, amount, 100)
 
     await increaseTime(50)
     expect((await vesting.releasable(await owner.getAddress(), await currentTimestamp()))[0]).to.be.equal(0)
@@ -108,7 +107,7 @@ describe("MultiVesting", function () {
 
   it("Blocking works", async()=>{
     await cheel.connect(gnosisCheel).mint(vesting.address, amount)
-    await vesting.vest(await vesting.address, await currentTimestamp()-1, 1000, amount, 100)
+    await vesting.vest(vesting.address, await currentTimestamp()-1, 1000, amount, 100)
 
     let fakeToken = await deployCHEEL()
 
@@ -213,7 +212,7 @@ describe("MultiVesting", function () {
     expect((await vesting.releasable(await receiver.getAddress(), getDay(71)))[0].toNumber()).to.be.equal(amount)
   })
 
-  it("change amount of recepient", async () => {
+  it("change amount of recipient", async () => {
     let currentTime = await currentTimestamp()
     
     await cheel.connect(gnosisCheel).mint(vesting.address, amount*3)
@@ -239,5 +238,11 @@ describe("MultiVesting", function () {
     expect(await cheel.balanceOf(await receiver2.getAddress())).to.be.equal(0)
     await vesting.release(await receiver2.getAddress())
     expect(await cheel.balanceOf(await receiver2.getAddress())).to.be.equal(1000)
+  })
+
+  it("should block emergency vesting when disabled upon deployment", async () => {
+    vesting = await deployMultiVesting(cheel.address, true, false)
+
+    await expect(vesting.connect(gnosisMV).emergencyVest(cheel.address)).to.be.revertedWith("Option not allowed")
   })
 })
