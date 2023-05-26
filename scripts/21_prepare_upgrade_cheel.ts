@@ -1,6 +1,6 @@
 import { ethers, upgrades } from 'hardhat';
 import {CHEELConfig} from "../config/ContractsConfig";
-import {verify} from "./19_verify";
+import {verify} from "./verify";
 
 async function main() {
   console.log('Preparing for upgrade CHEEL contract...');

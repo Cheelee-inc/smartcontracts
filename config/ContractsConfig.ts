@@ -68,6 +68,19 @@ export const NFTCasesConfig: NFTConfigInterface = {
   adminContractAddress: '0xe9B36a6cacB369E7eee08d595720662425454bc2',
 };
 
+export const NFTGemsConfig: NFTConfigInterface = {
+  testnet: Networks.bscTestnet,
+  mainnet: Networks.bscMainnet,
+  contractName: 'NFT',
+  nftName: 'CHEELEE NFT Gems',
+  nftSymbol: 'CNFTG',
+  blackList: '',
+  multiSigAddress: '',
+  contractAddress: '',
+  proxyContractAddress: '',
+  adminContractAddress: '',
+};
+
 export const NFTSaleConfig: NFTSaleConfigInterface = {
   testnet: Networks.bscTestnet,
   mainnet: Networks.bscMainnet,

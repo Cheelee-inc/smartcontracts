@@ -1,7 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import { NFTContractType } from '../lib/ContractProvider';
 import { NFTCasesConfig } from "../config/ContractsConfig";
-import {verify} from "./19_verify";
+import {verify} from "./verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
