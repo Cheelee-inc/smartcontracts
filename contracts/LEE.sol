@@ -130,4 +130,12 @@ contract LEE is ILEE, ERC20PermitUpgradeable, OwnableUpgradeable {
         }
         super._approve(owner, spender, amount);
     }
+
+    /**
+     * @dev Override name of token.
+     *
+    */
+    function name() public view virtual override returns (string memory) {
+        return "Love Earn Enjoy";
+    }
 }

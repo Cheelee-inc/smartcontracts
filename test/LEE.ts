@@ -55,7 +55,9 @@ contract(LEEConfig.contractName, () => {
     });
 
     it("Check initial data", async function () {
-      expect(await lee.name()).to.equal(LEEConfig.tokenName);
+      expect(await lee.name()).not.to.equal(LEEConfig.tokenName);
+      expect(await lee.name()).to.equal("Love Earn Enjoy")
+      
       expect(await lee.symbol()).to.equal(LEEConfig.tokenSymbol);
       const maxAmount = parseEther(`${LEEConfig.maxAmount}`).toString();
       expect((await lee.MAX_AMOUNT()).toString()).to.equal(maxAmount);
