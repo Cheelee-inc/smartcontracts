@@ -8,7 +8,7 @@ import "./interfaces/ICommonBlacklist.sol";
 contract CommonBlacklist is ICommonBlacklist, OwnableUpgradeable, AccessControlUpgradeable {
 
     bytes32 public constant BLACKLIST_OPERATOR_ROLE = keccak256("BLACKLIST_OPERATOR_ROLE");
-    address public constant GNOSIS = 0x126481E4E79cBc8b4199911342861F7535e76EE7;
+    address public constant GNOSIS = 0x50D6B478C3a3060ED4B946663c00D89a21659880;
 
     // user
     // is_blacklisted
