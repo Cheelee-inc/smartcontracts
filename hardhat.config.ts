@@ -24,6 +24,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     console.log(account.address);
   }
 });
+import './tasks/estimateGas'
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -37,6 +38,16 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  gasReporter: {
+    enabled: (process.env.REPORT_GAS) ? true : false,
+    showMethodSig: true,
+    showTimeSpent: true,
+    token: "BNB",
+    currency: "USD",
+    coinmarketcap: '1fba6c1d-805d-4d5b-abff-2b218a069489',
+    outputFile: 'gas_price.md',
+    noColors: true,
   },
   typechain: {
     outDir: "typechain",
@@ -61,11 +72,16 @@ const config: HardhatUserConfig = {
       timeout: 60000,
       gasMultiplier: 1,
     },
+    hardhat: {
+      accounts: {
+        count: 100,
+      },
+    },
   },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-  },
+  // gasReporter: {
+  //   enabled: process.env.REPORT_GAS !== undefined,
+  //   currency: "USD",
+  // },
   etherscan: {
     apiKey: process.env.API_KEY
   },

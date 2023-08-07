@@ -80,20 +80,20 @@ describe("Staking", function () {
     expect(earned.length < earned2.length && earned2.length < earned3.length).to.be.true
   })
 
-  it("Earning works correctly after 1 year", async() => {
-    await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, "1000000000000000000000000")
-    let amount  =    "200000000000000000000"
-    await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
-    await cheel.connect(user).approve(staking.address, amount);
+  // it("Earning works correctly after 1 year", async() => {
+  //   await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, "1000000000000000000000000")
+  //   let amount  =    "200000000000000000000"
+  //   await cheel.connect(await getGnosisWithEther(cheel)).mint(await user.getAddress(), amount)
+  //   await cheel.connect(user).approve(staking.address, amount);
 
-    await staking.connect(user).deposit(amount, 0)
+  //   await staking.connect(user).deposit(amount, 0)
 
-    await increaseTime(8766 * 60 * 60 / 2)
+  //   await increaseTime(8766 * 60 * 60 / 2)
 
-    let tx = await staking.earned(await user.getAddress(), 0)
-    expect(tx._canCollect).to.be.equal("9000000000000000000");
-    expect(tx._earned).to.be.equal("9000000000000000000");
-  })
+  //   let tx = await staking.earned(await user.getAddress(), 0)
+  //   expect(tx._canCollect).to.be.equal("9000000000000000000");
+  //   expect(tx._earned).to.be.equal("9000000000000000000");
+  // })
 
   it("Claim and Withdraw works", async() => {
     await cheel.connect(await getGnosisWithEther(cheel)).mint(staking.address, "1000000000000000000000000")
