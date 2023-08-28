@@ -13,7 +13,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
  * when specifying network, set kmsKeyId = "arn:aws:kms:..." instead of accounts: [""] in hardhat.config.ts for specified network.
  */
 
-const abi = JSON.parse(fs.readFileSync("./cheel_abi.json", 'utf8')); //read abi of tokens, can swap for any other contract
+const abi = JSON.parse(fs.readFileSync("./cheel_abi.json", 'utf8')); // read abi of tokens, can swap for any other contract
 
 const CONTRACT_ADDRESS = "0x1F1C90aEb2fd13EA972F0a71e35c0753848e3DB0" //address of erc20 token
 
@@ -22,10 +22,13 @@ const amount = BigNumber.from("276419438121572000");
 
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi);
 
-const chunkSize = 20;
+const chunkSize = 10;
+// const chunkSize = 1;
+
+const AIRDROP_TABLE = "Airdrop.csv";
 
 async function main() {
-    const csvData = await csv().fromFile("Airdrop_unique_shuffled_2.csv");
+    const csvData = await csv().fromFile(AIRDROP_TABLE);
     let recipients = await Promise.all(csvData.map((it: any) => it['receiver']));
     console.log(recipients);
     console.log(recipients.length);
@@ -38,7 +41,11 @@ async function main() {
     console.log("Init TX counter:", initTxCounter);
 
     // TODO: set N
-    for (let i = 0; i < 4629; i += chunkSize) {
+    const n = recipients.length;
+    // const n = 1;
+    for (let i = 0; i < n; i += chunkSize) {
+        const timeStart = performance.now();
+
         const chunk = recipients.slice(i, i + chunkSize);
 
         // const to = recipients[i];
@@ -68,7 +75,9 @@ async function main() {
         //     return;
         // }
 
-        await delay(100);
+        await delay(200);
+
+        console.log(`Took: ${performance.now() - timeStart} seconds to process`);
 
         // TODO: delete
         // return;
