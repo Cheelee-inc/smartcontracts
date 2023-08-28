@@ -8,7 +8,10 @@ typechain
 typechain-types
 backup_openzeppelin
 
-#Hardhat files
+# Hardhat files
 cache
 artifacts
 .openzeppelin**
+
+# Vesting and Airdrop
+*.csv
