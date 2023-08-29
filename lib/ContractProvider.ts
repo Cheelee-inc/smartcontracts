@@ -1,8 +1,10 @@
 import {
+  USDT as USDTType,
   CommonBlacklist as CommonBlacklistType,
   LEE as LEEType,
   CHEEL as CHEELType,
   NFT as NFTType,
+  NFTSale as NFTSaleType,
   Treasury as TreasuryType,
 } from '../typechain/index';
 
@@ -23,8 +25,10 @@ export class CommonBlacklistContractProvider {
   }
 };
 
+export type USDTContractType = USDTType;
 export type CommonBlacklistContractType = CommonBlacklistType;
 export type LEEContractType = LEEType;
 export type CHEELContractType = CHEELType;
 export type NFTContractType = NFTType;
+export type NFTSaleContractType = NFTSaleType;
 export type TreasuryContractType = TreasuryType;

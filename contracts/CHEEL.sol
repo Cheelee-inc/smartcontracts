@@ -125,7 +125,7 @@ contract CHEEL is ICHEEL, ERC20VotesUpgradeable, OwnableUpgradeable {
         uint256 amount
     ) internal virtual override {
         ICommonBlacklist iBlacklist = commonBlacklist;
-        
+
         if (address(iBlacklist) != address(0)) {
             require(!iBlacklist.userIsBlacklisted(owner, spender, address(0)), "CHEEL: Blocked by global blacklist");
             require(!iBlacklist.userIsInternalBlacklisted(address(this), owner, spender, address(0)), "CHEEL: Blocked by internal blacklist");

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { verify } from "./19_verify";
+import { verify } from "./24_verify";
 
 const CHEEL_TOKEN = "0x1F1C90aEb2fd13EA972F0a71e35c0753848e3DB0"
 const UPDATE_BENEFICIARY_MIN_SECONDS = 900;

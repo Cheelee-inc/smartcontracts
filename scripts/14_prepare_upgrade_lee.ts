@@ -1,6 +1,6 @@
 import { ethers, upgrades } from 'hardhat';
 import { LEEConfig } from "../config/ContractsConfig";
-import {verify} from "./19_verify";
+import {verify} from "./24_verify";
 
 async function main() {
   console.log('Preparing for upgrade LEE contract...');

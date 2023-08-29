@@ -68,20 +68,34 @@ export const NFTCasesConfig: NFTConfigInterface = {
   adminContractAddress: '0xe9B36a6cacB369E7eee08d595720662425454bc2',
 };
 
-export const NFTSaleConfig: NFTSaleConfigInterface = {
+export const NFTCasesSaleConfig: NFTSaleConfigInterface = {
   testnet: Networks.bscTestnet,
   mainnet: Networks.bscMainnet,
   contractName: 'NFTSale',
-  multiSigAddress: '0x841005214049dcE3168CF8a323DD742BcfbF1dc4',
-  contractAddress: '0x0645E0F7eE8ED0F20F3fC1DBFE81829Dd33CbFf2',
-  proxyContractAddress: '0x252FE80eC028aAfEB3925f8233a9ef024aDfdDfA',
-  adminContractAddress: '0xe9B36a6cacB369E7eee08d595720662425454bc2',
+  signer: '0xd02ea004e9cC09c19baab15DEA619Ad0e2E06282',
+  usdt: '0xCF0F093AE5A3226FD0118D4AD4B900c5B1b793aB',
+  wallet: '0x2ee51F0bCC1ece7B94091e5E250b08e8276256D9',
+  multiSigAddress: '0x2ee51F0bCC1ece7B94091e5E250b08e8276256D9',
+  contractAddress: '0x5E90b70f738dE63bB4570229777209964dDcb1A8',
+};
+
+export const NFTGlassesSaleConfig: NFTSaleConfigInterface = {
+  testnet: Networks.bscTestnet,
+  mainnet: Networks.bscMainnet,
+  contractName: 'NFTSale',
+  signer: '0xd02ea004e9cC09c19baab15DEA619Ad0e2E06282',
+  usdt: '0xCF0F093AE5A3226FD0118D4AD4B900c5B1b793aB',
+  wallet: '0x2ee51F0bCC1ece7B94091e5E250b08e8276256D9',
+  multiSigAddress: '0x2ee51F0bCC1ece7B94091e5E250b08e8276256D9',
+  contractAddress: '0x701442D236Ab4b6041e57f06794dB4154619871b',
 };
 
 export const TreasuryConfig: TreasuryConfigInterface = {
   testnet: Networks.bscTestnet,
   mainnet: Networks.bscMainnet,
   contractName: 'Treasury',
+  signer: '0xd02ea004e9cC09c19baab15DEA619Ad0e2E06282',
+  usdt: '0xA5DF6d48B733687748b2084d2561B140fc47e637',
   multiSigAddress: '0x4c4B657574782E68ECEdabA8151e25dC2C9C1C70',
   contractAddress: '0x31b9F82C5C160297Bd56c7eFD0e8a0A62077062e',
   proxyContractAddress: '0x54b2647c151990aC9E6bBe1cf39d5571D562c87c',
