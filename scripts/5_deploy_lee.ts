@@ -1,7 +1,7 @@
 import { ethers, upgrades } from 'hardhat';
 import { LEEContractType } from '../lib/ContractProvider';
 import { LEEConfig } from "../config/ContractsConfig";
-import {verify} from "./19_verify";
+import {verify} from "./24_verify";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command

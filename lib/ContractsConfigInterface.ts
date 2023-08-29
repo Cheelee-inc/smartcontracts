@@ -1,5 +1,16 @@
 import NetworkConfigInterface from '../lib/NetworkConfigInterface';
 
+export interface USDTInterface {
+  testnet: NetworkConfigInterface;
+  mainnet: NetworkConfigInterface;
+  contractName: string;
+  tokenName: string;
+  symbol: string;
+  decimals: number;
+  maxSupply: number;
+  contractAddress: string|null;
+}
+
 export interface CommonBlacklistInterface {
   testnet: NetworkConfigInterface;
   mainnet: NetworkConfigInterface;
@@ -55,16 +66,19 @@ export interface NFTSaleConfigInterface {
   testnet: NetworkConfigInterface;
   mainnet: NetworkConfigInterface;
   contractName: string;
+  signer: string;
+  usdt: string;
+  wallet: string;
   multiSigAddress: string;
-  contractAddress: string|null;
-  proxyContractAddress: string;
-  adminContractAddress: string|null;
+  contractAddress: string;
 }
 
 export interface TreasuryConfigInterface {
   testnet: NetworkConfigInterface;
   mainnet: NetworkConfigInterface;
   contractName: string;
+  signer: string;
+  usdt: string;
   multiSigAddress: string;
   contractAddress: string|null;
   proxyContractAddress: string;

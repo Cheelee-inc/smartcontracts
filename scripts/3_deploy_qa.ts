@@ -12,7 +12,7 @@ import {
   CHEELConfig,
   NFTCasesConfig,
   NFTGlassesConfig, USDTConfig, TreasuryConfig, NFTCasesSaleConfig, NFTGlassesSaleConfig,
-} from "../config/ContractsConfig";
+} from "../config/ContractsConfigQA";
 import {USDTArguments} from "../config/ContractArguments";
 
 async function main() {

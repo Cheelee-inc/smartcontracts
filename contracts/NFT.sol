@@ -203,7 +203,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
      */
     function _approve(address to, uint256 tokenId) internal virtual override {
         ICommonBlacklist iBlacklist = commonBlacklist;
-        
+
         if (address(iBlacklist) != address(0)) {
             require(!iBlacklist.userIsBlacklisted(address(0), address(0), to), "NFT: Recipient in global blacklist");
             require(!iBlacklist.userIsInternalBlacklisted(address(this), address(0), address(0), to), "NFT: Recipient in internal blacklist");
@@ -222,7 +222,7 @@ contract NFT is ICustomNFT, ERC721EnumerableUpgradeable, OwnableUpgradeable {
         bool approved
     ) internal virtual override {
         ICommonBlacklist iBlacklist = commonBlacklist;
-        
+
         if (address(iBlacklist) != address(0)) {
             require(!iBlacklist.userIsBlacklisted(owner, operator, address(0)), "NFT: Blocked by global blacklist");
             require(!iBlacklist.userIsInternalBlacklisted(address(this), owner, operator, address(0)), "NFT: Blocked by internal blacklist");
