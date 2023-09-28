@@ -59,12 +59,20 @@ const config: HardhatUserConfig = {
       url: process.env.BINANCE_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    binance_testnet: {
+      url: process.env.BINANCE_TESTNET_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     rinkeby: {
       url: process.env.RINKEBY_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     goerli: {
       url: process.env.GOERLI_URL || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     truffle: {
@@ -74,7 +82,7 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       accounts: {
-        count: 100,
+        count: 10,
       },
     },
   },
@@ -83,7 +91,12 @@ const config: HardhatUserConfig = {
   //   currency: "USD",
   // },
   etherscan: {
-    apiKey: process.env.API_KEY
+    apiKey: {
+      etherscan: process.env.ETHERSCAN_API_KEY || "",
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
+      bscTestnet: process.env.BSC_TESTNET_API_KEY || "",
+    }
   },
 };
 

@@ -12,3 +12,7 @@ backup_openzeppelin
 cache
 artifacts
 .openzeppelin**
+
+.yarn
+.DS_Store
+*.csv
