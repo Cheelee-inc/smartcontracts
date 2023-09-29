@@ -32,7 +32,7 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.7.1",
     "hardhat": "^2.9.7",
-    "hardhat-gas-reporter": "^1.0.8",
+    "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.7",
@@ -46,6 +46,7 @@
     "@openzeppelin/contracts-upgradeable": "4.7.3",
     "@rumblefishdev/hardhat-kms-signer": "^1.1.2",
     "aws-sdk": "^2.1327.0",
+    "csvtojson": "^2.0.10",
     "hardhat-prettier": "^0.0.1"
   },
   "scripts": {
