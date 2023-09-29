@@ -2,38 +2,42 @@ import * as dotenv from "dotenv";
 import { ethers, upgrades } from "hardhat";
 import { verify } from "./19_verify";
 import { CHEELContractType } from '../lib/ContractProvider';
+import { CHEEL, MultiVesting } from "../typechain";
+import { ContractTransaction } from "ethers";
+import { formatEther, parseEther } from "ethers/lib/utils";
 
 const UPDATE_BENEFICIARY_MIN_SECONDS = 1;
-const UPDATE_BENEFICIARY_MAX_SECONDS = 1800;
+const UPDATE_BENEFICIARY_MAX_SECONDS = 3600000;
 const UPDATE_BENEFICIARY_ALLOWED = true;
 const EMERGENCY_WITHDRAWAL_ALLOWED = false;
 
-dotenv.config();
+const amount = 1000;
+const cliff = 1;
+const timeSeconds = 30;
+const actuallyWaitSeconds = timeSeconds + 30;
 
-const N_CONFIRMATIONS = 3;
+dotenv.config();
 
 // BEFORE START: set `GNOSIS` var in CHEEL and MultiVesting  smarts to `owner` address.
 
 // TODO: save deployment info, set automatically
 const DO_DEPLOY = true;
 
-async function main() {
-    let tx;
-
-    const network = await ethers.provider.getNetwork();
-    console.log("Network name =", network.name);
-    console.log("Network chain id =", network.chainId);
-
-    const [owner] = await ethers.getSigners();
-    let nonce = await owner.getTransactionCount();
-
-    const address2_pk = process.env.DEV2_PRIVATE_KEY;
-    if (address2_pk === undefined) {
-        throw "Expected DEV2_PRIVATE_KEY env variable";
+async function try_verify(contractName: string, contractAddress: string, args: any[], chainId: number | undefined = undefined) {
+    info(`Verification for ${contractName} contract...`);
+    try {
+        // Except Hardhat
+        chainId = chainId !== undefined ? chainId : (await ethers.provider.getNetwork()).chainId;
+        if (chainId !== 31337) {
+            await verify(contractAddress, args);
+        }
+        info(`${contractName} contract is verified`);
+    } catch {
+        info(`${contractName} contract skip verification`);
     }
-    const address2 = new ethers.Wallet(address2_pk, ethers.provider);
+}
 
-    // We get the contract to deploy
+async function deploy_cheel(): Promise<CHEEL> {
     const CHEELContract = await ethers.getContractFactory("CHEEL");
 
     let cheelProxy;
@@ -47,111 +51,155 @@ async function main() {
     const cheelContract = await upgrades.erc1967.getImplementationAddress(cheelProxy.address);
     const cheelAdmin = await upgrades.erc1967.getAdminAddress(cheelProxy.address);
 
-    console.log('Contract CHEEL deployed to:', cheelContract);
-    console.log('Proxy CHEEL contract deployed to:', cheelProxy.address);
-    console.log('Admin CHEEL contract deployed to:', cheelAdmin);
+    info('Contract CHEEL deployed to:', cheelContract);
+    info('Proxy CHEEL contract deployed to:', cheelProxy.address);
+    info('Admin CHEEL contract deployed to:', cheelAdmin);
 
-    console.log('Verification for CHEEL contract...');
-    try {
-        await verify(cheelContract, []);
-        console.log('CHEEL contract is verified');
-    } catch {
-        console.log('CHEEL contract skip verification');
-    }
+    await try_verify("CHEEL", cheelContract, []);
 
-    const CHEEL_TOKEN = cheelProxy.address;
+    return cheelProxy;
+}
 
+async function deploy_vesting(cheelToken: string): Promise<MultiVesting> {
     const MV = await ethers.getContractFactory("MultiVesting");
     let multiVesting;
     if (DO_DEPLOY) {
         multiVesting = await MV.deploy(
-            CHEEL_TOKEN, UPDATE_BENEFICIARY_ALLOWED, EMERGENCY_WITHDRAWAL_ALLOWED,
+            cheelToken, UPDATE_BENEFICIARY_ALLOWED, EMERGENCY_WITHDRAWAL_ALLOWED,
             UPDATE_BENEFICIARY_MIN_SECONDS, UPDATE_BENEFICIARY_MAX_SECONDS
         );
         await multiVesting.deployed();
     } else {
         multiVesting = MV.attach("0x379983155895e55DAc43198698C0fC4060f9754c");
     }
-    
-    console.log("MultiVesting address:", multiVesting.address);
 
-    try {
-        await verify(multiVesting.address, [
-            CHEEL_TOKEN, UPDATE_BENEFICIARY_ALLOWED, EMERGENCY_WITHDRAWAL_ALLOWED,
-            UPDATE_BENEFICIARY_MIN_SECONDS, UPDATE_BENEFICIARY_MAX_SECONDS
-        ]);
-        console.log('MultiVesting verified');
-    } catch {
-        console.log('MultiVesting skip verification');
+    info("MultiVesting address:", multiVesting.address);
+
+    await try_verify("MultiVesting", multiVesting.address, [
+        cheelToken, UPDATE_BENEFICIARY_ALLOWED, EMERGENCY_WITHDRAWAL_ALLOWED,
+        UPDATE_BENEFICIARY_MIN_SECONDS, UPDATE_BENEFICIARY_MAX_SECONDS
+    ]);
+
+    return multiVesting;
+}
+
+async function wait_for(condition: () => Promise<boolean>) {
+    while (true) {
+        if (await condition()) {
+            return;
+        } else {
+            await delay(2);
+        }
     }
+}
 
-    console.log(`Doing mint: owner ${await cheelProxy.owner()}, we are on: ${owner.address}`);
-    const amount = 1000;
-    nonce += 1;
-    await cheelProxy.mint(multiVesting.address, amount, {nonce});
-    nonce += 1;
-    await multiVesting.setSeller(owner.address);
-    nonce += 1;
+function info(message?: any, ...optionalParams: any[]) {
+    console.log(message, ...optionalParams);
+}
 
-    console.log("vest");
-    const timeSeconds = 30;
-    const cliff = 1;
+async function main() {
+    const network = await ethers.provider.getNetwork();
+    info("Network name =", network.name);
+    info("Network chain id =", network.chainId);
 
-    let balanceIsCorrect = false;
-    while (!balanceIsCorrect) {
+    const address2_pk = process.env.DEV2_PRIVATE_KEY;
+    if (address2_pk === undefined) {
+        throw "Expected DEV2_PRIVATE_KEY env variable";
+    }
+    const address2 = new ethers.Wallet(address2_pk, ethers.provider);
+
+    const cheelProxy = await deploy_cheel();
+    const multiVesting = await deploy_vesting(cheelProxy.address);
+
+    const [owner] = await ethers.getSigners();
+    let nonce = await owner.getTransactionCount();
+    const safeWaitTx = async (tx: ContractTransaction | Promise<ContractTransaction>) => {
+        const txResolved = await Promise.resolve(tx);
+        info(`Waiting TX Hash: ${txResolved.hash}`);
+        nonce += 1;
+        await txResolved.wait();
+    };
+
+    info(`cheelProxy.mint: owner ${await cheelProxy.owner()}, we are on address: ${owner.address}`);
+    await safeWaitTx(cheelProxy.mint(multiVesting.address, amount, {nonce}));
+    info(`multiVesting.setSeller(${owner.address})`);
+    await safeWaitTx(multiVesting.setSeller(owner.address));
+
+    info("vest");
+    await wait_for(async () => {
         const tokenBalance = await cheelProxy.balanceOf(multiVesting.address);
         const seller = await multiVesting.seller();
-        console.log("Wait for balance:", tokenBalance, "seller:", seller);
-        if (tokenBalance.gte(amount) && seller === owner.address) {
-            balanceIsCorrect = true;
-        } else {
-            await delay(2);
-        }
-    }
+        return tokenBalance.gte(amount) && seller === owner.address;
+    });
+
+    // Check vesting sum tokens
     const sumVesting = await multiVesting.sumVesting();
     const tokenBalance = await cheelProxy.balanceOf(multiVesting.address);
-    console.log(`Check: ${sumVesting} + ${amount} <= ${tokenBalance}`);
-
-    tx = await multiVesting.vest(owner.address, await currentTimestamp()-1, timeSeconds, amount, cliff, {nonce});
-    nonce += 1;
-    await tx.wait(N_CONFIRMATIONS);
-
-    console.log("updateBeneficiary");
-    balanceIsCorrect = false;
-    while (!balanceIsCorrect) {
-        const tokenBalance = (await multiVesting.beneficiary(owner.address)).amount;
-        console.log("Wait for balance:", tokenBalance);
-        if (tokenBalance.gte(amount)) {
-            balanceIsCorrect = true;
-        } else {
-            await delay(2);
-        }
-    }
-    tx = await multiVesting.updateBeneficiary(owner.address, address2.address, {nonce});
-    nonce += 1;
-    console.log("Wait", N_CONFIRMATIONS);
-    await tx.wait(N_CONFIRMATIONS);
+    info(`Check: ${sumVesting} + ${amount} <= ${tokenBalance}`);
     
-    console.log("finishUpdateBeneficiary");
-    tx = await owner.sendTransaction({to: address2.address, value: ethers.utils.parseEther("0.01"), nonce})
-    nonce += 1;
-    console.log("Wait", N_CONFIRMATIONS);
-    await tx.wait(N_CONFIRMATIONS);
+    await safeWaitTx(
+        multiVesting.vest(
+            owner.address,
+            await currentTimestamp() - 1,
+            timeSeconds,
+            amount,
+            cliff,
+            {nonce},
+        )
+    );
 
-    console.log(`Waiting ${timeSeconds} seconds`);
-    const actuallyWaitSeconds = timeSeconds + 30;
-    // For Hardhat emulate time
+    info("updateBeneficiary");
+    await wait_for(async () => {
+        const tokenBalance = (await multiVesting.beneficiary(owner.address)).amount;
+        info("Wait for balance:", tokenBalance.toNumber());
+        return tokenBalance.gte(amount);
+    });
+    await safeWaitTx(
+        multiVesting.updateBeneficiary(owner.address, address2.address, {nonce})
+    );
+
+    info(`Waiting ${timeSeconds} seconds`);
+    // Emulate time for Hardhat
     if (network.chainId === 31337) {
         await increaseTime(actuallyWaitSeconds);
     } else {
         await delay(actuallyWaitSeconds);
     }
+    info('Wait: done');
 
-    tx = await multiVesting.connect(address2).finishUpdateBeneficiary(owner.address, {nonce});
-    nonce += 1;
-    console.log("Wait", N_CONFIRMATIONS);
-    await tx.wait(N_CONFIRMATIONS);
-    console.log("done");
+    info("finishUpdateBeneficiary");
+    let address2Nonce = await address2.getTransactionCount();
+
+    const gasLimit = await multiVesting
+        .connect(address2)
+        .estimateGas
+        .finishUpdateBeneficiary(owner.address, {nonce: address2Nonce});
+
+    info(`Gas limit: ${gasLimit}`);
+    const gasPrice = await ethers.provider.getGasPrice();
+    info(`Gas price: ${gasPrice}`);
+    const value = gasLimit.mul(gasPrice);
+    info(`Value: ${formatEther(value)}`);
+
+    const existingBalance = await address2.getBalance();
+    const valueToSend = value.sub(existingBalance);
+    if (valueToSend.gt(0)) {
+        await safeWaitTx(
+            owner.sendTransaction({to: address2.address, value: valueToSend, nonce})
+        );
+    }
+
+    const lowerGasPrice = gasPrice.mul(3).div(4);
+    info(`Lower gas price: ${lowerGasPrice}`);
+    const finishUpdateBeneficiaryTx = await multiVesting
+        .connect(address2)
+        .finishUpdateBeneficiary(owner.address, {nonce: address2Nonce, gasLimit, gasPrice: lowerGasPrice});
+    address2Nonce += 1;
+    info(`finishUpdateBeneficiaryTx.hash: ${finishUpdateBeneficiaryTx.hash}`);
+    const finishUpdateReceipt = await finishUpdateBeneficiaryTx.wait();
+    info(`Actual value: ${formatEther(finishUpdateReceipt.gasUsed.mul(finishUpdateReceipt.effectiveGasPrice).toNumber())}`);
+
+    info("Done");
 }
 
 async function currentTimestamp() {
@@ -160,13 +208,13 @@ async function currentTimestamp() {
     return blockBefore.timestamp;
 }
 
-async function increaseTime(seconds: any) {
-    await ethers.provider.send("evm_increaseTime", [seconds])
-    await ethers.provider.send("evm_mine", [])
+async function increaseTime(seconds: number) {
+    await ethers.provider.send("evm_increaseTime", [seconds]);
+    await ethers.provider.send("evm_mine", []);
 }
 
-function delay(s: number) {
-    return new Promise(resolve => setTimeout(resolve, s * 1000));
+function delay(seconds: number) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
 main().catch((error) => {
